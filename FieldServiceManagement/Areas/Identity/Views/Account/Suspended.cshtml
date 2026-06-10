@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Account Suspended";
+}
+
+<style>
+    :root { --error: #f59e0b; }
+    .code { font-size: 5rem; font-weight: 600; color: var(--error); letter-spacing: -0.02em; line-height: 1; margin-bottom: 1rem; }
+    .title { font-family: var(--sans); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 2rem; }
+    .btn { display: inline-block; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.75rem 1.5rem; text-decoration: none; transition: border-color 0.15s, color 0.15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<div class="container">
+    <div class="code">Suspended</div>
+    <h1 class="title">Account deactivated</h1>
+    <p class="desc">
+        Your account has been deactivated and you are no longer able to sign in.
+        If you believe this is a mistake, please contact your organisation administrator.
+    </p>
+    <a href="@Url.Action("Login", "Account", new { area = "Identity" })" class="btn">Back to login</a>
+</div>

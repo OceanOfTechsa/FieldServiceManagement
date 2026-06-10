@@ -1,0 +1,76 @@
+﻿@using FieldServiceManagement.Helpers
+@model FieldServiceManagement.Areas.Identity.Models.RegisterViewModel
+@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Register";
+}
+<style>
+    :root {
+        --text: #e8e8e8; --text-muted: #555555; --text-dim: #888888;
+        --mono: 'IBM Plex Mono', monospace; --sans: 'Bricolage Grotesque', sans-serif;
+    }
+    .dev-reset { margin-top: 1.5rem; border: 1px dashed #2a2a00; padding: 1rem; font-size: 0.7rem; color: #888800; word-break: break-all; }
+    .dev-reset strong { color: var(--accent); display: block; margin-bottom: 0.5rem; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+
+
+<div class="mb-4">
+    <h2 class="font-sans fw-semibold mb-0" style="font-size:1.75rem;">Register</h2>
+    <p class="">
+        Already have an account?
+        <a asp-area="Identity" asp-controller="Account"
+               asp-action="Login"
+               class="text-dim text-decoration-none border-bottom border-fsm pb-1">
+           Sign In
+        </a>
+    </p>
+</div>
+
+
+@using (Html.BeginForm("Register", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @if (!ViewData.ModelState.IsValid)
+        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+
+     <div class="form-group mb-2">
+        @Html.LabelFor(Model => Model.Email, new { @class = "form-label" })
+        @Html.TextBoxFor(Model => Model.Email, new { @class = "form-control", @placeholder = "you@example.com", @autocomplete = "Email" })
+        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger eyeball" })
+    </div>
+
+    <div class="form-group mb-2">
+        @Html.LabelFor(Model => Model.Password, new { @class = "form-label" })
+        @Html.TextBoxFor(Model => Model.Password, new { @class = "form-control", @placeholder = "••••••••", @autocomplete = "current-password", @type = "password" })
+        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger eyeball" })
+    </div>
+
+    <div class="form-group mb-4">
+        @Html.LabelFor(Model => Model.ConfirmPassword, new { @class = "form-label" })
+        @Html.TextBoxFor(Model => Model.ConfirmPassword, new { @class = "form-control", @placeholder = "••••••••", @autocomplete = "current-password", @type = "password" })
+        @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger eyeball" })
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100" data-loading-text="Creating Account">
+        Create Account
+    </button>
+}
+
+@if (ViewBag.DevConfirmationLink is string devLink)
+{
+    <div class="dev-reset bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md mt-4 shadow-sm rounded-2">
+        <div class="flex items-center mb-2">
+            <span class="font-semibold text-yellow-700">Dev — Confirm Email</span>
+        </div>
+        <div class="text-sm break-all">
+            <a href="@devLink" class="text-blue-600 underline hover:text-blue-800">Click here to confirm your email</a>
+        </div>
+        <div class="mt-2 text-xs">
+            Only visible in development environment.
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,37 @@
+﻿@{
+    var showDetails = ViewData["ErrorMessage"] != null;
+}
+
+<div class="error-code">500</div>
+
+<h1 class="error-title">Something went wrong</h1>
+
+<p class="error-desc">
+    An unexpected error occurred. Please try again later.
+</p>
+
+@if (ViewData["RequestId"] != null)
+{
+    <p class="error-desc" style="font-size: 0.7rem;">
+        Reference ID: <strong>@ViewData["RequestId"]</strong>
+    </p>
+}
+
+@if (showDetails)
+{
+    <hr />
+
+    <div style="text-align:left; font-size:0.75rem; color:#888;">
+        <p><strong>Path:</strong> @ViewData["Path"]</p>
+        <p><strong>Error:</strong> @ViewData["ErrorMessage"]</p>
+
+        @if (ViewData["StackTrace"] != null)
+        {
+            <pre style="white-space: pre-wrap;">@ViewData["StackTrace"]</pre>
+        }
+    </div>
+}
+
+@* <a href="@homeUrl" class="error-btn">
+    @(isAuthenticated ? "Return home" : "Go to login")
+</a> *@

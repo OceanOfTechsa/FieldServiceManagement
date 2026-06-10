@@ -1,0 +1,351 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
+
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0" id="userInfoAccordion">
+
+    @if(Model.User.StatusId == (int)UserStatus.Invited)
+    {
+        <div class="accordion-item rounded-2 mb-2 border border-warning">
+            <h2 class="accordion-header px-2">
+                <button class="accordion-button text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                       
+                        aria-expanded="true"
+                        aria-controls="userInfoCollapse">
+                    <div>Invite Mail Details</div>
+
+                    <div data-toggle="tooltip" class="ms-2" title="Invite email sent! If you can't find it, copy the subject shown below and search for the email."><i class="bi bi-info-circle"></i></div>
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show">
+                <div class="accordion-body px-2 pt-1 mt-0">
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            @{
+                                var expiresAt = Model?.Invitation?.ExpiresAt;
+                                var isExpired = expiresAt.HasValue && expiresAt.Value < DateTime.Now;
+                            }
+                            <i class="bi bi-node-minus-fill"></i>
+                            <div class="d-flex flex-column">
+                                <div class="d-flex gap-2">
+                                    <span class="text-muted">Mail Status</span>
+                                    <span class="text-black">
+                                        @if (isExpired)
+                                        {
+                                            <span class="fsm-pill bg-danger text-white me-2">Expired</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="fsm-pill bg-primary text-white me-2">Active</span>
+                                        }
+                                    </span>
+                                </div>
+
+                                <span class="text-black">
+                                    @(isExpired ? "Expired" : "Expires")
+                                    @expiresAt?.ToString("MMM dd, yyyy hh:mm")
+                                    @expiresAt?.ToString("tt").ToUpper()
+                                </span>
+                            </div>
+                        </div> 
+
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-envelope-arrow-up"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-muted">Sent to</span>
+                                <span class="text-black">@Model?.Invitation?.Email</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-card-text"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-muted">Subject</span>
+                                <div class="d-inline-flex gap-2 align-items-center copy-wrapper">
+                                    <span class="text-black col-6 text-truncate copy-text">
+                                        You are invited to join @Model?.Organisation?.Name on OOT FSM
+                                    </span>
+
+                                    <i class="bi bi-copy cursor-pointer copy-btn"></i>
+                                    <i class="bi bi-check-circle copy-feedback text-success d-none"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-calendar2-date"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-muted">Invited On</span>
+                                <span class="text-black">
+                                    @Model?.Invitation?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.Invitation?.CreatedAt.ToString("tt").ToUpper()
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (Model?.User.StatusId == (int)UserStatus.Deleted)
+    {
+        <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
+            <h2 class="accordion-header px-2">
+                <button class="accordion-button bg-danger-subtle" text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        aria-expanded="true"
+                        aria-controls="userInfoCollapse">
+                    <div>Deletion  Details</div>
+
+                    <div data-toggle="tooltip" class="ms-2" title="This user account has been permanently deleted from the system.
+                        All associated data has been moved to a different user and no further actions can be taken using this account">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show">
+                <div class="accordion-body px-2 pt-1 mt-0">
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus-fill"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">User Status</span>
+                                <span class="text-black"><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-person-circle"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">Deleted By</span>
+                                <span class="text-black">Deleted by name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#userInfoCollapse"
+                    aria-expanded="true"
+                    aria-controls="userInfoCollapse">
+                User Information
+            </button>
+        </h2>
+        <div id="userInfoCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#userInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-vcard"></i>
+                        <span class="text-muted">First Name</span>
+                        <span class="text-black">@Model?.User.Name</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-vcard"></i>
+                        <span class="text-muted">Last Name</span>
+                        <span class="text-black">@Model?.User.Surname</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-vcard"></i>
+                        <span class="text-muted">Employee Id</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.User.EmployeeNumber)
+                                           ? "--"
+                                           : Model?.User.EmployeeNumber)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-telephone"></i>
+                        <span class="text-muted">Phone</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.User.Phone)
+                                           ? "--"
+                                           : Model?.User.Phone)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-telephone"></i>
+                        <span class="text-muted">Mobile</span>
+                        <span class="text-black">--</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-mic"></i>
+                        <span class="text-muted">Language</span>
+                        <span class="text-black">English - United States</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#userAddressCollapse"
+                    aria-expanded="true"
+                    aria-controls="userAddressCollapse">
+                Address
+            </button>
+        </h2>
+        <div id="userAddressCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#userAddressAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                @* <div class="d-flex flex-column gap-3">
+                                    <div class="d-flex gap-2 align-items-start">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <div class="d-flex flex-column gap-1">
+                                            <span class="small text-black">@Model</span>
+                                            <span class="small text-black">Start Date: @Model.UserCreatedAt.ToString("MMM dd, yyyy")</span>
+                                            <span class="small text-black">End Date: -</span>
+                                        </div>
+                                    </div>
+                                </div> *@
+                <span class="small gap-2 text-danger">
+                    <i class="bi bi-exclamation-circle me-2"></i>No Crew Found
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#userTerritoriesCollapse"
+                    aria-expanded="true"
+                    aria-controls="userTerritoriesCollapse">
+                Territories
+            </button>
+        </h2>
+        <div id="userTerritoriesCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#userTerritoriesAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-globe"></i>
+                        <div class="d-flex flex-column gap-1">
+                            <span class="small text-black">@Model?.Organisation?.Name</span>
+                            <span class="small text-black">Start Date: @Model?.User.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            <span class="small text-black">End Date: -</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#userCrewCollapse"
+                    aria-expanded="true"
+                    aria-controls="userCrewCollapse">
+                Crew
+            </button>
+        </h2>
+        <div id="userCrewCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#userCrewAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <span class="small gap-2 text-danger">
+                    <i class="bi bi-exclamation-circle me-2"></i>No Crew Found
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <div class="accordion-body px-2">
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Created By</span>
+
+                        @{
+                            var createdBy = Model?.CreatedBy?.Name + " " + Model?.CreatedBy?.Surname ?? "-";
+                            var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var createdByLabel = isSystemCreated ? "System" : createdBy;
+                        }
+
+                        @if (isSystemCreated)
+                        {
+                            <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                  title="This account was self-registered">
+                                @createdByLabel
+                                <span class="fsm-pill fsm-pill bg-info-subtle text-black">Self-registered</span>
+                            </span>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedBy?.Id.ToString()!) })"
+                                   class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
+                                <span class="d-flex align-items-center gap-2">
+                                    @createdByLabel
+                                </span>
+                            </a>
+                        }
+
+                        <span class="small text-black mb-2 small">On @Model?.User.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.User.CreatedAt.ToString("tt").ToUpper()</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Modified By</span>
+                        @{
+                            var modifiedBy = Model?.CreatedBy?.Name + " " + Model?.CreatedBy?.Surname ?? "-";
+                            var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var modifiedByLabel = iSystemModified ? "System" : modifiedBy;
+                        }
+
+                        @if (iSystemModified)
+                        {
+                            <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                  title="This account was self-registered">
+                                @modifiedByLabel
+                                <span class="fsm-pill fsm-pill bg-info-subtle text-black">Self-registered</span>
+                            </span>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.User.Id.ToString()!) })"
+                                   class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
+                                <span class="d-flex align-items-center gap-2">
+                                    @modifiedByLabel
+                                </span>
+                            </a>
+                        }
+
+                        <span class="small text-black mb-2 small">On @Model?.User.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.User.UpdatedAt?.ToString("tt").ToUpper()</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>   
+

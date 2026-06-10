@@ -1,0 +1,570 @@
+@using FieldServiceManagement.Business.UserBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.User
+@using FieldServiceManagement.Web.Navigation
+@using System.Security.Claims
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    bool redirectToLogin()
+    {
+        Context.Response.Redirect(Url.Action("Login", "Account", new { area = "Identity" })!);
+        return true;
+    };
+
+    Action<string> redirectTo = (url) =>
+    {
+        Context.Response.Redirect(url);
+    };
+
+    var roleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+    var roleDisplay = roleClaim != null && Enum.TryParse<UserRole>(roleClaim, out var roleEnum)
+        ? roleEnum.GetDisplayName()
+        : roleClaim;
+    bool isLoading = true;
+    var currentPath = Context.Request.Path.Value ?? "";
+    AppUserProfileViewModel? Model = null;
+
+    if (string.IsNullOrEmpty(User?.Identity?.Name) && redirectToLogin()) return;
+    Model = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User?.Identity?.Name!);
+    if (Model == null && redirectToLogin()) return;
+
+    isLoading = false;
+    var organisationId = Model?.Organisation?.Id;
+    var initials = $"{(Model?.User.Name.Length > 0 ? Model.User.Name[0] : ' ')}{(Model?.User.Surname.Length > 0 ? Model.User.Surname[0] : ' ')}".Trim();
+
+    Func<string, bool> isActive = url => url != "#" && currentPath == url;
+    Func<string[], bool> isAnyActive = urls => urls.Any(u => currentPath == u || currentPath.StartsWith(u));
+    bool settingsActive = currentPath.Contains("/settings");
+
+    Func<string[], bool> hasAccess = roles =>
+    {
+        if (roles == null || roles.Length == 0)
+            return true; 
+        return roles.Any(r => User!.IsInRole(r));
+    };
+}
+
+@* ─── Sign-out dialog (global, outside header) ───────────────────────────── *@
+<div id="fsm-signout-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="signout-title">
+    <div class="fsm-dialog">
+        <p id="signout-title" class="dialog-title">Sign Out</p>
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Confirm sign out</p>
+                <p class="warn-sub">You will be required to sign in again to access FMS.</p>
+            </div>
+        </div>
+        <div class="dialog-body">Press <strong>Sign Out</strong> to continue, or <strong>Cancel</strong> to go back.</div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-signout-cancel>
+                Cancel
+            </button>
+
+            @await Html.PartialAsync("_LogoutPartial")
+        </div>
+    </div>
+</div>
+
+@* ─── Shared backdrop ─────────────────────────────────────────────────────── *@
+<div id="fsm-backdrop" class="fsm-backdrop" aria-hidden="true"></div>
+
+@* ─── Profile offcanvas ───────────────────────────────────────────────────── *@
+<aside id="fsm-profile-sheet" class="fsm-offcanvas" aria-label="User profile">
+    @* Header *@
+    <div class="offcanvas-header">
+        <div class="oc-user-row">
+            <img src="@(string.IsNullOrWhiteSpace(Model?.User.AvatarUrl)
+            ? $"https://ui-avatars.com/api/?name={Model?.User.Name + " " + Model?.User.Surname}&background=random"
+            : Model?.User.AvatarUrl)" alt="Avatar" class="oc-avatar" />
+            <div class="oc-info">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="text-white">@Model?.User.Name @Model?.User.Surname</h5>
+                    <p class="role-label">
+                        <span class="badge-role">
+                            @if (User.IsInRole(UserRole.Administrator.ToString()))
+                            {
+                                <text>Administrator</text>
+                            }
+                            else if (User.IsInRole(UserRole.CallCenterAgent.ToString()))
+                            {
+                                <text>Call Center Agent</text>
+                            }
+                            else if (User.IsInRole(UserRole.FieldAgent.ToString()))
+                            {
+                                <text>Field Agent</text>
+                            }
+                            else if (User.IsInRole(UserRole.LimitedFieldAgent.ToString()))
+                            {
+                                <text>Limited Field Agent</text>
+                            }
+                            else if (User.IsInRole(UserRole.Dispatcher.ToString()))
+                            {
+                                <text>Dispatcher</text>
+                            }else if(User.IsInRole(UserRole.SuperAdmin.ToString()))
+                            {
+                                <text>Super Admin</text>
+                            }
+                        </span>
+                    </p>
+                </div>
+                <div class="oc-actions">
+                    <button class="btn-account">My Account</button>
+                    <button class="btn-signout-trigger" data-fsm-signout-trigger>Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Body *@
+    <div class="offcanvas-body">
+        @* Organisation card *@
+        <div class="oc-org-card">
+            <img src="@(string.IsNullOrWhiteSpace(Model?.Organisation?.AvatarUrl)
+                ? $"https://ui-avatars.com/api/?name={Model?.Organisation?.Name}&background=random"
+                : Model?.Organisation.AvatarUrl)" alt="Organisation logo" />
+            <div class="org-info">
+                <h6>@Model?.Organisation?.Name</h6>
+                <p>Username: @User.Identity?.Name</p>
+            </div>
+        </div>
+
+        @* Subscription card *@
+         @if (User.IsInRole("Administrator") || User.IsInRole("SuperAdmin"))
+        {
+            <div class="oc-sub-card">
+                <div class="sub-header">
+                    <h6>Subscription</h6>
+                    <span class="fsm-pill @(Model?.SubscriptionPlan?.Id == (int)SubscriptionPlanEnum.Free ? "bg-warning text-white" : "badge-paid")">@Model?.SubscriptionPlan?.Name</span>
+                </div>
+                <div class="sub-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></svg>
+                        </span>
+                        <p class="stat-val">0 / @(Model?.SubscriptionPlan?.MaxWorkOrders.ToString() ?? "∞")</p>
+                        <p class="stat-lbl">Work Orders</p>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg>
+                        </span>
+                        <p class="stat-val">0 / @(Model?.SubscriptionPlan?.MaxForms.ToString() ?? "∞")</p>
+                        <p class="stat-lbl">Forms</p>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>
+                        </span>
+                        <p class="stat-val">@Model.numberOfUsers / @(Model?.SubscriptionPlan?.MaxUsers.ToString() ?? "∞")</p>
+                        <p class="stat-lbl">Users</p>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2" /><rect x="2" y="14" width="20" height="8" rx="2" ry="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" /></svg>
+                        </span>
+                        <p class="stat-val">@(Model?.SubscriptionPlan?.MaxStorageMb == null ? "∞" : $"0 / {Model?.SubscriptionPlan?.MaxStorageMb} MB")</p>
+                        <p class="stat-lbl">Storage</p>
+                    </div>
+                </div>
+                <p class="sub-appt">Appointments Credit: <strong>0 / 6</strong></p>
+                @if(Model?.SubscriptionPlan?.Id == (int)SubscriptionPlanEnum.Enterprise)
+                {
+                    <div class="bg-success-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-primary"></i>
+                        Enterprise edition, Enjoy FMS with no limits.
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                        Professional edition trial expires in <strong>10</strong> day(s)
+                    </div>
+                }
+                <div class="sub-footer">
+                    <button class="sub-link">Manage Subscription</button>
+                    <div class="sub-divider"></div>
+                    <button class="sub-link">Try Other Editions</button>
+                </div>
+            </div>
+        } 
+   
+        @* Help grid *@
+        <div class="oc-help-card">
+            <h6>Need Help?</h6>
+            <div class="help-grid">
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(34,197,94,0.1)">
+                        <span style="color:#16a34a"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" /><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" /></svg></span>
+                    </div>
+                    <p>Help Guide</p>
+                </a>
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(59,130,246,0.1)">
+                        <span style="color:#2563eb"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg></span>
+                    </div>
+                    <p>Videos</p>
+                </a>
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(168,85,247,0.1)">
+                        <span style="color:#9333ea"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg></span>
+                    </div>
+                    <p>Community</p>
+                </a>
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(16,185,129,0.1)">
+                        <span style="color:#059669"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14h0z" /></svg></span>
+                    </div>
+                    <p>Contact Us</p>
+                </a>
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(249,115,22,0.1)">
+                        <span style="color:#ea580c"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg></span>
+                    </div>
+                    <p>Changelog</p>
+                </a>
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(239,68,68,0.1)">
+                        <span style="color:#dc2626"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></span>
+                    </div>
+                    <p>Status</p>
+                </a>
+                <a href="#" class="help-item">
+                    <div class="help-icon-wrap" style="background:rgba(100,116,139,0.1)">
+                        <span style="color:#475569"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg></span>
+                    </div>
+                    <p>API Docs</p>
+                </a>
+            </div>
+        </div>
+
+        @* Feedback *@
+        <a href="#" class="oc-feedback">
+            <h6>Having a great experience so far?</h6>
+            <p>Share your feedback and receive a special credit from us</p>
+        </a>
+    </div>
+</aside>
+
+@* ─── Notifications offcanvas ─────────────────────────────────────────────── *@
+<aside id="fsm-notif-sheet" class="fsm-offcanvas fsm-offcanvas-light" aria-label="Notifications">
+    <div style="padding:16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <h5 style="margin:0;font-size:16px;color:#111;">Notifications</h5>
+        <button data-fsm-notif-close style="background:none;border:none;cursor:pointer;font-size:20px;color:#6b7280;line-height:1;">&times;</button>
+    </div>
+    <div style="padding:16px;color:#606261;font-size:14px;">No new notifications.</div>
+</aside>
+
+@* ─── Mobile offcanvas ────────────────────────────────────────────────────── *@
+<aside id="fsm-mobile-sheet" class="fsm-mobile-offcanvas" aria-label="Mobile menu">
+    <div style="padding:2px;border-bottom:1px solid #606261;display:flex;align-items:center;justify-content:space-between;" class="mb-3">
+        <h5 style="margin:0;font-size:16px;color:#fff;">Menu</h5>
+        <button data-fsm-mobile-close style="background:none;border:none;cursor:pointer;font-size:20px;color:#fff;line-height:1;">&times;</button>
+    </div>
+    <nav>
+        @* Getting Started *@
+        <a href="/fsm/@organisationId/getting-started" class="mobile-nav-link @(currentPath.Contains("getting-started") ? "active" : "")">
+            Getting started
+        </a>
+
+        @foreach (var item in NavItemDefinitions.Items)
+        {
+            if (!hasAccess(item.Roles))
+                continue;
+
+            if (item.Subs.Count > 0)
+            {
+                var anySubActive = item.Subs.Any(s => currentPath == s.Url || currentPath.StartsWith(s.Url));
+                <button class="mobile-dropdown-toggle @(anySubActive ? "active" : "")">
+                    <span class="toggle-left">
+                        <i class="@item.Icon" style="width:16px;height:16px;"></i>
+                        @item.Title
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                </button>
+                <div class="mobile-sub-menu @(anySubActive ? "show" : "")">
+                    @foreach (var sub in item.Subs)
+                    {
+                        if (!hasAccess(sub.Roles))
+                            continue;
+
+                        <a href="@sub.Url" class="@(currentPath == sub.Url ? "active" : "")"
+                           data-fsm-mobile-close>@sub.Title
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <a href="@item.Url" class="mobile-nav-link @(isActive(item.Url) ? "active" : "")"
+                       data-fsm-mobile-close>
+                    <i class="@item.Icon"></i>
+                    @item.Title
+                </a>
+            }
+        }
+
+        @* Settings (admin/dispatcher only — gate in C# if needed) *@
+        <a href="/fsm/@organisationId/settings"
+               class="mobile-nav-link @(settingsActive ? "active" : "")"
+               data-fsm-mobile-close>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+            Settings
+        </a>
+    </nav>
+
+    <div class="mobile-bottom">
+        @{
+            var isAdmin =
+                (User?.IsInRole(UserRole.Administrator.ToString()) ?? false) ||
+                (User?.IsInRole(UserRole.SuperAdmin.ToString()) ?? false);
+        }
+
+        @if (isAdmin)
+        {
+            <div class="mobile-edition-row">
+                <span>@Model?.SubscriptionPlan?.Name Edition</span>
+
+                @if (Model?.SubscriptionPlan?.Id != (int)SubscriptionPlanEnum.Enterprise)
+                {
+                    <div class="dot"></div>
+                    <button>Upgrade</button>
+                }
+            </div>
+        }
+
+        <button class="mobile-profile-trigger" data-fsm-profile-trigger data-fsm-mobile-close>
+            <img src="@(string.IsNullOrWhiteSpace(Model?.User?.AvatarUrl)
+            ? $"https://ui-avatars.com/api/?name={Model?.User?.Name + " " + Model?.User.Surname}&background=random"
+            : Model.User.AvatarUrl)" alt="Avatar" class="fsm-avatar" />
+            <div class="mp-info">
+                <span class="mp-name">@Model?.User.Name @Model?.User.Surname</span>
+                <span class="mp-role">@User.Identity?.Name</span>
+            </div>
+        </button>
+    </div>
+</aside>
+
+@* ─── The header itself ───────────────────────────────────────────────────── *@
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <header id="fsm-header" class="fsm-header" role="banner">
+        <div class="container-fluid">
+
+            @* Brand *@
+            <a href="/" class="fsm-brand">
+                <img src="/Assets/Images/Brand/logo.svg" alt="FSM logo" class="brand-avatar" />
+                FSM
+            </a>
+
+            @* Desktop nav *@
+            @if (isLoading)
+            {
+                <div class="fsm-nav" aria-label="Loading navigation">
+                    @foreach (var w in new[] { 100, 72, 140, 110, 80 })
+                    {
+                        <div style="padding:0 12px;">
+                            <span class="fsm-skeleton" style="width:@(w)px;"></span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <nav class="fsm-nav" aria-label="Main navigation">
+                    @* Getting started — always first *@
+                    <a href="/fsm/@organisationId/getting-started"
+                           class="nav-link @(currentPath.Contains("getting-started") ? "active" : "")">
+                        Getting started
+                    </a>
+
+                    @* Main items — all rendered, JS hides by index *@
+                    @for (int i = 0; i < NavItemDefinitions.Items.Count; i++)
+                    {
+                        var item = NavItemDefinitions.Items[i];
+                        if (!hasAccess(item.Roles))
+                            continue;
+                        
+                        if (item.Subs.Count > 0)
+                        {
+                            var subUrls = item.Subs.Select(s => s.Url).ToArray();
+                            var anyActive = isAnyActive(subUrls);
+                            <div class="fsm-dropdown fsm-nav-item" data-index="@i">
+                                <button class="nav-dropdown-toggle @(anyActive ? "active" : "")"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    @item.Title
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                                </button>
+                                <div class="fsm-dropdown-menu" role="menu">
+                                    @foreach (var sub in item.Subs)
+                                    {
+                                        if (!hasAccess(sub.Roles))
+                                            continue;
+
+                                        <a href="@sub.Url"
+                                           class="dropdown-item @(currentPath == sub.Url ? "active" : "")"
+                                           role="menuitem">@sub.Title
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="@item.Url"
+                                   class="nav-link fsm-nav-item @(isActive(item.Url) ? "active" : "")"
+                                   data-index="@i">
+                                @item.Title
+                            </a>
+                        }
+                    }
+
+                    @* More overflow button *@
+                    <div id="fsm-more-wrapper" class="fsm-dropdown" style="display:none;">
+                        <button class="nav-more-btn" aria-haspopup="true" aria-label="More navigation items">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
+                        </button>
+                        <div id="fsm-more-menu" class="fsm-dropdown-menu align-center" role="menu">
+                            @for (int i = 0; i < NavItemDefinitions.Items.Count; i++)
+                            {
+                                var item = NavItemDefinitions.Items[i];
+                                if (!hasAccess(item.Roles))
+                                    continue;
+                                
+                                if (item.Subs.Count > 0)
+                                {
+                                    <div class="dropdown-label fsm-more-item" data-index="@i">@item.Title</div>
+                                    @foreach (var sub in item.Subs)
+                                    {
+                                        if (!hasAccess(sub.Roles))
+                                            continue;
+                                        <a href="@sub.Url"
+                                           class="dropdown-item indented fsm-more-item @(currentPath == sub.Url ? "active" : "")"
+                                           data-index="@i" role="menuitem">@sub.Title
+                                        </a>
+                                    }
+                                }
+                                else
+                                {
+                                    <a href="@item.Url"
+                                       class="dropdown-item fsm-more-item @(isActive(item.Url) ? "active" : "")"
+                                       data-index="@i" role="menuitem">@item.Title
+                                    </a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </nav>
+            }
+
+            @* Right side *@
+            <div class="fsm-right">
+                @if (isAdmin)
+                {
+                    <span class="edition-text">@Model?.SubscriptionPlan?.Name Edition</span>
+                    @if (Model?.SubscriptionPlan?.Id != (int)SubscriptionPlanEnum.Enterprise)
+                    {
+                        <div class="dot-sep" aria-hidden="true"></div>
+                        <button class="upgrade-btn" type="button">Upgrade</button>
+                    }
+                    <div class="fsm-separator" aria-hidden="true"></div>
+                }
+
+                <div class="fsm-dropdown">
+                    @* Actions button (adapts to your Actions component) *@
+                    <button class="actions-btn nav-dropdown-toggle" type="button" aria-label="Quick actions">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                    </button>
+                    <div id="fsm-more-menu" class="fsm-dropdown-menu align-center" role="menu">
+                        <div class="dropdown-label d-flex justify-content-between mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                                <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
+                                <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
+                            </svg>
+                            Forms
+                        </div>
+                        <a href="/"
+                               class="dropdown-item"
+                               role="menuitem">
+                            Submit Work Order
+                        </a>
+                        <a href="/"
+                               class="dropdown-item"
+                               role="menuitem">
+                            Submit Leave Application
+                        </a>
+                        <a href="/"
+                               class="dropdown-item"
+                               role="menuitem">
+                            Submit Asset Application
+                        </a>
+                        <div class="dropdown-label d-flex justify-content-between mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bezier2" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 2.5A1.5 1.5 0 0 1 2.5 1h1A1.5 1.5 0 0 1 5 2.5h4.134a1 1 0 1 1 0 1h-2.01q.269.27.484.605C8.246 5.097 8.5 6.459 8.5 8c0 1.993.257 3.092.713 3.7.356.476.895.721 1.787.784A1.5 1.5 0 0 1 12.5 11h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5H6.866a1 1 0 1 1 0-1h1.711a3 3 0 0 1-.165-.2C7.743 11.407 7.5 10.007 7.5 8c0-1.46-.246-2.597-.733-3.355-.39-.605-.952-1-1.767-1.112A1.5 1.5 0 0 1 3.5 5h-1A1.5 1.5 0 0 1 1 3.5zM2.5 2a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10 10a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" />
+                            </svg>
+                            Actions
+                        </div>
+                        <a href="/Workforce/Users"
+                               class="dropdown-item"
+                               role="menuitem">
+                            Add new user
+                        </a>
+                    </div>
+                </div>
+           
+
+                @* Settings *@
+                <a href="/fsm/@organisationId/settings"
+                       class="icon-btn settings-btn @(settingsActive ? "active" : "")"
+                       title="Settings" aria-label="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+                </a>
+
+              @*   @await Html.PartialAsync("_ThemeToggle") *@
+
+                @* Notifications *@
+                <button class="icon-btn" type="button" title="Notifications" aria-label="Notifications"
+                        data-fsm-notif-trigger>
+                    <span class="notification-dot" aria-label="You have new notifications"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" /></svg>
+                </button>
+
+
+                @* Mobile hamburger *@
+                @if (!isLoading)
+                {
+                    <button id="fsm-mobile-trigger" class="icon-btn d-lg-none border border-dark-subtle" type="button"
+                            aria-label="Open menu" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                    </button>
+                }
+
+                @* Desktop avatar → opens profile sheet *@
+                @if (isLoading)
+                {
+                    <span class="fsm-skeleton" style="width:32px;height:32px;border-radius:50%;display:inline-block;" aria-hidden="true"></span>
+                }
+                else if (Model is not null)
+                {
+                    <button class="d-none d-md-flex" style="background:none;border:none;padding:0;cursor:pointer;"
+                            data-fsm-profile-trigger aria-label="Open profile">
+                        <img src="@(string.IsNullOrWhiteSpace(Model?.User.AvatarUrl)
+                        ? $"https://ui-avatars.com/api/?name={Model?.User.Name + " " + Model?.User.Surname}&background=random"
+                        : Model?.User.AvatarUrl)" alt="Your avatar" class="fsm-avatar" />
+                    </button>
+                }
+            </div>
+        </div>
+    </header>
+
+}
+@* ─── JS (deferred, placed before </body> in layout) ──────────────────────── *@
+@section Scripts {
+    <script src="~/js/header-navigation.js" defer></script>
+}

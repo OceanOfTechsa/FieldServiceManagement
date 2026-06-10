@@ -1,0 +1,52 @@
+﻿using FieldServiceManagement.Data;
+using FieldServiceManagement.Data.DataModels.Country;
+using FieldServiceManagement.Data.DataModels.Industry;
+using FieldServiceManagement.Data.RepositoryServices;
+using FieldServiceManagement.Data.RepositoryServices.Contracts;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace FieldServiceManagement.Repository.Repositories
+{
+    public class CountryRepository
+    {
+        private DataContext _dbContext;
+        private readonly IRepository<Country> _repository;
+        private bool _disposed = false;
+
+        public CountryRepository()
+        {
+            _dbContext = DataContext.Create();
+            _repository = new RepositoryService<Country>(_dbContext);
+        }
+
+        public List<Country> GetCountriesBySearchName(string SearchName)
+        {
+            SqlParameter[] parameters = [new("@SearchName", SearchName)];
+            const string query = "EXEC [dbo].[GetCountriesBySearchName] @SearchName";
+            return [.. _dbContext.Set<Country>().FromSqlRaw(query, parameters)];
+        }
+
+        #region DISPOSE
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _dbContext?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        ~CountryRepository() => Dispose(false);
+        #endregion
+    }
+}

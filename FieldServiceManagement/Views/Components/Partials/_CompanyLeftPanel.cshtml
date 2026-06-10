@@ -1,0 +1,255 @@
+﻿@using System.Text.RegularExpressions
+@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+
+@model FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel
+
+
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0" id="userInfoAccordion">
+    @if (Model?.IsDeleted == true)
+    {
+        <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
+            <h2 class="accordion-header px-2">
+                <button class="accordion-button bg-danger-subtle" text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        aria-expanded="true"
+                        aria-controls="userInfoCollapse">
+                    <div>Deletion  Details</div>
+
+                    <div data-toggle="tooltip" class="ms-2" title="This company has been permanently deleted from the system.">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show">
+                <div class="accordion-body px-2 pt-1 mt-0">
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus-fill"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">Status</span>
+                                <span class="text-black"><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-person-circle"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">Deleted By</span>
+                                <span class="text-black">Deleted by name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#companyInfoCollapse"
+                    aria-expanded="true"
+                    aria-controls="companyInfoCollapse">
+                Company Information
+            </button>
+        </h2>
+        <div id="companyInfoCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#companyInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-buildings"></i>
+                        <span class="text-muted">Name</span>
+                        <span class="text-black">@Model?.Name</span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-globe"></i>
+                        <span class="text-muted">Website</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.Website) ? "--" : Model?.Website)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-bookmarks"></i>
+                        <span class="text-muted">Type</span>
+                        <span class="text-black">
+                            @{
+                                var type = ((CompanyType?)Model?.Type)?.GetDisplayName() ?? "Unknown";
+                                var typeLabel = Regex.Replace(type, "(?<=[a-z])(?=[A-Z])", " ");
+                            }
+                            <span>@typeLabel</span>
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-telephone"></i>
+                        <span class="text-muted">Phone</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.Phone) ? "--" : Model?.Phone)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-phone"></i>
+                        <span class="text-muted">Mobile</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.Mobile) ? "--" : Model?.Mobile)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                       <i class="bi bi-envelope"></i>
+                        <span class="text-muted">Email</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.Email) ? "--" : Model?.Email)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#companyAddressCollapse"
+                    aria-expanded="true"
+                    aria-controls="companyAddressCollapse">
+                Company Address
+            </button>
+        </h2>
+        <div id="companyAddressCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#companyAddressAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-gear-wide-connected"></i>
+                    <div class="d-flex flex-column gap-1">
+                        <span class="mb-1">Service Address</span>
+                        <span class="text-black">
+                            @Html.Raw(
+                                Model?.ServiceAddressName?
+                                    .Replace(",", ",<br />")
+                                    .Replace(" ,", ",")
+                            )
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 align-items-start mt-3">
+                    <i class="bi bi-receipt"></i>
+                    <div class="d-flex flex-column gap-1">
+                        <span class="mb-1">Billing Address</span>
+                        <span class="text-black">
+                            @Html.Raw(
+                                Model?.BillingAddressName?
+                                    .Replace(",", ",<br />")
+                                    .Replace(" ,", ",")
+                            )
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#invoiceInformationCollapse"
+                    aria-expanded="true"
+                    aria-controls="invoiceInformationCollapse">
+                Invoice Information
+            </button>
+        </h2>
+        <div id="invoiceInformationCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#invoiceInformationAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-3">
+                    <span class="small gap-2 text-danger">
+                        <i class="bi bi-exclamation-circle me-2"></i>No Crew Found
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <div class="accordion-body px-2">
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-person-circle"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Owner</span>
+
+                        @{
+                            var owner = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
+                            var isSystemOwner = owner.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var ownerLabel = isSystemOwner ? "System" : owner;
+                        }
+                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedById.ToString()!) })"
+                           class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
+                            <span class="d-flex align-items-center gap-2">
+                                @ownerLabel
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Created By</span>
+
+                        @{
+                            var createdBy = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
+                            var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var createdByLabel = isSystemCreated ? "System" : createdBy;
+                        }                        
+                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedById.ToString()!) })"
+                            class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
+                            <span class="d-flex align-items-center gap-2">
+                                @createdByLabel
+                            </span>
+                        </a>
+                        
+                        <span class="small text-black mb-2 small">On @Model?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.CreatedAt.ToString("tt").ToUpper()</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Modified By</span>
+                        @{
+                            var modifiedBy = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
+                            var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var modifiedByLabel = iSystemModified ? "System" : modifiedBy;
+                        }
+                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedByCreatedById.ToString()!) })"
+                            class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
+                            <span class="d-flex align-items-center gap-2">
+                                @modifiedByLabel
+                            </span>
+                        </a>
+                        
+                        <span class="small text-black mb-2 small">On @Model?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.UpdatedAt?.ToString("tt").ToUpper()</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

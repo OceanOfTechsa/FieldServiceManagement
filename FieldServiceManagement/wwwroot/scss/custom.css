@@ -1,0 +1,323 @@
+﻿// ─── Google Fonts ─────────────────────────────────────────────────────────────
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Bricolage+Grotesque:wght@300;400;600&display=swap');
+
+// ─── 1. Your variables (must come BEFORE Bootstrap imports) ───────────────────
+@import 'variables';
+
+// ─── 2. Bootstrap source ──────────────────────────────────────────────────────
+@import '../lib/bootstrap/scss/bootstrap';
+
+// ─── 3. FSM custom component styles ───────────────────────────────────────────
+
+// Scrollbar
+* {
+    scrollbar-width: thin;
+    scrollbar-color: $scrollbar-thumb $scrollbar-track;
+}
+
+::-webkit-scrollbar {
+    width: $scrollbar-width;
+}
+
+::-webkit-scrollbar-track {
+    background: $scrollbar-track;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $scrollbar-thumb;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: $scrollbar-thumb-hover;
+    }
+
+// Button text-transform and letter-spacing
+// (Bootstrap doesn't have these as variables)
+.btn {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  &-primary {
+    color: $fsm-bg !important;
+    &:hover { background-color: $fsm-accent-dim; border-color: $fsm-accent-dim; color: $fsm-bg !important; }
+  }
+
+  &-outline-primary {
+    color: $fsm-accent;
+    border-color: $fsm-accent;
+    &:hover { background-color: $fsm-accent; color: $fsm-bg; }
+  }
+
+  &-secondary {
+    color: $fsm-dim;
+    background-color: $fsm-surface-2;
+    border-color: $fsm-border;
+    &:hover { border-color: $fsm-border-active; color: $fsm-text; }
+  }
+}
+
+// Form labels — uppercase mono style
+.form-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: $font-family-monospace;
+}
+
+// Form control focus ring override
+.form-control:focus,
+.form-select:focus {
+  border-color: $fsm-accent;
+  box-shadow: none;
+  outline: none;
+}
+
+// Input group
+.input-group-text {
+  background-color: $fsm-surface-2;
+  border-color: $fsm-border;
+  color: $fsm-dim;
+  font-family: $font-family-monospace;
+  font-size: 0.75rem;
+}
+
+// Navbar
+.navbar {
+  border-bottom: 1px solid $fsm-border;
+  background-color: $fsm-surface !important;
+
+  .navbar-brand {
+    font-family: $font-family-monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: $fsm-text;
+  }
+
+  .nav-link {
+    font-family: $font-family-monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $fsm-dim;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover { color: $fsm-text; }
+    &.active { color: $fsm-accent; border-bottom-color: $fsm-accent; }
+  }
+}
+
+// Sidebar nav
+.sidebar {
+  background-color: $fsm-surface;
+  border-right: 1px solid $fsm-border;
+  min-height: 100vh;
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: $font-family-monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $fsm-dim;
+    padding: 0.625rem 1.25rem;
+    border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+
+    &:hover {
+      color: $fsm-text;
+      background-color: rgba(255,255,255,0.02);
+    }
+
+    &.active {
+      color: $fsm-accent;
+      border-left-color: $fsm-accent;
+      background-color: rgba(200,255,0,0.04);
+    }
+  }
+
+  .sidebar-section-label {
+    font-family: $font-family-monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: $fsm-muted;
+    padding: 1.25rem 1.25rem 0.4rem;
+  }
+}
+
+// Cards
+.card {
+  background-color: $fsm-surface;
+  border-color: $fsm-border;
+
+  .card-header {
+    background-color: $fsm-surface-2;
+    border-bottom-color: $fsm-border;
+    font-family: $font-family-monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $fsm-dim;
+  }
+
+  .card-title {
+    font-family: $font-family-sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $fsm-text;
+  }
+}
+
+// Tables
+.table {
+  thead th {
+    font-family: $font-family-monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: $fsm-muted;
+    border-bottom-color: $fsm-border;
+  }
+
+  tbody td {
+    font-size: 0.85rem;
+    vertical-align: middle;
+  }
+
+  &-hover tbody tr:hover {
+    background-color: rgba(200,255,0,0.03);
+  }
+}
+
+// Badges
+.badge {
+  font-family: $font-family-monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &.bg-primary { color: $fsm-bg !important; }
+  &.bg-success  { color: $fsm-bg !important; }
+}
+
+// Alerts
+.alert {
+  font-size: 0.85rem;
+  border-width: 1px;
+
+  &-primary   { background-color: rgba(200,255,0,0.06);  border-color: rgba(200,255,0,0.2);  color: $fsm-accent; }
+  &-danger    { background-color: rgba(255,68,68,0.06);  border-color: rgba(255,68,68,0.2);  color: $fsm-error; }
+  &-warning   { background-color: rgba(255,170,0,0.06);  border-color: rgba(255,170,0,0.2);  color: $fsm-warning; }
+  &-info      { background-color: rgba(0,170,255,0.06);  border-color: rgba(0,170,255,0.2);  color: $fsm-info; }
+  &-success   { background-color: rgba(0,221,136,0.06);  border-color: rgba(0,221,136,0.2);  color: $fsm-success; }
+}
+
+// Modals
+.modal-content {
+  border-color: $fsm-border;
+}
+.modal-header {
+  border-bottom-color: $fsm-border;
+  .modal-title {
+    font-family: $font-family-monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $fsm-dim;
+  }
+}
+.modal-footer { border-top-color: $fsm-border; }
+
+// Pagination
+.page-link {
+  font-family: $font-family-monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+// Breadcrumb
+.breadcrumb {
+  font-family: $font-family-monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  .breadcrumb-item + .breadcrumb-item::before { color: $fsm-muted; }
+  .breadcrumb-item.active { color: $fsm-dim; }
+  a { color: $fsm-dim; &:hover { color: $fsm-accent; } }
+}
+
+// Dropdown
+.dropdown-menu {
+  border-color: $fsm-border;
+  border-radius: 0;
+  font-size: 0.8rem;
+}
+.dropdown-item {
+  font-family: $font-family-monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+}
+.dropdown-divider { border-color: $fsm-border; }
+
+// Spinner accent colour
+.spinner-border { color: $fsm-accent; }
+
+// Text utilities
+.text-accent  { color: $fsm-accent !important; }
+.text-muted   { color: $fsm-muted !important; }
+.text-dim     { color: $fsm-dim !important; }
+.text-surface { color: $fsm-surface !important; }
+
+// Background utilities
+.bg-surface   { background-color: $fsm-surface !important; }
+.bg-surface-2 { background-color: $fsm-surface-2 !important; }
+
+// Border utilities
+.border-fsm   { border-color: $fsm-border !important; }
+
+// Grid overlay (for panels)
+.grid-overlay {
+  background-image:
+    linear-gradient($fsm-border 1px, transparent 1px),
+    linear-gradient(90deg, $fsm-border 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.4;
+}
+
+// Eyebrow label
+.eyebrow {
+  display: block;
+  font-family: $font-family-monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: $fsm-muted;
+  margin-bottom: 0.35rem;
+}
+
+// Dev panel
+.dev-panel {
+  margin-top: 2rem;
+  border: 1px dashed #2a2a00;
+  background: #0f0f00;
+  padding: 1.25rem;
+}
+.dev-badge {
+  display: inline-block;
+  font-family: $font-family-monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: #2a2a00;
+  color: $fsm-accent;
+  padding: 0.2rem 0.5rem;
+}

@@ -1,0 +1,8 @@
+﻿
+@using (Html.BeginForm("Logout", "Account", routeValues: new { area = "Identity" }, method: FormMethod.Post, antiforgery: null, htmlAttributes: new { @class = "d-inline" }))
+{
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn-confirm" data-loading-text="Loading">
+        Logout
+    </button>
+}

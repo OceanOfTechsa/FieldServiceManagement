@@ -1,0 +1,422 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Audit
+@using X.PagedList
+@model IPagedList<FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel>
+
+@{
+    var company = Model.FirstOrDefault();
+    ViewData["Title"] = company?.Name;
+    var auditLogs = Model
+        .Where(m => m.AuditLogId.HasValue)
+        .Select(m => new AuditLogViewModel
+        {
+            Id = m.AuditLogId ?? Guid.Empty,
+            EntityName = m.AuditLogEntityName,
+            EntityId = m.AuditLogEntityId,
+            Action = m.AuditLogAction,
+            FieldName = m.AuditLogFieldName,
+            OldValue = m.AuditLogOldValue,
+            NewValue = m.AuditLogNewValue,
+            Comment = m.AuditLogComment,
+            PerformedByUserId = m.AuditLogPerformedByUserId ?? Guid.Empty,
+            PerformedByName = m.AuditLogPerformedByName,
+            IpAddress = m.AuditLogIpAddress,
+            OrganisationId = m.AuditLogOrganisationId,
+            CreatedAt = m.AuditLogCreatedAt ?? DateTime.MinValue,
+            ShowEntityType = false,
+            ShowComment = m.AuditLogShowComment,
+            VisibleTo =  m.AuditLogVisibleTo,
+            createdByEmail = m.CreatedByEmail
+            
+        })
+        .ToList();
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
+        <div class="d-flex gap-2 align-items-center">
+            @* <img src="@($"https://ui-avatars.com/api/?name={company?.Name}&background=random")"
+                 alt="Avatar"
+                 class="fsm-avatar-lg" /> *@
+
+            <div class="d-flex flex-column">
+                <div class="d-flex align-items-start gap-1">
+                    <a href="/Customers/Companies" class="text-primary">Companies</a>
+                    <i class="bi bi-caret-right-fill"></i>
+                    <span><strong>@company?.Name</strong></span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    @{
+                        var (statusLabel, statusCss) = company!.IsDeleted
+                            ? ("Deleted", "bg-danger")
+                            : company.IsActive
+                                ? ("Active", "bg-success")
+                                : ("Inactive", "bg-secondary");
+                    }
+                    <span class="d-inline-flex align-items-center gap-2 fsm-meta-item">
+                        <span class="fsm-status-dot @statusCss"></span>
+                        <span>@statusLabel</span>
+                    </span>
+
+                    <span class="fsm-meta-item">
+                        <i class="bi bi-person-circle"></i>
+                        <span>@company.CreatedByName @company.CreatedBySurname</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.CallCenterAgent.ToString())) && company.IsDeleted == false)
+        {
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn-sm bg-warning text-white" data-fsm-transfer-trigger>
+                    <i class="bi bi-person-gear"></i> Change Owner
+                </button>
+
+                <button class="btn-sm delete text-white" data-fsm-delete-trigger>
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+
+                <a href="/Customers/Companies/Edit?Id=@UrlEncryptionBusiness.EncryptParam(company.Id.ToString())" class="btn-sm btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            @* check the height of this *@
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel">
+                @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", company)
+            </div>
+
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
+            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+                <div class="fsm-tab-bar" id="fsm-user-tab-bar">
+                    <div class="fsm-tab-track" id="fsm-tab-track">
+                        <button class="fsm-tab active" data-tab="timeline" data-index="0">Timeline</button>
+                        <button class="fsm-tab" data-tab="contacts" data-index="1">Contacts</button>
+                        <button class="fsm-tab" data-tab="addresses" data-index="2">Addresses</button>
+                        <button class="fsm-tab" data-tab="notes" data-index="3">Notes</button>
+                        <button class="fsm-tab" data-tab="attachments" data-index="4">Attachments</button>
+                        <button class="fsm-tab" data-tab="billing" data-index="5">Billing</button>
+                        <button class="fsm-tab" data-tab="relatedList" data-index="6">Related List</button>
+                    </div>
+
+           
+                    <div class="fsm-tab-more fsm-dropdown" id="fsm-tab-more" style="display:none;">
+                        <button class="fsm-tab-more-btn nav-dropdown-toggle"
+                                id="fsm-tab-more-btn"
+                                type="button"
+                                aria-expanded="false"
+                                aria-label="More tabs">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="fsm-dropdown-menu fsm-tab-more-menu show"
+                             id="fsm-tab-more-menu"
+                             role="menu">
+                        </div>
+                    </div>
+                </div>
+
+          
+                <div class="fsm-tab-content flex-grow-1 overflow-auto">
+                    <div class="fsm-tab-panel active" data-panel="timeline">
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+                    </div>
+                    @*<div class="fsm-tab-panel " data-panel="contacts">
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+                    </div>
+                     <div class="fsm-tab-panel" data-panel="appointments">
+                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_ServiceAppointments.cshtml", Model)
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="timesheets">
+                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_TimeSheets.cshtml", Model)
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="territories">
+                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Territories.cshtml", Model)
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="crew">
+                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Crew.cshtml", Model)
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="trips">
+                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Trips.cshtml", Model)
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="relatedList">
+                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_RelatedList.cshtml", Model)
+                    </div> *@
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">Company Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 overflow-y-auto">
+        @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", company)
+    </div>
+</div>
+
+<div id="fsm-change-owner-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="owner-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="owner-title" class="dialog-title">Change Company Owner</p>
+
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <i class="bi bi-person-gear"></i>
+            </div>
+            <div class="warn-text">
+                <p>Company Ownership Transfer</p>
+                <p class="warn-sub">You are about to transfer ownership of the entire company to a new user.</p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            To change the company owner, please select the new owner below. All company records, settings, and ownership rights will be transferred.
+        </div>
+
+        <div class="d-flex flex-column align-items-start mb-2 mx-2">
+            <h6 class="d-flex align-items-center gap-2">New Company Owner <span class="text-danger">*</span></h6>
+            <select class="dialog-select w-50" id="new-owner-select">
+                <!-- Options populated dynamically -->
+                <option value="">Select user...</option>
+            </select>
+        </div>
+
+      @*   <div class="bd-callout bd-callout-info my-0 p-2 mx-2 bg-opacity-10">
+            <strong>Note</strong>
+            <br />
+            <span class="smaller">
+                • All records owned by the current owner will be transferred to the new owner (Requests, Estimates, Work Orders, Service Appointments, etc.).
+                <br />
+                • Crews owned or led by the current owner will be transferred.
+                <br />
+                • If the current owner is a field technician, their Timesheets, Trips, and Location tracking will be closed or stopped automatically.
+                <br />
+                <strong class="text-danger">This action cannot be easily undone.</strong>
+            </span>
+        </div> *@
+
+        <div class="dialog-body">
+            Please select <strong>Transfer Ownership</strong> to proceed with changing the company owner, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            Failed to transfer ownership. Please try again.
+            <button class="read-more-btn text-black small">Read more</button>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-transfer-cancel>Cancel</button>
+            <button class="btn-confirm" id="fsm-change-owner-confirm">
+                Transfer Ownership
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="fsm-delete-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="delete-title" class="dialog-title">Delete Company</p>
+
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Delete Confirmation Required</p>
+                <p class="warn-sub">Are you sure you want to permanently delete the company <strong>@company.Name</strong>?</p>
+            </div>
+        </div>
+
+        <div class="bd-callout bd-callout-info my-0 mt-3 p-2 mx-2 bg-opacity-10">
+            <strong>Note</strong>
+            <br />
+            <span class="smaller">
+                • All records owned by this company will be transferred to the new owner (Requests, Estimates, Work Orders, Service Appointments, etc.).
+                <br />
+                • Crews, teams, and assets will be transferred to the new owner.
+                <br />
+                • Active timesheets, trips, and location tracking will be closed or stopped automatically.
+                <br />
+                <strong class="text-danger">This action is irreversible. All company data will be permanently deleted after transfer.</strong>
+            </span>
+        </div>
+
+        <div class="dialog-body">
+            Please select <strong>Delete Company</strong> to proceed with removing this company, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            Failed to delete this company. Please try again.
+            <button class="read-more-btn text-black small">Read more</button>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+            <button class="btn-confirm" id="fsm-delete-confirm">
+                Delete Company
+            </button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript" nonce="9815422428">
+        const transferDialog   = document.getElementById('fsm-change-owner-dialog');
+        const transferTriggers = document.querySelectorAll('[data-fsm-transfer-trigger]');
+        const transferCancels  = document.querySelectorAll('[data-fsm-transfer-cancel]');
+
+        // ── Delete dialog ─────────────────────────────────────────────────────────
+        const deleteDialog   = document.getElementById('fsm-delete-dialog');
+        const deleteTriggers = document.querySelectorAll('[data-fsm-delete-trigger]');
+        const deleteCancels  = document.querySelectorAll('[data-fsm-delete-cancel]');
+
+        transferTriggers.forEach(btn => btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            transferDialog?.classList.add('show');
+        }));
+
+        transferCancels.forEach(btn => btn.addEventListener('click', () => {
+            transferDialog?.classList.remove('show');
+        }));
+
+
+        deleteTriggers.forEach(btn => btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteDialog?.classList.add('show');
+        }));
+
+        deleteCancels.forEach(btn => btn.addEventListener('click', () => {
+            deleteDialog?.classList.remove('show');
+        }));
+
+        (function () {
+            const track    = document.getElementById('fsm-tab-track');
+            const moreWrap = document.getElementById('fsm-tab-more');
+            const moreBtn  = document.getElementById('fsm-tab-more-btn');
+            const moreMenu = document.getElementById('fsm-tab-more-menu');
+            const tabs     = Array.from(track?.querySelectorAll('.fsm-tab') ?? []);
+            const panels   = Array.from(document.querySelectorAll('.fsm-tab-panel'));
+
+            if (!track || !tabs.length) return;
+
+            // ── Activate ──────────────────────────────────────────────────
+            function activate(tabName) {
+                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
+                moreMenu?.querySelectorAll('button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tab === tabName);
+                });
+            }
+
+            tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.tab)));
+
+            // ── Overflow calculation ──────────────────────────────────────
+            function recalc() {
+                if (!moreWrap) return;
+
+                tabs.forEach(t => { t.style.display = ''; });
+                moreWrap.style.display    = 'none';
+                moreWrap.style.visibility = 'hidden';
+                moreMenu.innerHTML        = '';
+
+                requestAnimationFrame(() => {
+                    const barWidth   = track.parentElement.offsetWidth;
+                    const moreBtnW   = 44;
+                    let   used       = 0;
+                    const overflowed = [];
+
+                    tabs.forEach(tab => {
+                        used += tab.getBoundingClientRect().width;
+                        if (used > barWidth - moreBtnW) {
+                            tab.style.display = 'none';
+                            overflowed.push(tab);
+                        }
+                    });
+
+                    if (overflowed.length === 0) {
+                        moreWrap.style.display    = 'none';
+                        moreWrap.style.visibility = '';
+                        return;
+                    }
+
+                    moreWrap.style.display    = '';
+                    moreWrap.style.visibility = '';
+
+                    overflowed.forEach(tab => {
+                        const btn       = document.createElement('button');
+                        btn.type        = 'button';
+                        btn.role        = 'menuitem';
+                        btn.dataset.tab = tab.dataset.tab;
+                        btn.textContent = tab.textContent.trim();
+                        btn.className   = 'dropdown-item' + (tab.classList.contains('active') ? ' active' : '');
+                        btn.addEventListener('click', () => {
+                            activate(tab.dataset.tab);
+                            moreMenu.classList.remove('show');
+                            moreBtn.setAttribute('aria-expanded', 'false');
+                        });
+                        moreMenu.appendChild(btn);
+                    });
+                });
+            }
+
+            // ── More button toggle ────────────────────────────────────────
+            moreBtn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log("clicked")
+                const isOpen = moreMenu.classList.contains('show');
+                console.log(isOpen)
+                document.querySelectorAll('.fsm-dropdown-menu.show').forEach(m => {
+                    console.log(m)
+                    m.classList.remove('show');
+                    m.closest('.fsm-dropdown')
+                     ?.querySelector('[aria-expanded]')
+                     ?.setAttribute('aria-expanded', 'false');
+                });
+
+                if (!isOpen) {
+                    moreMenu.classList.add('show');
+                    console.log(moreMenu);
+                    moreBtn.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            moreMenu?.addEventListener('click', (e) => e.stopPropagation());
+
+            document.addEventListener('click', () => {
+                moreMenu?.classList.remove('show');
+                moreBtn?.setAttribute('aria-expanded', 'false');
+            });
+
+            // ── Init ──────────────────────────────────────────────────────
+            requestAnimationFrame(() => requestAnimationFrame(recalc));
+            window.addEventListener('resize', recalc);
+        })();
+
+    </script>
+}

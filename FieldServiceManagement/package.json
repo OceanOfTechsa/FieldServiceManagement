@@ -1,0 +1,21 @@
+{
+  "name": "fieldservicemanagement",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.11",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "sass": "^1.99.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "scripts": {
+    "css:build": "sass wwwroot/scss/custom.scss wwwroot/css/site.css --style=compressed --no-source-map --silence-deprecation=import,global-builtin,color-functions,if-function",
+    "css:watch": "sass wwwroot/scss/custom.scss wwwroot/css/site.css --watch --no-source-map --silence-deprecation=import,global-builtin,color-functions,if-function"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

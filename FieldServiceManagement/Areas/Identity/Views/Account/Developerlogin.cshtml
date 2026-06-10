@@ -1,0 +1,58 @@
+﻿@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Developer Login";
+}
+
+<div class="mb-4">
+    <h2 class="font-sans fw-semibold mb-0" style="font-size:1.75rem;">
+        Choose a User Type To Login
+    </h2>
+    <p>
+        Setup these accounts and ensure that you have logged in at least once with each account.
+        This process does not create the user account. Or <a asp-area="Identity" asp-controller="Account"
+                                                         asp-action="Login"
+                                                         class="text-dim text-decoration-none border-bottom border-fsm pb-1">
+        Go To Login
+    </a>
+    </p>
+</div>
+
+<div class="dev-panel">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="dev-badge">Dev</span>
+        <span class="text-muted" style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;">
+            Quick login
+        </span>
+    </div>
+
+    <div class="d-flex flex-column gap-2">
+
+        @foreach (var user in new[]
+                {
+                ("Administrator", "Administrator"),
+                ("Dispatcher", "Dispatcher"),
+                ("FieldAgent", "FieldAgent"),
+                ("CallCenterAgent", "Call Center Agent"),
+                ("LimitedFieldAgent", "Limited Field Agent"),
+                ("SuperAdmin", "Super Admin"),
+            })
+        {
+            <form asp-area="Identity"
+                  asp-controller="Account"
+                  asp-action="DeveloperLogin"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="role" value="@user.Item1" />
+
+                <button type="submit" class="btn-dev color-accent" data-loading-text="Logging In">
+                    Login as:
+                    <span style="font-size:0.9rem;opacity:0.6;">
+                        @user.Item2
+                    </span>
+                </button>
+            </form>
+        }
+    </div>
+</div>

@@ -1,0 +1,727 @@
+﻿@import 'bootstrap-switch';
+
+// ─── Back to top ──────────────────────────────────────────────────────────────
+.back-top {
+    cursor: pointer;
+    position: fixed !important;
+    bottom: 40px;
+    right: 40px;
+    display: block;
+    z-index: 99;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(50%);
+    transition: $transition-base;
+    background: rgba($fsm-accent, 0.1);
+    color: $fsm-accent;
+    border-radius: 10%;
+    width: 52px;
+    height: 52px;
+    line-height: 52px;
+    text-align: center;
+
+    i {
+        font-size: 1.6rem;
+        vertical-align: middle;
+    }
+
+    &:hover {
+        background: $fsm-accent;
+        color: $white;
+    }
+
+    &.back-top-show {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0%);
+    }
+
+    @include media-breakpoint-down(md) {
+        bottom: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+
+        i {
+            font-size: 1rem;
+        }
+    }
+}
+
+// ─── Preloader ────────────────────────────────────────────────────────────────
+.preloader {
+    background-color: var(--background);
+    position: fixed;
+    z-index: 1190;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+
+    .preloader-item {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        text-align: center;
+        transform: translate(-50%, -50%);
+    }
+}
+
+// ─── Ribbon ───────────────────────────────────────────────────────────────────
+.ribbon {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    background: var(--surface);
+    padding: 0 10px;
+    color: $gray-800;
+    box-shadow: 0 0 40px rgba(0,0,0,.15);
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -20px;
+        border-top: 0.75em solid var(--surface);
+        border-bottom: 0.75em solid var(--surface);
+        border-right: 20px solid transparent;
+    }
+}
+
+// ─── Notification dot ─────────────────────────────────────────────────────────
+.notif-badge {
+    width: 10px;
+    height: 10px;
+    background: $fsm-danger;
+    border-radius: 50%;
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    z-index: 1;
+}
+
+.animation-blink {
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+// ─── Page content (admin layout) ──────────────────────────────────────────────
+.top-bar {
+    position: relative;
+    padding: 1.6rem;
+    box-shadow: var(--shadow);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.page-content {
+    position: relative;
+    height: 100%;
+    display: block;
+
+    .page-content-wrapper {
+        min-height: 86vh;
+        margin: 1.5rem;
+        padding: 1.5rem;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        border-radius: $border-radius;
+        height: 100%;
+        flex-direction: column !important;
+        display: flex !important;
+    }
+
+    @include media-breakpoint-up(xl) {
+        margin-left: 16.25rem;
+    }
+
+    @include media-breakpoint-down(sm) {
+        .page-content-wrapper {
+            margin: 1rem 0;
+            padding: 1rem;
+        }
+    }
+}
+
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+$avatar-size-base: 3rem;
+$avatar-size-xs: 2.1875rem;
+$avatar-size-sm: 2.5rem;
+$avatar-size-lg: 4rem;
+$avatar-size-xl: 5.125rem;
+$avatar-size-xxl: 8rem;
+$avatar-size-xxxl: 11rem;
+
+.avatar {
+    height: $avatar-size-base;
+    width: $avatar-size-base;
+    position: relative;
+    display: inline-block !important;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-group {
+    padding: 0;
+    display: flex;
+
+    > li {
+        position: relative;
+
+        &:not(:last-child) {
+            margin-right: -0.8rem;
+        }
+    }
+
+    .avatar-img {
+        border: 2px solid var(--background);
+    }
+}
+
+.avatar-xs {
+    height: $avatar-size-xs;
+    width: $avatar-size-xs;
+}
+
+.avatar-sm {
+    height: $avatar-size-sm;
+    width: $avatar-size-sm;
+}
+
+.avatar-lg {
+    height: $avatar-size-lg;
+    width: $avatar-size-lg;
+}
+
+.avatar-xl {
+    height: $avatar-size-xl;
+    width: $avatar-size-xl;
+}
+
+.avatar-xxl {
+    height: $avatar-size-xl;
+    width: $avatar-size-xl;
+
+    @include media-breakpoint-up(md) {
+        height: $avatar-size-xxl;
+        width: $avatar-size-xxl;
+    }
+}
+
+.avatar-xxxl {
+    height: $avatar-size-xxl;
+    width: $avatar-size-xxl;
+
+    @include media-breakpoint-up(md) {
+        height: $avatar-size-xxxl;
+        width: $avatar-size-xxxl;
+    }
+}
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+.icon-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    text-align: center;
+    font-size: 75%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-md {
+    width: 2.6rem;
+    height: 2.6rem;
+    line-height: 2.6rem;
+    text-align: center;
+    font-size: .8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-lg {
+    width: 3.5rem;
+    height: 3.5rem;
+    line-height: 3.5rem;
+    text-align: center;
+    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-xl {
+    width: 5rem;
+    height: 5rem;
+    line-height: 5rem;
+    text-align: center;
+    font-size: 1.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-xxl {
+    width: 7rem;
+    height: 7rem;
+    line-height: 7rem;
+    text-align: center;
+    font-size: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// ─── Nav extensions ───────────────────────────────────────────────────────────
+.nav.flex-column:not(.nav-pills) .nav-link {
+    padding-left: 0;
+    padding-top: 0.30rem;
+    padding-bottom: 0.30rem;
+}
+
+.nav.nav-divider {
+    a:not(.dropdown-item) {
+        color: inherit;
+    }
+
+    .nav-item + .nav-item::before {
+        content: "\2022";
+        color: inherit;
+        padding-left: .65rem;
+        padding-right: .75rem;
+        opacity: 0.8;
+    }
+
+    .nav-item {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .nav-link {
+        padding: 0;
+        color: inherit;
+    }
+}
+
+.nav-pill-soft {
+    .nav-link {
+        background-color: rgba($fsm-accent, 0.1);
+        color: $fsm-accent;
+        border: none;
+    }
+
+        .nav-link.active, .show > .nav-link {
+            color: $white !important;
+            background-color: $fsm-accent;
+        }
+}
+
+.nav-pill-dark-soft {
+    .nav-link {
+        background-color: $gray-200;
+        color: $gray-800;
+        border: none;
+    }
+
+        .nav-link.active, .show > .nav-link {
+            color: $gray-200;
+            background-color: $gray-800;
+        }
+}
+
+.nav.nav-bottom-line {
+    .nav-link {
+        border: transparent;
+        font-weight: 600;
+        padding: ($nav-link-padding-y * 3) ($nav-link-padding-x * 1.3);
+        background: transparent;
+        border-bottom: 3px solid transparent;
+
+        &.active {
+            background: transparent;
+            color: $fsm-accent;
+            border-bottom: 3px solid $fsm-accent;
+        }
+    }
+
+    .nav-item:first-child .nav-link {
+        padding-left: 0;
+    }
+
+    .nav-item {
+        margin-bottom: -2px;
+    }
+}
+
+// ─── Table extensions ─────────────────────────────────────────────────────────
+.table td, .table th {
+    white-space: nowrap;
+}
+
+@include media-breakpoint-up(md) {
+    .table-responsive .table td,
+    .table-responsive .table th {
+        white-space: inherit;
+    }
+}
+
+.table.table-dark-gray {
+    thead {
+        background-color: $gray-800 !important;
+
+        th {
+            color: $white !important;
+        }
+    }
+
+    tbody {
+        border-top: none;
+    }
+}
+
+// ─── Dropdown extensions ──────────────────────────────────────────────────────
+.dropdown-item.active,
+.dropdown-item:active,
+.dropdown-item:hover,
+.dropdown-item:focus {
+    border-radius: $border-radius;
+}
+
+.dropdown-menu {
+    padding-left: 10px;
+    padding-right: 10px;
+    z-index: 1100;
+}
+
+.dropdown-menu-size-sm {
+    min-width: 13rem;
+}
+
+.dropdown-menu-size-md {
+    min-width: 22rem;
+}
+
+.dropdown-menu-size-lg {
+    min-width: 30rem;
+}
+
+@include media-breakpoint-down(sm) {
+    .dropdown-menu-size-md {
+        min-width: 16rem;
+    }
+}
+
+.dropdown-menu.dropdown-animation.show {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+    animation-name: dropdownslideIn;
+    position: absolute !important;
+    top: 100% !important;
+}
+
+@keyframes dropdownslideIn {
+    0% {
+        transform: translateY(1rem);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+// ─── Pagination extensions ────────────────────────────────────────────────────
+.pagination .page-item {
+    margin-bottom: 5px;
+    float: left;
+}
+
+.pagination-primary-soft {
+    border: none;
+    padding: 4px;
+    border-radius: $border-radius;
+
+    .page-item {
+        margin: 4px;
+    }
+
+    .page-link {
+        border: transparent;
+        border-radius: $border-radius !important;
+        color: $fsm-accent;
+        background-color: rgba($fsm-accent, 0.1);
+    }
+
+        .page-link:hover {
+            color: $white;
+            background-color: $fsm-accent;
+            border-color: $fsm-accent;
+        }
+
+    .page-item.active .page-link {
+        color: $white;
+        background-color: $fsm-accent;
+    }
+}
+
+// ─── List group extensions ────────────────────────────────────────────────────
+.list-group .list-group-item i,
+.list-group .list-group-item span {
+    margin-right: 5px;
+}
+
+.list-group-borderless .list-group-item {
+    border: none !important;
+    padding: 0.425rem 0;
+}
+
+// ─── Progress extensions ──────────────────────────────────────────────────────
+.progress {
+    position: relative;
+    overflow-x: visible;
+    overflow-y: visible;
+
+    .progress-bar {
+        position: relative;
+        overflow: visible;
+        border-radius: $border-radius;
+    }
+
+    .progress-percent {
+        color: $gray-600;
+        font-weight: $font-weight-normal;
+        line-height: 24px;
+        position: absolute;
+        right: 0;
+        top: -24px;
+        font-size: 12px;
+    }
+
+    &.progress-xs {
+        height: 3px;
+    }
+
+    &.progress-sm {
+        height: 5px;
+    }
+
+    &.progress-md {
+        height: 10px;
+    }
+
+    &.progress-lg {
+        height: 16px;
+    }
+
+    &.progress-xl {
+        height: 20px;
+    }
+}
+
+// ─── Accordion extensions ─────────────────────────────────────────────────────
+.accordion .accordion-button {
+    text-align: left;
+}
+
+.accordion.accordion-icon {
+    .accordion-header .accordion-button {
+        background: transparent;
+        border: none;
+
+        &::after, &::before {
+            content: "";
+            background: $gray-800;
+            width: 10px;
+            height: 2px;
+            display: block;
+            position: absolute;
+            top: 47%;
+            right: 20px;
+            transform: translateY(-50%);
+            transition: $transition-base;
+            z-index: 9;
+        }
+
+        &[aria-expanded=false]::after {
+            transform: rotateZ(90deg);
+        }
+
+        &[aria-expanded=true]::before {
+            transform: rotateZ(0deg);
+        }
+    }
+
+    .accordion-body {
+        padding: 0.2rem 0.5rem 0.5rem 1rem;
+    }
+}
+
+.accordion-flush {
+    .accordion-item {
+        background-color: transparent;
+    }
+
+    .accordion-button {
+        padding: 1rem 0;
+        background-color: transparent;
+
+        &:not(.collapsed) {
+            color: $gray-800;
+            background-color: transparent;
+        }
+    }
+}
+
+// ─── Breadcrumb extensions ────────────────────────────────────────────────────
+.breadcrumb-item a {
+    color: var(--foreground);
+
+    &:hover {
+        color: $fsm-accent;
+    }
+}
+
+.breadcrumb.breadcrumb-dots .breadcrumb-item + .breadcrumb-item::before {
+    content: "•";
+    font-size: 22px;
+    line-height: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+// ─── Form extensions ──────────────────────────────────────────────────────────
+.form-check .form-check-input,
+.form-check .form-check-label {
+    cursor: pointer;
+}
+
+.bg-light-input {
+    .form-control {
+        background-color: var(--surface-raised) !important;
+        border: 1px solid var(--surface-raised) !important;
+        border-radius: $input-border-radius;
+
+        &:focus {
+            border: 1px solid $fsm-accent !important;
+        }
+    }
+}
+
+// ─── Utility classes ──────────────────────────────────────────────────────────
+.font-base {
+    font-family: $font-family-base !important;
+}
+
+.font-heading {
+    font-family: $headings-font-family !important;
+}
+
+.text-primary-hover {
+    transition: $transition-base;
+
+    &:hover {
+        color: $fsm-accent !important;
+    }
+
+    a, li {
+        color: $gray-400;
+
+        &:hover {
+            color: $fsm-accent !important;
+        }
+    }
+}
+
+.grayscale {
+    filter: grayscale(100%);
+    transition: all .6s ease;
+
+    &:hover {
+        filter: none;
+    }
+}
+
+.zoom-hover {
+    transform: scale(1);
+    transition: $transition-base;
+
+    &:hover {
+        transform: scale(1.2);
+    }
+}
+
+.shadow-hover:hover {
+    transition: $transition-base;
+    box-shadow: 0px 0px 20px rgba(0,0,0,.25);
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bg-overlay {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.bg-blur {
+    backdrop-filter: blur(5px);
+}
+
+.transition-base {
+    transition: $transition-base;
+}
+
+// Soft button check variants
+.btn-success-soft-check {
+    background-color: var(--surface-raised);
+    text-align: start;
+
+    &:hover {
+        background-color: rgba($fsm-success, 0.2) !important;
+        border: $border-width $border-style $fsm-success !important;
+    }
+}
+
+.btn-primary-check {
+    border: $border-width $border-style $gray-400;
+
+    &:hover {
+        background-color: $fsm-accent;
+        color: $white;
+        border: $border-width $border-style $fsm-accent;
+    }
+}

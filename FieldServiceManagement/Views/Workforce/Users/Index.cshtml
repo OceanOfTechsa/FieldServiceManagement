@@ -1,0 +1,598 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.User
+@using System.Text.RegularExpressions
+
+@model IEnumerable<AppUserProfileViewModel>
+
+@{
+    ViewData["Title"] = "All Users";
+
+    var users = Model?.ToList() ?? new List<AppUserProfileViewModel>();
+    var filteredUsers = users;
+
+    var selectedStatus = ViewBag.SelectedStatus?.ToString() ?? "All";
+    var selectedRole   = ViewBag.SelectedRole?.ToString()   ?? "All";
+
+    filteredUsers = selectedStatus switch
+    {
+        "All"      => users,
+        "Active"   => users.Where(x => x.User.StatusId == (int)UserStatus.Active).ToList(),
+        "Deleted"  => users.Where(x => x.User.StatusId == (int)UserStatus.Deleted).ToList(),
+        "Invited"  => users.Where(x => x.User.StatusId == (int)UserStatus.Invited).ToList(),
+        "InActive" => users.Where(x => x.User.StatusId == (int)UserStatus.InActive).ToList(),
+        _          => users
+    };
+    selectedRole = selectedRole?.Trim() ?? "All";
+    UserRole parsedRole = default(UserRole);
+    if (selectedRole != "All" && System.Enum.TryParse<UserRole>(selectedRole.Trim(), true, out parsedRole))
+    {
+        filteredUsers = filteredUsers.Where(x => x.User.UserRoleId == (int?)parsedRole).ToList();
+    }
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <i class="bi bi-funnel"></i>
+            <div id="app" class="mt-2">
+                <enum-dropdown :options="statusOptions"
+                               v-model="selectedStatus"
+                               placeholder="All"
+                               param-name="status"
+                               suffix="Users">
+                </enum-dropdown>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-start">
+            <div class="d-flex align-items-center position-relative">
+
+                <button type="button" class="btn border-fsm btn-xs mb-0" id="searchBtn"><i class="bi bi-search"></i></button>
+
+                <div id="searchWrapper" class="search-wrapper">
+                    <input class="border-fsm form-control search-input"
+                           placeholder="Search by name or email..."
+                           id="searchInput" />
+
+                    <button id="cancelSearch" class="cancel-btn">
+                        ✕
+                    </button>
+                </div>
+
+            </div>
+            <a href="/Workforce/Users/Invite" class="btn btn-primary btn-xs"
+                    title="Invite User"
+                    aria-label="Invite User"
+                    >
+                <i class="fa-solid fa-plus"></i>
+                Invite User
+            </a>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="border-0 rounded-2 overflow-hidden mx-2">
+        <div class="table-responsive fsm-table-wrapper">
+            <table class="table align-middle mb-0 fsm-table">
+                <thead>
+                    <tr>
+                        <th class="fsm-sortable" data-sort="name">
+                            Full Name
+                            <span class="fsm-sort-icon">
+                                <i class="bi bi-chevron-expand"></i>
+                            </span>
+                        </th>
+                        <th>Employee ID</th>
+                        <th>Email</th>
+                        <th>
+                            <div id="role-filter-app" class="text-muted">
+                                <enum-dropdown :options="roleOptions"
+                                               v-model="selectedRole"
+                                               placeholder="All Roles"
+                                               param-name="role"
+                                               suffix="">
+                                </enum-dropdown>
+                            </div>
+                        </th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Created Time</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (filteredUsers.Any())
+                    {
+                        foreach (var item in filteredUsers)
+                        {
+                            <tr data-sort-value="@item.User.Name">
+                                <!-- Full Name -->
+                                <td>
+                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.User.Id.ToString()) })"
+                                       class="d-flex align-items-center gap-2 full-name-wrapper">
+                                        <img src="@(string.IsNullOrWhiteSpace(item.User.AvatarUrl)
+                                                ? $"https://ui-avatars.com/api/?name={item.User.Name + " " + item.User.Surname}&background=random"
+                                                : item.User.AvatarUrl)"
+                                             class="fsm-avatar"
+                                             alt="@item.User.Name" />
+                                        <span class="fsm-user-name">@item.User.Name @item.User.Surname</span>
+                                    </a>
+                                </td>
+
+                                <!-- Employee ID -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(string.IsNullOrWhiteSpace(item.User.EmployeeNumber)
+                                            ? "-"
+                                            : item.User.EmployeeNumber)
+                                    </span>
+                                </td>
+
+                                <!-- Email -->
+                                <td>
+                                    <span class="fsm-meta-text">@item.User.Email</span>
+                                </td>
+
+                                <!-- Role -->
+                                <td>
+                                    @{
+                                        var roleDisplay = ((UserRole?)item.User.UserRoleId)?.GetDisplayName() ?? "Unknown";
+                                        var roleLabel   = Regex.Replace(roleDisplay, "(?<=[a-z])(?=[A-Z])", " ");
+                                    }
+                                    <span class="fsm-meta-text">@roleLabel</span>
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    @{
+                                        var status = (UserStatus)(item.User.StatusId ?? (int)UserStatus.InActive);
+
+                                        string statusCss = status switch
+                                        {
+                                            UserStatus.Active   => "bg-success",
+                                            UserStatus.Invited  => "bg-warning",
+                                            UserStatus.InActive => "bg-secondary",
+                                            UserStatus.Deleted  => "bg-danger",
+                                            _                   => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="d-inline-flex align-items-center gap-2">
+                                        <span class="fsm-status-dot @statusCss"></span>
+                                        <span>@status.ToString()</span>
+                                    </span>
+                                </td>
+
+                                <!-- Created By -->
+                                <td>
+                                    @{
+                                        var createdBy = item?.CreatedBy?.Name + " " + item?.CreatedBy?.Surname ?? "-";
+                                        var isSystem       = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                                        var createdByLabel = isSystem ? "System" : createdBy;
+                                    }
+                                    <span class="fsm-meta-text d-flex align-items-center gap-2">
+                                        @createdByLabel
+                                        @if (isSystem)
+                                        {
+                                            <span class="fsm-pill bg-info-subtle">Self-registered</span>
+                                        }
+                                    </span>
+                                </td>
+
+                                <!-- Created At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @item?.User.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item?.User.CreatedAt.ToString("tt").ToUpper()
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7">
+                                <div class="fsm-empty-state">
+                                    <div class="fsm-empty-icon">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">No users found</h6>
+                                    <p class="text-muted small mb-3">No users match the selected filter.</p>
+                                    <a href="/Workforce/Users/Invite" class="btn btn-primary btn-xs"
+                                       title="New User"
+                                       aria-label="New User">
+                                        <i class="fa-solid fa-plus"></i>
+                                        New User
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (selectedStatus == "Deleted" && filteredUsers.Any())
+                    {
+                    <tr>
+                        <td colspan="7">
+                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                                <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    @(filteredUsers.Count > 1 ? "These user accounts have" : "This user account has")
+                                    been permanently deleted from the system.
+                                    All associated data has been moved to a different user and no further actions can be taken using
+                                    @(filteredUsers.Count > 1 ? "these accounts" : "this account").
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="fsm-table-footer">
+            <span>
+                Total Users : <strong>@filteredUsers.Count</strong> @if (selectedStatus != "All" || selectedRole != "All")
+                {
+                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>    
+                }
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                <span class="fsm-page-current">1</span>
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                <select class="fsm-per-page">
+                    <option value="10">10 Records per page</option>
+                    <option value="25">25 Records per page</option>
+                    <option value="50">50 Records per page</option>
+                    <option value="100">100 Records per page</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Components/Sheets/_NewUserSheet.cshtml", new UserInvitationViewModel())
+
+@section Scripts {
+    <script src="https://unpkg.com/vue-select@@2.6.4/dist/vue-select.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/vue-select@@2.6.4/dist/vue-select.css" />
+    <script src="~/js/onboarding/GetLanguages.js"></script>
+
+    <script>
+        // ── Shared enum-dropdown component ───────────────────────────────
+        Vue.component('enum-dropdown', {
+            props: {
+                options:     Array,
+                value:       String,
+                placeholder: { type: String, default: 'Select...' },
+                paramName:   { type: String, default: 'status' },
+                suffix:      { type: String, default: '' }
+            },
+            data() {
+                return { search: '', open: false };
+            },
+            computed: {
+                filtered() {
+                    return this.options.filter(o =>
+                        o.toLowerCase().includes(this.search.toLowerCase())
+                    );
+                },
+                display() {
+                    return this.value || this.placeholder;
+                }
+            },
+            methods: {
+                select(option) {
+                    this.$emit('input', option);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set(this.paramName, option);
+                    window.location.href = url.toString();
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) this.$nextTick(() => this.$refs.search.focus());
+                },
+                close() {
+                    this.open = false;
+                    this.search = '';
+                }
+            },
+            template: `
+                <div style="position:relative;display:inline-block;" v-click-outside="close">
+                    <button class="btn btn-sm border-0 bg-transparent text-black px-2" type="button" @@click="toggle">
+                        {{ display }}<span v-if="suffix"> {{ suffix }}</span>
+                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
+                    </button>
+                    <div v-if="open" style="position:absolute;top:100%;left:0;z-index:1000;min-width:220px;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;background:#fff;">
+                        <div class="d-flex align-items-center px-3 py-2" style="border-bottom:1px solid #f0f0f0;gap:8px;">
+                            <i class="bi bi-search" style="color:#adb5bd;font-size:13px;"></i>
+                            <input ref="search" v-model="search" type="text" class="border-0 bg-transparent w-100" placeholder="Search" style="outline:none;box-shadow:none;font-size:13px;color:#495057;" />
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li v-if="filtered.length === 0">
+                                <span class="dropdown-item small gap-2 text-danger">
+                                    <i class="bi bi-exclamation-circle me-2"></i>No results
+                                </span>
+                            </li>
+                            <li v-for="option in filtered" :key="option">
+                                <button type="button"
+                                        class="dropdown-item py-2 px-3 border-0 text-start w-100"
+                                        @@click="select(option)"
+                                        style="font-size:13px;color:#212529;"
+                                        :style="value === option ? 'background:rgba(16,185,129,.10);color:#059669;font-weight:500;' : ''">
+                                    {{ option }}<span v-if="suffix"> {{ suffix }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        });
+
+        Vue.directive('click-outside', {
+            bind(el, binding) {
+                el._clickOutside = (e) => { if (!el.contains(e.target)) binding.value(); };
+                document.addEventListener('click', el._clickOutside);
+            },
+            unbind(el) {
+                document.removeEventListener('click', el._clickOutside);
+            }
+        });
+
+        // ── Status filter instance ────────────────────────────────────────
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    statusOptions: ["All", ...@Html.Raw(Json.Serialize(Enum.GetNames(typeof(UserStatus))))],
+                    selectedStatus: '@(ViewBag.SelectedStatus ?? "All")'
+                };
+            }
+        });
+
+        // ── Role filter instance ──────────────────────────────────────────
+        new Vue({
+            el: '#role-filter-app',
+            data() {
+                return {
+                    roleOptions: ["All", ...@Html.Raw(Json.Serialize(Enum.GetNames(typeof(UserRole))))],
+                    selectedRole: '@(ViewBag.SelectedRole ?? "All")'
+                };
+            }
+        });
+
+        // ── New user sheet ────────────────────────────────────────────────
+        Vue.component('v-select', VueSelect.VueSelect);
+
+        const newUserApp = new Vue({
+            el: '#fsm-new-user-sheet',
+            data: {
+                selectedLanguage: null,
+                languageOptions: []
+            },
+            methods: {
+                makeVm(listKey, loadingFn) {
+                    const self = this;
+                    return {
+                        set options(val) { self[listKey] = val; loadingFn(false); },
+                        get options()    { return self[listKey]; }
+                    };
+                },
+                onLanguageSearch(search, loading) {
+                    if (!search || search.length < 2) { this.languageOptions = []; return; }
+                    loading(true);
+                    GetLanguages(search, loading, this.makeVm('languageOptions', loading));
+                },
+                validate() {
+                    let valid = true;
+                    const name    = $('input[name="Name"]').val().trim();
+                    const surname = $('input[name="Surname"]').val().trim();
+                    const email   = $('input[name="Email"]').val().trim();
+                    const role    = $('select[name="UserType"]').val();
+                    const Language= $('select[name="Language"]').val();
+
+                    if (!name)    { this.showFieldError('Name',    'Name is required.');        valid = false; }
+                    if (!surname) { this.showFieldError('Surname', 'Surname is required.');     valid = false; }
+                    if (!email)   { this.showFieldError('Email',   'Email is required.');       valid = false; }
+                    if (!role)    { this.showSelectError('UserType','User type is required.');  valid = false; }
+                    if (!Language){ this.showSelectError('Language','Language type is required.');  valid = false; }
+
+                    return valid;
+                },
+                showFieldError(name, message) {
+                    $('input[name="' + name + '"]').addClass('is-invalid').siblings('.field-error').text(message).show();
+                },
+                showSelectError(name, message) {
+                    $('select[name="' + name + '"]').addClass('is-invalid').siblings('.field-error').text(message).show();
+                }
+            }
+        });
+
+        $('#save-user-btn').on('click', function () {
+            if (newUserApp.validate()) $('#create-user-form').submit();
+        });
+
+        $(document).on('input change', '#create-user-form .form-control, #create-user-form .form-select', function () {
+            $(this).removeClass('is-invalid');
+            $(this).siblings('.field-error').text('').hide();
+        });
+
+        // ── Table sorting + pagination ────────────────────────────────────────
+        (function () {
+            const table      = document.querySelector('.fsm-table');
+            const tbody      = table?.querySelector('tbody');
+            const headers    = table?.querySelectorAll('th.fsm-sortable');
+            const prevBtn    = document.querySelector('.fsm-page-btn:first-of-type');
+            const nextBtn    = document.querySelector('.fsm-page-btn:last-of-type');
+            const pageLabel  = document.querySelector('.fsm-page-current');
+            const perPageSel = document.querySelector('.fsm-per-page');
+
+            if (!tbody) return;
+
+            let allRows    = Array.from(tbody.querySelectorAll('tr'));
+            let currentCol = null;
+            let ascending  = true;
+            let currentPage = 1;
+            let perPage     = 10;
+
+            function getPerPage() {
+                return parseInt(perPageSel?.value) || 10;
+            }
+
+            function render() {
+                const total      = allRows.length;
+                const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+                currentPage = Math.min(currentPage, totalPages);
+
+                const start = (currentPage - 1) * perPage;
+                const end   = start + perPage;
+
+                allRows.forEach((row, i) => {
+                    row.style.display = (i >= start && i < end) ? '' : 'none';
+                });
+
+                if (pageLabel) pageLabel.textContent = `${currentPage} / ${totalPages}`;
+                if (prevBtn)   prevBtn.disabled  = currentPage <= 1;
+                if (nextBtn)   nextBtn.disabled  = currentPage >= totalPages;
+            }
+
+            // ── Sorting ──────────────────────────────────────────────────────
+            headers?.forEach(th => {
+                th.style.cursor = 'pointer';
+                th.addEventListener('click', () => {
+                    const col = th.dataset.sort;
+
+                    if (currentCol === col) {
+                        ascending = !ascending;
+                    } else {
+                        ascending  = true;
+                        currentCol = col;
+                    }
+
+                    headers.forEach(h => {
+                        h.querySelector('.fsm-sort-icon i').className = 'bi bi-chevron-expand';
+                    });
+                    th.querySelector('.fsm-sort-icon i').className = ascending
+                        ? 'bi bi-chevron-up'
+                        : 'bi bi-chevron-down';
+
+                    allRows.sort((a, b) => {
+                        const aText = a.dataset.sortValue ?? a.cells[0]?.innerText.trim() ?? '';
+                        const bText = b.dataset.sortValue ?? b.cells[0]?.innerText.trim() ?? '';
+                        return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                    });
+
+                    allRows.forEach(row => tbody.appendChild(row));
+                    currentPage = 1;
+                    render();
+                });
+            });
+
+            // ── Pagination controls ───────────────────────────────────────────
+            prevBtn?.addEventListener('click', () => {
+                if (currentPage > 1) { currentPage--; render(); }
+            });
+
+            nextBtn?.addEventListener('click', () => {
+                const totalPages = Math.ceil(allRows.length / perPage);
+                if (currentPage < totalPages) { currentPage++; render(); }
+            });
+
+            perPageSel?.addEventListener('change', () => {
+                perPage     = getPerPage();
+                currentPage = 1;
+                render();
+            });
+
+            // ── Initial render ────────────────────────────────────────────────
+            render();
+        })();
+
+        const searchBtn = document.getElementById('searchBtn');
+        const searchWrapper = document.getElementById('searchWrapper');
+        const cancelSearch = document.getElementById('cancelSearch');
+        const searchInput = document.getElementById('searchInput');
+
+        const table = document.querySelector('.fsm-table');
+        const tbody = table.querySelector('tbody');
+        const rows = table.querySelectorAll('tbody tr');
+
+        /* Empty state row */
+        const emptyStateRow = document.createElement("tr");
+        emptyStateRow.id = "emptyStateRow";
+        emptyStateRow.style.display = "none";
+
+        emptyStateRow.innerHTML = `
+            <td colspan="7">
+                <div class="fsm-empty-state">
+                    <div class="fsm-empty-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <h6 class="fw-semibold mb-1">No users found</h6>
+
+                    <p class="text-muted small mb-3">
+                        No users match the selected filter.
+                    </p>
+
+                    <a href="/Workforce/Users/Invite" class="btn btn-primary btn-xs"
+                        title="New User"
+                        aria-label="New User"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        New User
+                    </a>
+                </div>
+            </td>
+        `;
+
+        tbody.appendChild(emptyStateRow);
+
+        searchBtn.addEventListener("click", () => {
+            searchWrapper.classList.add("active");
+            searchBtn.classList.add("d-none");
+
+            setTimeout(() => {
+                searchInput.focus();
+                }, 200);
+            });
+
+            cancelSearch.addEventListener("click", () => {
+                searchWrapper.classList.remove("active");
+                searchBtn.classList.remove("d-none");
+
+                searchInput.value = "";
+
+                rows.forEach(row => {
+                row.style.display = "";
+                });
+
+                emptyStateRow.style.display = "none";
+            });
+
+            searchInput.addEventListener("keyup", () => {
+
+            const value = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const col1 = row.cells[0]?.textContent.toLowerCase() || "";
+                const col2 = row.cells[1]?.textContent.toLowerCase() || "";
+                const col3 = row.cells[2]?.textContent.toLowerCase() || "";
+
+                const match =
+                col1.includes(value) ||
+                col2.includes(value) ||
+                col3.includes(value);
+
+                row.style.display = match ? "" : "none";
+
+                if (match) {
+                    visibleCount++;
+                    }
+                });
+
+                emptyStateRow.style.display =
+                visibleCount === 0 ? "" : "none";
+        });
+    </script>
+}

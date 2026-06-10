@@ -1,0 +1,304 @@
+﻿// ─── Typography ───────────────────────────────────────────────────────────────
+$font-family-base: 'Roboto', sans-serif;
+$font-family-sans-serif: 'Roboto', sans-serif;
+$font-family-monospace: 'Source Code Pro', 'Courier New', monospace;
+
+$font-size-xs: .8125rem;
+$font-size-base: 0.9375rem;
+$font-size-lg: $font-size-base * 1.25;
+$font-size-sm: $font-size-base * .875;
+
+$font-weight-light: 400;
+$font-weight-normal: 500;
+$font-weight-bold: 700;
+
+$line-height-base: 1.5;
+$line-height-sm: 1.25;
+$line-height-lg: 2;
+
+$headings-font-family: 'Heebo', sans-serif;
+$headings-font-weight: 700;
+$headings-line-height: 1.25;
+$headings-color: #24292d;
+
+$h1-font-size: $font-size-base * 3;
+$h2-font-size: $font-size-base * 2.5;
+$h3-font-size: $font-size-base * 2;
+$h4-font-size: $font-size-base * 1.75;
+$h5-font-size: $font-size-base * 1.4;
+$h6-font-size: $font-size-base;
+
+$lead-font-size: $font-size-base * 1.25;
+$lead-font-weight: 400;
+$small-font-size: .875em;
+
+// ─── Colours ──────────────────────────────────────────────────────────────────
+$white: #fff;
+$gray-100: #f5f7f9;
+$gray-200: #eff1f2;
+$gray-300: #dde0e3;
+$gray-400: #cfd3d7;
+$gray-500: #9a9ea4;
+$gray-600: #747579;
+$gray-700: #404448;
+$gray-800: #24292d;
+$gray-900: #0b0f13;
+$black: #000;
+
+$fsm-accent: #009966;
+$fsm-accent-dim: #007a52;
+$fsm-success: #0cbc87;
+$fsm-info: #17a2b8;
+$fsm-warning: #f59e0b;
+$fsm-danger: #d6293e;
+
+$primary: $fsm-accent;
+$secondary: $gray-500;
+$success: $fsm-success;
+$info: $fsm-info;
+$warning: $fsm-warning;
+$danger: $fsm-danger;
+$light: $gray-100;
+$dark: $gray-800;
+
+$body-bg: $white;
+$body-color: $gray-600;
+$body-emphasis-color: $black;
+
+$min-contrast-ratio: 2;
+
+// ─── Links ────────────────────────────────────────────────────────────────────
+$link-color: $primary;
+$link-decoration: none;
+$link-shade-percentage: 20%;
+$link-hover-decoration: null;
+
+// ─── Grid ─────────────────────────────────────────────────────────────────────
+$grid-gutter-width: 1.875rem;
+$container-padding-x: $grid-gutter-width;
+
+$container-max-widths: ( sm: 96%, md: 94%, lg: 94%, xl: 1140px, xxl: 1300px );
+
+$spacer: 1rem;
+$spacers: ( 0: 0, 1: $spacer * .25, 2: $spacer * .5, 3: $spacer, 4: $spacer * 1.6, 5: $spacer * 3, 6: $spacer * 3.5, 7: $spacer * 6, 8: $spacer * 7, 9: $spacer * 10 );
+
+$enable-negative-margins: true;
+$enable-dark-mode: true;
+$color-mode-type: data;
+
+// ─── Borders & radius ─────────────────────────────────────────────────────────
+$border-width: 1px;
+$border-style: solid;
+$border-color: $gray-300;
+
+$border-radius: .325rem;
+$border-radius-sm: .2rem;
+$border-radius-lg: .5rem;
+$border-radius-xl: 1rem;
+$border-radius-2xl: 2rem;
+
+// ─── Shadows ──────────────────────────────────────────────────────────────────
+$box-shadow: 0px 0px 40px rgba(29, 58, 83, .15);
+$box-shadow-sm: 0 .125rem .25rem rgba(29, 58, 83, .15);
+$box-shadow-lg: 0 1rem 3rem rgba(29, 58, 83, .15);
+
+// ─── Transitions ──────────────────────────────────────────────────────────────
+$transition-base: all .3s ease-in-out;
+
+// ─── Components ───────────────────────────────────────────────────────────────
+$component-active-color: $white;
+$component-active-bg: $primary;
+
+// ─── Buttons + Forms ──────────────────────────────────────────────────────────
+$input-btn-padding-y: .5rem;
+$input-btn-padding-x: 1rem;
+$input-btn-font-size: $font-size-base;
+$input-btn-line-height: $line-height-base;
+$input-btn-focus-width: 0;
+$input-btn-focus-color: rgba($fsm-accent, .25);
+$input-btn-focus-box-shadow: 0 0 0 $input-btn-focus-width $input-btn-focus-color;
+$input-btn-border-width: $border-width;
+
+$input-btn-padding-y-sm: .4rem;
+$input-btn-padding-x-sm: .8rem;
+$input-btn-font-size-sm: $font-size-xs;
+$input-btn-line-height-sm: $line-height-sm;
+
+$input-btn-padding-y-lg: .8rem;
+$input-btn-padding-x-lg: 1.5rem;
+$input-btn-font-size-lg: 1rem;
+$input-btn-line-height-lg: $line-height-lg;
+
+// ─── Buttons ──────────────────────────────────────────────────────────────────
+$btn-padding-y: $input-btn-padding-y;
+$btn-padding-x: $input-btn-padding-x;
+$btn-font-size: $input-btn-font-size;
+$btn-line-height: $input-btn-line-height;
+$btn-font-weight: $font-weight-normal;
+$btn-box-shadow: none;
+$btn-focus-width: $input-btn-focus-width;
+$btn-focus-box-shadow: $input-btn-focus-box-shadow;
+$btn-active-box-shadow: none;
+$btn-border-radius: $border-radius;
+$btn-border-radius-sm: $border-radius-sm;
+$btn-border-radius-lg: $border-radius-lg;
+$btn-transition: $transition-base;
+$btn-disabled-opacity: .65;
+
+// ─── Inputs ───────────────────────────────────────────────────────────────────
+$input-padding-y: $input-btn-padding-y;
+$input-padding-x: $input-btn-padding-x;
+$input-font-size: $input-btn-font-size;
+$input-line-height: $input-btn-line-height;
+$input-bg: $white;
+$input-color: $gray-700;
+$input-border-color: $gray-300;
+$input-border-width: $input-btn-border-width;
+$input-border-radius: $border-radius;
+$input-border-radius-sm: $border-radius-sm;
+$input-border-radius-lg: $border-radius-sm;
+$input-box-shadow: none;
+$input-focus-bg: $white;
+$input-focus-border-color: $primary;
+$input-focus-color: $input-color;
+$input-focus-width: $input-border-width;
+$input-focus-box-shadow: $input-btn-focus-box-shadow;
+$input-placeholder-color: $gray-500;
+$input-disabled-bg: $gray-200;
+
+$form-label-font-size: $font-size-sm;
+$form-label-font-weight: $font-weight-normal;
+$form-label-color: $gray-700;
+
+$form-check-input-bg: $gray-200;
+$form-check-input-border: 1px solid rgba(0,0,0,.25);
+$form-check-input-checked-color: $component-active-color;
+$form-check-input-checked-bg-color: $component-active-bg;
+
+$form-select-padding-y: $input-padding-y;
+$form-select-padding-x: $input-padding-x;
+$form-select-font-size: $input-font-size;
+$form-select-color: $input-color;
+$form-select-border-radius: $border-radius;
+$form-select-focus-border-color: $input-focus-border-color;
+$form-select-focus-box-shadow: $input-focus-box-shadow;
+
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+$navbar-padding-y: 0;
+$navbar-padding-x: 0;
+$navbar-nav-link-padding-x: 1rem;
+$navbar-nav-link-font-size: $font-size-base;
+$navbar-nav-link-font-weight: $font-weight-normal;
+$navbar-brand-font-size: 0;
+$navbar-brand-height: 36px;
+$navbar-brand-padding-y: 30px;
+$navbar-toggler-padding-x: 0;
+$navbar-toggler-focus-width: $btn-focus-width;
+$navbar-light-color: $gray-600;
+$navbar-light-hover-color: $primary;
+$navbar-light-active-color: $primary;
+$navbar-dark-color: $white;
+
+// ─── Dropdowns ────────────────────────────────────────────────────────────────
+$dropdown-min-width: 15rem;
+$dropdown-padding-x: 0.8rem;
+$dropdown-padding-y: 1rem;
+$dropdown-spacer: 0;
+$dropdown-font-size: $font-size-base;
+$dropdown-color: $body-color;
+$dropdown-bg: $white;
+$dropdown-border-color: $gray-300;
+$dropdown-border-radius: $border-radius;
+$dropdown-border-width: 0;
+$dropdown-box-shadow: $box-shadow;
+$dropdown-link-color: $gray-600;
+$dropdown-link-hover-color: $primary;
+$dropdown-link-hover-bg: rgba($fsm-accent, .1);
+$dropdown-link-active-color: $primary;
+$dropdown-link-active-bg: $dropdown-link-hover-bg;
+$dropdown-item-padding-y: .40rem;
+$dropdown-item-padding-x: 1rem;
+$dropdown-item-font-weight: $font-weight-light;
+$dropdown-divider-bg: $gray-300;
+$dropdown-header-color: $gray-800;
+$dropdown-header-font-size: $font-size-base;
+$dropdown-header-font-weight: $font-weight-bold;
+
+// ─── Cards ────────────────────────────────────────────────────────────────────
+$card-spacer-y: 1rem;
+$card-spacer-x: 1.25rem;
+$card-border-radius: $border-radius-lg;
+$card-border-width: 0;
+$card-border-color: $gray-300;
+$card-cap-bg: $white;
+$card-cap-padding-y: $card-spacer-y;
+$card-title-color: $headings-color;
+$card-bg: $white;
+$card-color: $body-color;
+
+// ─── Tables ───────────────────────────────────────────────────────────────────
+$table-bg: transparent;
+$table-color: $body-color;
+$table-cell-padding-y: 1rem;
+$table-border-color: $gray-300;
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+$badge-font-weight: $font-weight-light;
+$badge-font-size: 0.85em;
+
+// ─── Modals ───────────────────────────────────────────────────────────────────
+$modal-content-border-width: 0;
+$modal-content-border-radius: $border-radius;
+$modal-header-border-color: $gray-300;
+$modal-footer-border-color: $modal-header-border-color;
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+$pagination-padding-y: .7rem;
+$pagination-padding-x: 1rem;
+$pagination-color: $gray-600;
+$pagination-bg: $white;
+$pagination-border-color: $gray-300;
+$pagination-hover-color: $white;
+$pagination-hover-bg: $primary;
+$pagination-hover-border-color: $primary;
+$pagination-active-color: $component-active-color;
+$pagination-active-bg: $component-active-bg;
+$pagination-active-border-color: $pagination-active-bg;
+$pagination-disabled-color: $gray-400;
+$pagination-disabled-bg: $white;
+$pagination-disabled-border-color: $gray-300;
+
+// ─── List group ───────────────────────────────────────────────────────────────
+$list-group-color: $gray-600;
+$list-group-bg: transparent;
+$list-group-border-radius: $border-radius;
+$list-group-active-color: $component-active-color;
+$list-group-active-bg: $component-active-bg;
+$list-group-active-border-color: $list-group-active-bg;
+$list-group-hover-bg: rgba($fsm-accent, .1);
+
+// ─── Accordion ────────────────────────────────────────────────────────────────
+$accordion-button-active-color: shade-color($primary, 10%);
+$accordion-button-focus-box-shadow: $btn-focus-box-shadow;
+$accordion-icon-color: $gray-600;
+$accordion-icon-active-color: $accordion-button-active-color;
+
+// ─── Breadcrumb ───────────────────────────────────────────────────────────────
+$breadcrumb-font-size: $font-size-xs;
+$breadcrumb-padding-y: .5rem;
+$breadcrumb-padding-x: 0;
+$breadcrumb-bg: transparent;
+$breadcrumb-divider-color: $gray-500;
+$breadcrumb-active-color: $gray-500;
+$breadcrumb-divider: quote("/");
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+$progress-bg: $gray-300;
+$progress-bar-bg: $primary;
+$progress-height: 0.5rem;
+
+// ─── Tooltips ─────────────────────────────────────────────────────────────────
+$tooltip-font-size: 11px;
+
+// ─── Offcanvas ────────────────────────────────────────────────────────────────
+$offcanvas-padding-x: $grid-gutter-width;

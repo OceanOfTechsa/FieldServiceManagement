@@ -1,0 +1,432 @@
+﻿@using System.Text.RegularExpressions
+@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Company
+
+@model IEnumerable<CompanyListItemViewModel>
+
+@{
+    ViewData["Title"] = "All Companies";
+    var companies = Model?.ToList() ?? new List<CompanyListItemViewModel>();
+    var selectedStatus = ViewBag.SelectedStatus?.ToString() ?? "All";
+
+    var filteredCompanies = selectedStatus switch
+    {
+        "Active" => companies.Where(x => x.IsActive && !x.IsDeleted).ToList(),
+        "InActive" => companies.Where(x => !x.IsActive && !x.IsDeleted).ToList(),
+        "Deleted" => companies.Where(x => x.IsDeleted).ToList(),
+        _ => companies
+    };
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <!-- Toolbar -->
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <i class="bi bi-funnel"></i>
+            <div id="app" class="mt-2">
+                <enum-dropdown :options="statusOptions"
+                               v-model="selectedStatus"
+                               placeholder="All"
+                               param-name="status"
+                               suffix="Companies">
+                </enum-dropdown>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-start">
+            <div class="d-flex align-items-center position-relative">
+                <button type="button" class="btn border-fsm btn-xs" id="searchBtn">
+                    <i class="bi bi-search"></i>
+                </button>
+                <div id="searchWrapper" class="search-wrapper">
+                    <input class="border-fsm form-control search-input"
+                           placeholder="Search by name or email..."
+                           id="searchInput" />
+                    <button id="cancelSearch" class="cancel-btn">✕</button>
+                </div>
+            </div>
+            <a href="/Customers/Companies/Import" class="btn border-fsm btn-xs">
+                <i class="bi bi-file-earmark-arrow-up"></i>
+            </a>
+            <button class="btn btn-info-soft btn-xs">
+                <i class="bi bi-question-circle-fill"></i>
+            </button>
+            <a href="/Customers/Companies/Create" class="btn btn-primary btn-xs"
+               title="New Company"
+               aria-label="New Company">
+                <i class="fa-solid fa-plus"></i>
+                New Company
+            </a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="border-0 rounded-2 overflow-hidden mx-2">
+        <div class="table-responsive fsm-table-wrapper">
+            <table class="table align-middle mb-0 fsm-table">
+                <thead>
+                    <tr>
+                        <th class="fsm-sortable" data-sort="name">
+                            Company Name
+                            <span class="fsm-sort-icon">
+                                <i class="bi bi-chevron-expand"></i>
+                            </span>
+                        </th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Type</th>
+                        <th>Service Address</th>
+                        <th>Billing Address</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredCompanies.Any())
+                    {
+                        foreach (var item in filteredCompanies)
+                        {
+                            <tr data-sort-value="@item.Name">
+                                <!-- Company Name -->
+                                <td>
+                                    <a href="/Customers/Companies/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())" class="d-flex align-items-center gap-2 full-name-wrapper">
+                                        <img src="@($"https://ui-avatars.com/api/?name={item.Name}&background=random")" class="fsm-avatar-lg" alt="@item.Name" />
+                                        <div>
+                                            <span class="fsm-user-name">@item.Name</span>
+                                            @if (!string.IsNullOrWhiteSpace(item.Website))
+                                            {
+                                                <div class="fsm-user-meta">@item.Website</div>
+                                            }
+                                        </div>
+                                    </a>
+                                </td>
+
+                                <!-- Email -->
+                                <td><span class="fsm-meta-text">@item.Email</span></td>
+
+                                <!-- Phone -->
+                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? "-" : item.Phone)</span></td>
+
+                                <!-- Type -->
+                                <td>
+                                    @{
+                                        var TypeDisplay = ((CompanyType?)@item.Type)?.GetDisplayName() ?? "Unknown";
+                                        var typeLabel = Regex.Replace(TypeDisplay, "(?<=[a-z])(?=[A-Z])", " ");
+                                    }
+                                    <span class="fsm-meta-text">@typeLabel</span>
+                                </td>
+
+                                <!-- Service Address -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(string.IsNullOrWhiteSpace(item.ServiceAddressName) ? "-" : item.ServiceAddressName)
+                                    </span>
+                                </td>
+
+                                <!-- Billing Address -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(string.IsNullOrWhiteSpace(item.BillingAddressName) ? "-" : item.BillingAddressName)
+                                    </span>
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    @{
+                                        var (statusLabel, statusCss) = item.IsDeleted
+                                            ? ("Deleted", "bg-danger")
+                                            : item.IsActive
+                                                ? ("Active", "bg-success")
+                                                : ("Inactive", "bg-secondary");
+                                    }
+                                    <span class="d-inline-flex align-items-center gap-2">
+                                        <span class="fsm-status-dot @statusCss"></span>
+                                        <span>@statusLabel</span>
+                                    </span>
+                                </td>
+
+                                <!-- Created By -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @* <img src="@($"https://ui-avatars.com/api/?name={item.}&background=random")" class="fsm-avatar-lg" alt="@item.Name" /> *@
+                                        @(string.IsNullOrWhiteSpace(item.CreatedByName) ? "-" : item.CreatedByName)
+                                    </span>
+                                </td>
+
+                                <!-- Created At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @item.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item.CreatedAt.ToString("tt").ToUpper()
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9">
+                                <div class="fsm-empty-state">
+                                    <div class="fsm-empty-icon">
+                                        <i class="bi bi-buildings"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">No companies found</h6>
+                                    <p class="text-muted small mb-3">No companies match the selected filter.</p>
+                                    <a href="/Companies/Create" class="btn btn-primary btn-xs">
+                                        <i class="fa-solid fa-plus"></i>
+                                        New Company
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (selectedStatus == "Deleted" && filteredCompanies.Any())
+                    {
+                        <tr>
+                            <td colspan="9">
+                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                                    <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    @(filteredCompanies.Count > 1 ? "These companies have" : "This company has")
+                                    been permanently deleted. All associated data has been archived.
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="fsm-table-footer">
+            <span>
+                Total Companies: <strong>@filteredCompanies.Count</strong>
+                @if (selectedStatus != "All")
+                {
+                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
+                }
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                <span class="fsm-page-current">1</span>
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                <select class="fsm-per-page">
+                    <option value="10">10 Records per page</option>
+                    <option value="25">25 Records per page</option>
+                    <option value="50">50 Records per page</option>
+                    <option value="100">100 Records per page</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ── Shared enum-dropdown component ───────────────────────────────
+        Vue.component('enum-dropdown', {
+            props: {
+                options:     Array,
+                value:       String,
+                placeholder: { type: String, default: 'Select...' },
+                paramName:   { type: String, default: 'status' },
+                suffix:      { type: String, default: '' }
+            },
+            data() { return { search: '', open: false }; },
+            computed: {
+                filtered() {
+                    return this.options.filter(o => o.toLowerCase().includes(this.search.toLowerCase()));
+                },
+                display() { return this.value || this.placeholder; }
+            },
+            methods: {
+                select(option) {
+                    this.$emit('input', option);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set(this.paramName, option);
+                    window.location.href = url.toString();
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) this.$nextTick(() => this.$refs.search.focus());
+                },
+                close() { this.open = false; this.search = ''; }
+            },
+            template: `
+                <div style="position:relative;display:inline-block;" v-click-outside="close">
+                    <button class="btn btn-sm border-0 bg-transparent text-black px-2" type="button" @@click="toggle">
+                        {{ display }}<span v-if="suffix"> {{ suffix }}</span>
+                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
+                    </button>
+                    <div v-if="open" style="position:absolute;top:100%;left:0;z-index:1000;min-width:220px;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;background:#fff;">
+                        <div class="d-flex align-items-center px-3 py-2" style="border-bottom:1px solid #f0f0f0;gap:8px;">
+                            <i class="bi bi-search" style="color:#adb5bd;font-size:13px;"></i>
+                            <input ref="search" v-model="search" type="text" class="border-0 bg-transparent w-100" placeholder="Search" style="outline:none;font-size:13px;color:#495057;" />
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li v-if="filtered.length === 0">
+                                <span class="dropdown-item small text-danger"><i class="bi bi-exclamation-circle me-2"></i>No results</span>
+                            </li>
+                            <li v-for="option in filtered" :key="option">
+                                <button type="button" class="dropdown-item py-2 px-3 border-0 text-start w-100"
+                                        @@click="select(option)"
+                                        style="font-size:13px;color:#212529;"
+                                        :style="value === option ? 'background:rgba(16,185,129,.10);color:#059669;font-weight:500;' : ''">
+                                    {{ option }}<span v-if="suffix"> {{ suffix }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        });
+
+        Vue.directive('click-outside', {
+            bind(el, binding) {
+                el._clickOutside = (e) => { if (!el.contains(e.target)) binding.value(); };
+                document.addEventListener('click', el._clickOutside);
+            },
+            unbind(el) {
+                document.removeEventListener('click', el._clickOutside);
+            }
+        });
+
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    statusOptions: ['All', 'Active', 'InActive', 'Deleted'],
+                    selectedStatus: '@(ViewBag.SelectedStatus ?? "All")'
+                };
+            }
+        });
+
+        // ── DOM refs ──────────────────────────────────────────────────────
+        const searchBtn     = document.getElementById('searchBtn');
+        const searchWrapper = document.getElementById('searchWrapper');
+        const cancelSearch  = document.getElementById('cancelSearch');
+        const searchInput   = document.getElementById('searchInput');
+        const table         = document.querySelector('.fsm-table');
+        const tbody         = table.querySelector('tbody');
+
+        // ── Empty state row (search) ──────────────────────────────────────
+        const emptyStateRow = document.createElement('tr');
+        emptyStateRow.id = 'emptyStateRow';
+        emptyStateRow.style.display = 'none';
+        emptyStateRow.dataset.static = 'true';
+        emptyStateRow.innerHTML = `
+            <td colspan="9">
+                <div class="fsm-empty-state">
+                    <div class="fsm-empty-icon"><i class="bi bi-buildings"></i></div>
+                    <h6 class="fw-semibold mb-1">No companies found</h6>
+                    <p class="text-muted small mb-3">No companies match your search.</p>
+                </div>
+            </td>`;
+        tbody.appendChild(emptyStateRow);
+
+        // ── Data rows only (excludes static rows) ─────────────────────────
+        const dataRows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.dataset.static);
+
+        // ── Search ────────────────────────────────────────────────────────
+        searchBtn.addEventListener('click', () => {
+            searchWrapper.classList.add('active');
+            searchBtn.classList.add('d-none');
+            setTimeout(() => searchInput.focus(), 200);
+        });
+
+        cancelSearch.addEventListener('click', () => {
+            searchWrapper.classList.remove('active');
+            searchBtn.classList.remove('d-none');
+            searchInput.value = '';
+            dataRows.forEach(r => r.style.display = '');
+            emptyStateRow.style.display = 'none';
+            // re-run pagination to restore correct page state
+            currentPage = 1;
+            render();
+        });
+
+        searchInput.addEventListener('keyup', () => {
+            const value = searchInput.value.toLowerCase().trim();
+            let visible = 0;
+
+            dataRows.forEach(row => {
+                const match = [0, 1, 2].some(i => row.cells[i]?.textContent.toLowerCase().includes(value));
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+
+            emptyStateRow.style.display = visible === 0 ? '' : 'none';
+        });
+
+        // ── Sort + Pagination ─────────────────────────────────────────────
+        const headers    = table.querySelectorAll('th.fsm-sortable');
+        const prevBtn    = document.querySelector('.fsm-page-btn:first-of-type');
+        const nextBtn    = document.querySelector('.fsm-page-btn:last-of-type');
+        const pageLabel  = document.querySelector('.fsm-page-current');
+        const perPageSel = document.querySelector('.fsm-per-page');
+
+        // allRows excludes static rows so pagination never touches emptyStateRow
+        let allRows     = dataRows.slice();
+        let currentCol  = null;
+        let ascending   = true;
+        let currentPage = 1;
+        let perPage     = 10;
+
+        function render() {
+            const total      = allRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+            currentPage      = Math.min(currentPage, totalPages);
+            const start      = (currentPage - 1) * perPage;
+
+            allRows.forEach((row, i) => {
+                row.style.display = (i >= start && i < start + perPage) ? '' : 'none';
+            });
+
+            if (pageLabel) pageLabel.textContent = `${currentPage} / ${totalPages}`;
+            if (prevBtn)   prevBtn.disabled = currentPage <= 1;
+            if (nextBtn)   nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        // ── Sorting ───────────────────────────────────────────────────────
+        headers?.forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const col  = th.dataset.sort;
+                ascending  = currentCol === col ? !ascending : true;
+                currentCol = col;
+
+                headers.forEach(h => h.querySelector('.fsm-sort-icon i').className = 'bi bi-chevron-expand');
+                th.querySelector('.fsm-sort-icon i').className = ascending ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+
+                allRows.sort((a, b) => {
+                    const aText = a.dataset.sortValue ?? a.cells[0]?.innerText.trim() ?? '';
+                    const bText = b.dataset.sortValue ?? b.cells[0]?.innerText.trim() ?? '';
+                    return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                });
+
+                allRows.forEach(row => tbody.appendChild(row));
+                currentPage = 1;
+                render();
+            });
+        });
+
+        // ── Pagination controls ───────────────────────────────────────────
+        prevBtn?.addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; render(); }
+        });
+
+        nextBtn?.addEventListener('click', () => {
+            if (currentPage < Math.ceil(allRows.length / perPage)) { currentPage++; render(); }
+        });
+
+        perPageSel?.addEventListener('change', () => {
+            perPage     = parseInt(perPageSel.value) || 10;
+            currentPage = 1;
+            render();
+        });
+
+        // ── Initial render ────────────────────────────────────────────────
+        render();
+    </script>
+}

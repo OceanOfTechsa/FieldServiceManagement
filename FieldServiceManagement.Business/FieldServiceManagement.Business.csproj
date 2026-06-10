@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\FieldServiceManagement.Repository\FieldServiceManagement.Repository.csproj" />
+    <ProjectReference Include="..\FieldServiceManagement.ViewModels\FieldServiceManagement.ViewModels.csproj" />
+    <ProjectReference Include="..\FieldServiceManagement.Enum\FieldServiceManagement.Enum.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.5" />
+    <PackageReference Include="ElmahCore" Version="2.1.2" />
+    <PackageReference Include="ElmahCore.Sql" Version="2.1.2" />
+    <PackageReference Include="Resend" Version="0.3.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

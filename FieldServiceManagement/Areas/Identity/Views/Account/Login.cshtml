@@ -1,0 +1,64 @@
+﻿@using FieldServiceManagement.Helpers
+@model FieldServiceManagement.Areas.Identity.Models.LoginViewModel
+
+@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Sign In";
+}
+
+
+@if (!string.IsNullOrEmpty(Model.Browser) &&
+     (Model.Browser.Contains("Trident/") || Model.Browser.Contains("MSIE ")))
+@await Html.PartialAsync("~/Views/Shared/_BrowserNotice.cshtml")
+
+<div class="mb-4">
+    <h2 class="font-sans fw-semibold mb-0" style="font-size:1.75rem;">Sign in</h2>
+    <p class="">
+        No account?
+        <a asp-area="Identity" asp-controller="Account"
+               asp-action="Register"
+               class="text-dim text-decoration-none border-bottom border-fsm pb-1">
+            Create one
+        </a>
+    </p>
+</div>
+
+@using (Html.BeginForm("Login", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(Model => Model.ReturnUrl)
+    @if (!ViewData.ModelState.IsValid)
+        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+
+    <div class="form-group mb-2">
+        @Html.LabelFor(Model => Model.Email, new { @class = "form-label" })
+        @Html.TextBoxFor(Model => Model.Email, new { @class = "form-control", @placeholder = "you@example.com", @autocomplete = "email" })
+    </div>
+
+    <div class="form-group mb-2">
+        @Html.LabelFor(Model => Model.Password, new { @class = "form-label" })
+        @Html.TextBoxFor(Model => Model.Password, new { @class = "form-control", @placeholder = "••••••••", @autocomplete = "current-password", @type = "password" })
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="form-check">
+            @Html.CheckBoxFor(Model => Model.RememberMe, new { @class = "form-check-input", Type = "checkbox" })
+            @Html.LabelFor(Model => Model.RememberMe, new { @class = "form-check-label small text-dim pointer-event" })
+        </div>
+        <a asp-area="Identity" asp-controller="Account"
+               asp-action="ForgotPassword"
+               class="small text-dim text-decoration-none border-bottom border-fsm pb-1">
+            Forgot password?
+        </a>
+    </div>
+     
+    <button type="submit" class="btn btn-primary w-100" data-loading-text="Logging In">Log in</button>
+}
+
+@if (Model.IsInDev)
+{
+    <a asp-area="Identity" asp-controller="Account" asp-action="Developerlogin" class="text-center mt-5">Developer Login</a>
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

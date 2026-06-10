@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Invalid or Expired Link";
+    Layout = "_IdentityLayout"; 
+
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+    var backUrl = isAuthenticated
+        ? Url.Action("Index", "Home", new { area = "" })
+        : Url.Action("Login", "Account", new { area = "Identity" });
+
+    var backLabel = isAuthenticated
+        ? "Go back"
+        : (isAuthenticated ? "Return home" : "Go to login");
+}
+
+<style>
+    :root { --error: #ff4444; }
+    .code { font-size: 5rem; font-weight: 600; color: var(--error); letter-spacing: -0.02em; line-height: 1; margin-bottom: 1rem; }
+    .title { font-family: var(--sans); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 2rem; }
+    .btn { display: inline-block; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.75rem 1.5rem; text-decoration: none; transition: border-color 0.15s, color 0.15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<div class="container">
+    <div class="code">410</div>
+    <h1 class="title">Invalid Link</h1>
+    <p class="desc">This may happen if the link is older, incomplete, or no longer supported after our recent system upgrades.
+        Please access your application directly from your dashboard.
+    </p>
+    <a href="@backUrl" class="btn">@backLabel</a>
+</div>

@@ -1,0 +1,55 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Audit
+@using X.PagedList
+@model IPagedList<FieldServiceManagement.ViewModels.Contact.ContactDetailsViewModel>
+
+@{
+    var contact = Model.FirstOrDefault();
+    ViewData["Title"] = contact?.Name;
+    var auditLogs = Model
+        .Where(m => m.AuditLogId.HasValue)
+        .Select(m => new AuditLogViewModel
+        {
+            Id = m.AuditLogId ?? Guid.Empty,
+            EntityName = m.AuditLogEntityName,
+            EntityId = m.AuditLogEntityId,
+            Action = m.AuditLogAction,
+            FieldName = m.AuditLogFieldName,
+            OldValue = m.AuditLogOldValue,
+            NewValue = m.AuditLogNewValue,
+            Comment = m.AuditLogComment,
+            PerformedByUserId = m.AuditLogPerformedByUserId ?? Guid.Empty,
+            PerformedByName = m.AuditLogPerformedByName,
+            IpAddress = m.AuditLogIpAddress,
+            OrganisationId = m.AuditLogOrganisationId,
+            CreatedAt = m.AuditLogCreatedAt ?? DateTime.MinValue,
+            ShowEntityType = false,
+            ShowComment = m.AuditLogShowComment,
+            VisibleTo = m.AuditLogVisibleTo,
+            createdByEmail = m.CreatedByEmail
+
+        })
+        .ToList();
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item text-blue">Customers</li>
+                    <li class="breadcrumb-item text-blue"><a href="/Customers/Companies">Contacts</a></li>
+                    <li class="breadcrumb-item link-success" aria-current="page">Create</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="fsm-fixed-view-wrapper-forms">
+        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+            @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+        </div>
+    </div>
+</div>

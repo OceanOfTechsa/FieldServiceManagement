@@ -1,0 +1,136 @@
+﻿using FieldServiceManagement.Business.LanguageBusiness;
+using FieldServiceManagement.Business.URLEncryptionBusiness;
+using FieldServiceManagement.Business.UserBusiness;
+using FieldServiceManagement.Data.DataModels.User;
+using FieldServiceManagement.Models;
+using FieldServiceManagement.ViewModels.User;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace FieldServiceManagement.Controllers
+{
+    [Authorize(Roles = "SuperAdmin, Administrator")]
+    [Route("Workforce/[controller]")]
+    public class UsersController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public UsersController(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Index(string? status, string? role)
+        {
+            var users = await new UserBusiness().GetAllUsersByEmailAsync(User?.Identity?.Name!);
+            role ??= "All";
+
+            ViewBag.SelectedStatus = status;
+            ViewBag.SelectedRole = role;
+
+            return View(users);
+        }
+
+        [HttpGet("Info")]
+        [MVCDecryptFilter]
+        public async Task<IActionResult> Info(Guid Id)
+        {
+            var profile = await new UserBusiness().GetAllUserDetailsByIdAsync(Id);
+            if(profile.User.OrganisationId != new UserBusiness().GetUserDetailsByUserNameAsync(User?.Identity?.Name!).Result.OrganisationId)
+                return Forbid();
+            if (profile == null)
+                return NotFound();
+
+            return View(profile);
+        }
+
+        [HttpGet("Invite")]
+        [Authorize(Roles = "SuperAdmin, Administrator")]
+        public IActionResult Invite()
+        {
+            var model = new UserInvitationViewModel();
+            return View(model);
+        }
+
+        [HttpPost("Invite")]
+        [Authorize(Roles = "SuperAdmin, Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Invite(UserInvitationViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User.Identity?.Name!);
+            var result = await new UserBusiness().SendUserInvitationAsync(model, user, _userManager);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message!);
+                return View(model);
+            }
+                
+            return RedirectToAction("Index");
+        }
+
+
+        [HttpGet("Edit")]
+        [Authorize(Roles = "SuperAdmin, Administrator")]
+        [MVCDecryptFilter]
+        public async Task<IActionResult> Edit(Guid Id)
+        {
+            var model = await new UserBusiness().GetAllUserDetailsByIdAsync(Id);
+            BuildLanguagesList(model);
+            return View(model);
+        }
+
+        [HttpPost("Edit")]
+        [Authorize(Roles = "SuperAdmin, Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(AppUserProfileViewModel model)
+        {
+            var keysToRemove = ModelState.Keys.Where(k => !k.StartsWith(nameof(AppUserProfileViewModel.User))).ToList();
+            foreach (var key in keysToRemove)
+                ModelState.Remove(key);
+
+            //ModelState.Remove($"{nameof(AppUserProfileViewModel.User)}.{nameof(AppUserViewModel.AvatarUrl)}");
+
+            if (!ModelState.IsValid)
+            {
+                BuildLanguagesList(model);
+                return View(model);
+            }
+            var performedBy = await new UserBusiness().GetUserDetailsByUserNameAsync(User?.Identity?.Name!);
+            new UserBusiness().UpdateUserAsync(model.User, performedBy);
+
+            return RedirectToAction("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(model.User.Id.ToString()) });
+        }
+
+        private void BuildLanguagesList(AppUserProfileViewModel model)
+        {
+            var langs = new LanguageBusiness().GetLanguages();
+            ViewBag.Languages = new SelectList(langs, "Id", "Name", model.User.PreferredLanguageId);
+        }
+
+        [Authorize(Roles = "SuperAdmin, Administrator")]
+        [HttpPost("SendInvitationReminder")]
+        //[ValidateAntiForgeryToken]
+        public async Task<ActionResult> SendInvitationReminder([FromBody] ReminderRequest request)
+        {
+            if (request?.Email is null)
+                return Json(new { result = new { success = false, message = "Email is required." } });
+
+
+            var result = await new UserInvitationBusiness().SendInvitationReminder(request.Email);
+            return Json(new { result });
+        }
+
+
+        public class ReminderRequest
+        {
+            public string Email { get; set; }
+        }
+    }
+}

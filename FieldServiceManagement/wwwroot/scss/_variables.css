@@ -1,0 +1,226 @@
+﻿// ─── Typography ───────────────────────────────────────────────────────────────
+$font-family-sans-serif: "Bricolage Grotesque", system-ui, sans-serif;
+$font-family-monospace: "IBM Plex Mono", "Courier New", monospace;
+$font-size-base: 0.9rem;
+$font-weight-normal: 400;
+$font-weight-bold: 600;
+$headings-font-family: "Bricolage Grotesque", sans-serif;
+$headings-font-weight: 600;
+$line-height-base: 1.6;
+
+// ─── Colour palette ───────────────────────────────────────────────────────────
+$fsm-bg: #0a0a0a;
+$fsm-surface: #111111;
+$fsm-surface-2: #161616;
+$fsm-border: #1f1f1f;
+$fsm-border-active:#333333;
+$fsm-text: #e8e8e8;
+$fsm-muted: #555555;
+$fsm-dim: #888888;
+$fsm-accent: #c8ff00;
+$fsm-accent-dim: #8aad00;
+$fsm-error: #ff4444;
+$fsm-warning: #ffaa00;
+$fsm-info: #00aaff;
+$fsm-success: #00dd88;
+
+// ─── Bootstrap colour map overrides ───────────────────────────────────────────
+$primary: $fsm-accent;
+$secondary: $fsm-surface-2;
+$success: $fsm-success;
+$info: $fsm-info;
+$warning: $fsm-warning;
+$danger: $fsm-error;
+$light: #1e1e1e;
+$dark: $fsm-bg;
+
+$body-bg: $fsm-bg;
+$body-color: $fsm-text;
+$body-emphasis-color: $fsm-text;
+
+// ─── Links ────────────────────────────────────────────────────────────────────
+$link-color: $fsm-accent;
+$link-hover-color: $fsm-accent-dim;
+$link-decoration: none;
+$link-hover-decoration: underline;
+
+// ─── Borders & radius ─────────────────────────────────────────────────────────
+$border-color: $fsm-border;
+$border-radius: 0;
+$border-radius-sm: 0;
+$border-radius-lg: 0;
+$border-radius-xl: 0;
+$border-radius-xxl: 0;
+$border-radius-pill: 0;
+
+// ─── Spacing ──────────────────────────────────────────────────────────────────
+$spacer: 1rem;
+
+// ─── Shadows ──────────────────────────────────────────────────────────────────
+$box-shadow: none;
+$box-shadow-sm: none;
+$box-shadow-lg: none;
+
+// ─── Components ───────────────────────────────────────────────────────────────
+
+// Cards
+$card-bg: $fsm-surface;
+$card-border-color: $fsm-border;
+$card-border-radius: 0;
+$card-cap-bg: $fsm-surface-2;
+$card-cap-color: $fsm-text;
+$card-color: $fsm-text;
+$card-spacer-x: 1.5rem;
+$card-spacer-y: 1.25rem;
+
+// Inputs
+$input-bg: $fsm-bg;
+$input-border-color: $fsm-border;
+$input-border-radius: 0;
+$input-color: $fsm-text;
+$input-placeholder-color: $fsm-muted;
+$input-focus-border-color: $fsm-accent;
+$input-focus-box-shadow: none;
+$input-focus-bg: $fsm-bg;
+$input-font-family: $font-family-monospace;
+$input-font-size: 0.875rem;
+$input-padding-x: 1rem;
+$input-padding-y: 0.75rem;
+
+// Labels
+$form-label-font-size: 0.65rem;
+$form-label-font-weight: 400;
+$form-label-color: $fsm-muted;
+$form-label-margin-bottom: 0.5rem;
+
+// Select
+$form-select-bg: $fsm-bg;
+$form-select-border-color: $fsm-border;
+$form-select-color: $fsm-text;
+$form-select-focus-border-color: $fsm-accent;
+$form-select-focus-box-shadow: none;
+$form-select-indicator-color: $fsm-muted;
+
+// Buttons
+$btn-border-radius: 0;
+$btn-border-radius-sm: 0;
+$btn-border-radius-lg: 0;
+$btn-font-family: $font-family-monospace;
+$btn-font-size: 0.75rem;
+$btn-font-weight: 600;
+$btn-padding-x: 1.5rem;
+$btn-padding-y: 0.75rem;
+$btn-letter-spacing: 0.1em;
+$btn-focus-box-shadow: none;
+
+// Navbar
+$navbar-dark-color: $fsm-dim;
+$navbar-dark-hover-color: $fsm-text;
+$navbar-dark-active-color: $fsm-accent;
+$navbar-dark-brand-color: $fsm-text;
+$navbar-dark-toggler-border-color: $fsm-border;
+$navbar-padding-y: 0.75rem;
+
+// Nav
+$nav-link-color: $fsm-dim;
+$nav-link-hover-color: $fsm-text;
+$nav-tabs-border-color: $fsm-border;
+$nav-tabs-link-active-color: $fsm-accent;
+$nav-tabs-link-active-bg: transparent;
+$nav-tabs-link-active-border-color: $fsm-border $fsm-border $fsm-bg;
+
+// Dropdowns
+$dropdown-bg: $fsm-surface;
+$dropdown-border-color: $fsm-border;
+$dropdown-color: $fsm-text;
+$dropdown-link-color: $fsm-dim;
+$dropdown-link-hover-color:$fsm-text;
+$dropdown-link-hover-bg: $fsm-surface-2;
+$dropdown-link-active-color: $fsm-accent;
+$dropdown-link-active-bg: transparent;
+$dropdown-divider-bg: $fsm-border;
+
+// Tables
+$table-color: $fsm-text;
+$table-bg: transparent;
+$table-border-color: $fsm-border;
+$table-striped-bg: rgba(255,255,255,0.02);
+$table-hover-bg: rgba(200,255,0,0.04);
+$table-active-bg: rgba(200,255,0,0.06);
+$table-cell-padding-x: 1rem;
+$table-cell-padding-y: 0.75rem;
+
+// Badges
+$badge-border-radius: 0;
+$badge-font-size: 0.65rem;
+$badge-font-weight: 500;
+$badge-padding-x: 0.6rem;
+$badge-padding-y: 0.3rem;
+
+// Alerts
+$alert-border-radius: 0;
+$alert-border-width: 1px;
+
+// Modals
+$modal-content-bg: $fsm-surface;
+$modal-content-border-color: $fsm-border;
+$modal-header-border-color: $fsm-border;
+$modal-footer-border-color: $fsm-border;
+$modal-backdrop-opacity: 0.7;
+
+// Pagination
+$pagination-bg: transparent;
+$pagination-border-color: $fsm-border;
+$pagination-color: $fsm-dim;
+$pagination-hover-bg: $fsm-surface-2;
+$pagination-hover-color: $fsm-text;
+$pagination-hover-border-color: $fsm-border-active;
+$pagination-active-bg: $fsm-accent;
+$pagination-active-color: $fsm-bg;
+$pagination-active-border-color: $fsm-accent;
+$pagination-disabled-bg: transparent;
+$pagination-disabled-color: $fsm-muted;
+
+// List group
+$list-group-bg: $fsm-surface;
+$list-group-border-color: $fsm-border;
+$list-group-color: $fsm-text;
+$list-group-hover-bg: $fsm-surface-2;
+$list-group-active-bg: $fsm-accent;
+$list-group-active-color: $fsm-bg;
+$list-group-active-border-color: $fsm-accent;
+
+// Toasts
+$toast-background-color: $fsm-surface;
+$toast-border-color: $fsm-border;
+$toast-color: $fsm-text;
+$toast-header-background-color: $fsm-surface-2;
+$toast-header-color: $fsm-dim;
+
+// Progress
+$progress-bg: $fsm-surface-2;
+$progress-bar-bg: $fsm-accent;
+$progress-border-radius: 0;
+$progress-height: 0.35rem;
+
+// Accordion
+$accordion-bg: $fsm-surface;
+$accordion-border-color: $fsm-border;
+$accordion-button-bg: $fsm-surface-2;
+$accordion-button-active-bg: $fsm-surface;
+$accordion-button-active-color: $fsm-accent;
+$accordion-button-color: $fsm-text;
+$accordion-button-focus-box-shadow: none;
+$accordion-icon-color: $fsm-dim;
+$accordion-icon-active-color: $fsm-accent;
+
+// Offcanvas
+$offcanvas-bg-color: $fsm-surface;
+$offcanvas-border-color: $fsm-border;
+$offcanvas-color: $fsm-text;
+
+// Scrollbar (custom, non-Bootstrap)
+$scrollbar-width: 6px;
+$scrollbar-track: $fsm-surface;
+$scrollbar-thumb: $fsm-border-active;
+$scrollbar-thumb-hover: $fsm-muted;

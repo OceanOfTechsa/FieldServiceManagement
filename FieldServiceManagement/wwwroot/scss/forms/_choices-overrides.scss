@@ -1,0 +1,129 @@
+﻿// _choices-overrides.scss
+
+.choices {
+    margin-bottom: 0;
+    width: 100%;
+    // The visible "input" box
+    .choices__inner {
+        display: block;
+        width: 100%;
+        padding: 0 0 !important;
+        font-family: $input-font-family;
+        font-size: $input-font-size;
+        font-weight: $input-font-weight;
+        line-height: $input-line-height;
+        color: $input-color;
+        background-color: $input-bg;
+        background-clip: padding-box;
+        border: $input-border-width solid $input-border-color !important;
+        @include border-radius($input-border-radius, 0);
+        @include box-shadow($input-box-shadow);
+        @include transition($input-transition);
+        min-height: unset !important;
+    }
+    // Kill extra padding Choices adds around the selected item
+    .choices__list--single, .choices__list--multiple {
+        padding: 0;
+    }
+    // Selected tags (multi-select)
+
+    .choices .choices__input{
+        width: 100% !important;
+    }
+        
+        
+    .choices__list--multiple .choices__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.1rem 0.45rem;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        line-height: 1.4;
+        color: #fff;
+        background-color: $primary;
+        border: 1px solid darken($primary, 8%);
+        @include border-radius($border-radius-sm);
+        margin: 2px;
+        // The × remove button
+        &.is-highlighted {
+            background-color: darken($primary, 10%);
+            border-color: darken($primary, 15%);
+        }
+
+        .choices__button {
+            border-left: 1px solid rgba(#fff, 0.35);
+            padding: 0 0 0 0.35rem;
+            margin-left: 0.25rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' d='M5 4.293 8.646.646l.708.708L5.707 5l3.647 3.646-.708.708L5 5.707 1.354 9.354l-.708-.708L4.293 5 .646 1.354l.708-.708z'/%3E%3C/svg%3E");
+            background-size: 8px;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+    // Focus state
+    &.is-focused .choices__inner,
+    &.is-open .choices__inner {
+        color: $input-focus-color;
+        background-color: $input-focus-bg;
+        border-color: $primary !important;
+        outline: 55px !important;
+        //box-shadow: 0 0 0 $input-btn-focus-width rgba(red, .25);
+    }
+    // Disabled state
+    &.is-disabled .choices__inner {
+        color: $input-disabled-color;
+        background-color: $input-disabled-bg;
+        border-color: $input-disabled-border-color;
+        opacity: 1;
+    }
+    // Dropdown panel
+    .choices__list--dropdown,
+    .choices__list[aria-expanded] {
+        background-color: $input-bg;
+        border: $input-border-width solid $primary;
+        @include border-radius($input-border-radius);
+        @include box-shadow($input-focus-box-shadow);
+        color: $input-color;
+        z-index: $zindex-dropdown;
+    }
+    // Search input inside the dropdown
+    .choices__input {
+        background-color: $input-bg;
+        color: $input-color;
+        font-family: $input-font-family;
+        font-size: $input-font-size;
+        border-bottom: $input-border-width solid $input-border-color;
+        padding: $input-padding-y $input-padding-x;
+        margin-bottom: 0;
+        width: 100%;
+
+        &::placeholder {
+            color: $input-placeholder-color;
+            opacity: 1;
+        }
+    }
+    // Option items
+    .choices__item--selectable {
+        padding: $input-padding-y $input-padding-x;
+        font-size: $input-font-size;
+    }
+    // Highlighted option
+    .choices__list--dropdown .choices__item--selectable.is-highlighted {
+        background-color: $primary;
+        color: $component-active-color;
+    }
+    // No results / no choices text
+    .choices__list--dropdown .choices__item--disabled {
+        color: $input-placeholder-color;
+        font-size: $input-font-size;
+        padding: $input-padding-y $input-padding-x;
+    }
+}

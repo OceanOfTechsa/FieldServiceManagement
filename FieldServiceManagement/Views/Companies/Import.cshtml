@@ -1,0 +1,575 @@
+﻿@model FieldServiceManagement.ViewModels.Company.CompaniesImportViewModel
+
+@{
+    ViewData["Title"] = "Import Companies Data";
+}
+<style>
+    .al-bg {
+        background: #f7fafc;
+    }
+
+    .al-text {
+        color: #374151;
+    }
+</style>
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        <h6>Import Data</h6>
+        <div class="mt-1">
+            <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>
+                Cancel
+            </button>
+            <button class="btn btn-xs btn-primary" onclick="handleNext()" disabled id="nextBtn">
+                Next
+            </button>
+        </div>
+    </div>
+    <div class="fsm-fixed-view-wrapper-forms">
+        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column p-2">
+            <div class="d-flex align-items-start justify-content-between">
+                <nav class="fsm-breadcrumb-sm" style="--bc-max-width: 20px;">
+                    <span class="fsm-breadcrumb-item active">
+                        <span class="fsm-breadcrumb-badge">1</span>
+                        <span class="fsm-breadcrumb-complete-badge">✓</span>
+                        Upload your file
+                    </span>
+                    <span class="fsm-breadcrumb-item">
+                        <span class="fsm-breadcrumb-badge">2</span>
+                        <span class="fsm-breadcrumb-complete-badge">✓</span>
+                        Map your data
+                    </span>
+                    <span class="fsm-breadcrumb-item">
+                        <span class="fsm-breadcrumb-badge">3</span>
+                        <span class="fsm-breadcrumb-complete-badge">✓</span>
+                        Completed
+                    </span>
+                </nav>
+                <button class="d-md-none btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                        style="width: 30px; height: 30px; flex-shrink: 0;"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#infoOffcanvas">
+                    <i class="bi bi-info-lg fs-6"></i>
+                </button>
+            </div>
+
+            <div class="bg-soft text-black mt-3 rounded-2 p-2 d-flex align-items-start gap-2 position-relative overflow-hidden overflow-y-auto"
+                 style="height: calc(100vh - 190px);">
+                <div class="flex-grow-1" style="flex-basis: 60%; height: calc(100vh - 210px);">
+
+                    <!-- ==================== Companies ==================== -->
+                    <div id="CompaniesSection" class="bg-white rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
+                        <div class="fsm-upload-container rounded-2 overflow-hidden">
+                            <input type="file" class="d-none" id="Companies" accept=".csv" />
+                            <label for="Companies" class="fsm-upload-label w-100 rounded-2" id="fsm-upload-label-Companies">
+                                <span class="px-2 d-flex flex-column gap-2 mt-2">
+                                    <span class="text-black fw-semibold">Companies</span>
+                                    <span class="al-text small">Upload the file you wish to import as Companies</span>
+                                    <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
+                                </span>
+                            </label>
+
+                            <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-Companies">
+                                <span class="px-2 d-flex flex-column gap-2 mt-2">
+                                    <span class="text-black fw-semibold">Companies</span>
+                                    <span class="al-text small">Upload the file you wish to import as Companies</span>
+                                </span>
+                            </span>
+
+                            <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 border-start-0 d-none" id="attachmentInfoAccordion">
+                                <div class="accordion-item rounded-2 gap-0">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small text-black">
+                                        Attachment
+                                        <i class="bi bi-arrow-down-circle cursor-pointer" data-bs-toggle="collapse" data-bs-target="#attachmentInfoCollapse"></i>
+                                    </div>
+                                    <div id="attachmentInfoCollapse" class="accordion-collapse collapse show">
+                                        <div class="accordion-body al-bg px-2 pt-1">
+                                            <div class="file-preview file-preview-sm bg-white rounded-2 border border-fsm d-flex flex-column">
+                                                <div class="d-flex align-items-start gap-1 p-2">
+                                                    <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
+                                                    <div class="flex-grow-1 min-width-0 small gap-0">
+                                                        <span class="fw-bold d-block text-truncate file-name" id="uploadedFileName-Companies">filename.csv</span>
+                                                        <span class="text-muted smaller" id="uploadedFileInfo-Companies">0 MB • CSV File</span>
+                                                    </div>
+                                                    <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="CompaniesUploader.removeFile()">
+                                                        <i class="bi bi-trash fs-6 text-danger"></i>
+                                                    </button>
+                                                </div>
+                                                <div id="uploadProgressContainer-Companies" class="w-100 d-none">
+                                                    <div class="progress" style="height: 3px;">
+                                                        <div id="uploadProgressBar-Companies" class="progress-bar bg-primary" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Import Options -->
+                            <div class="d-flex flex-column mt-2 px-2 d-none" id="howto">
+                                <span class="text-black fw-semibold">How do you want to import records in the file?</span>
+                                <!-- Your original options (unchanged) -->
+                                <div class="mt-2 d-flex-column align-items-start gap-1 border-bottom">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="importOption" id="importNew" value="new" checked>
+                                        <label class="form-check-label al-text" for="importNew">Add as new Companies</label>
+                                    </div>
+                                    <div class="import-suboptions d-none" id="subNew">
+                                        <div class="d-flex align-items-center gap-2 mb-2 mx-3">
+                                            <span class="small text-muted">Skip existing Companies based on</span>
+                                            <select class="fsm-per-page" id="skipBasedOn">
+                                                <option value="none">None</option>
+                                                <option value="id">Contact Id</option>
+                                                <option value="email">Email</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 d-flex-column align-items-start gap-1 border-bottom">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="importOption" id="importUpdate" value="update">
+                                        <label class="form-check-label al-text" for="importUpdate">Update existing Companies only</label>
+                                    </div>
+                                    <div class="import-suboptions d-none" id="subUpdate">
+                                        <div class="d-flex align-items-center gap-2 mb-2 mx-3">
+                                            <span class="small text-muted">Find existing Companies based on</span>
+                                            <select class="fsm-per-page" id="findBasedOnUpdate">
+                                                <option value="id">Contact Id</option>
+                                                <option value="email">Email</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-check ms-3 smaller">
+                                            <input class="form-check-input" type="checkbox" id="chkNoEmptyUpdate" checked>
+                                            <label class="form-check-label text-muted">Don't update empty values</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 mb-2 d-flex-column align-items-start gap-1">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="importOption" id="importBoth" value="both">
+                                        <label class="form-check-label al-text" for="importBoth">Both</label>
+                                    </div>
+                                    <div class="import-suboptions d-none" id="subBoth">
+                                        <div class="d-flex align-items-center gap-2 mb-2 mx-3">
+                                            <span class="small text-muted">Find existing Companies based on</span>
+                                            <select class="fsm-per-page" id="findBasedOnBoth">
+                                                <option value="id">Contact Id</option>
+                                                <option value="email">Email</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-check ms-3 smaller">
+                                            <input class="form-check-input" type="checkbox" id="chkNoEmptyBoth" checked>
+                                            <label class="form-check-label text-muted">Don't update empty values</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span id="upload-error-Companies" class="bg-danger d-none text-white small p-1 px-2 d-flex justify-content-between align-items-center gap-2">
+                                <span class="d-flex gap-2 align-items-center">
+                                    <i class="bi bi-exclamation-circle-fill"></i>
+                                    <span id="uploadErrorMsg-Companies"></span>
+                                </span>
+                                <span id="close-error-Companies" style="cursor:pointer;"><i class="bi bi-x-circle"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ==================== ADDRESSES ==================== -->
+                    <div id="addressesSection" class="bg-white rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
+                        <div class="fsm-upload-container rounded-2 overflow-hidden">
+                            <input type="file" class="d-none" id="addresses" accept=".csv" />
+                            <label for="addresses" class="fsm-upload-label w-100 rounded-2">
+                                <span class="px-2 d-flex flex-column gap-2 mt-2">
+                                    <span class="text-black fw-semibold">Addresses</span>
+                                    <span class="al-text small">Upload the file you wish to import as Addresses for Companies</span>
+                                    <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
+                                </span>
+                            </label>
+                            <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-addresses">
+                                <span class="px-2 d-flex flex-column gap-2 mt-2">
+                                    <span class="text-black fw-semibold">Addresses</span>
+                                    <span class="al-text small">Upload the file you wish to import as Addresses for Companies</span>
+                                </span>
+                            </span>
+                            <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 rounded-bottom border-start-0 d-none" id="addressAttachmentInfoAccordion">
+                                <div class="accordion-item rounded-2 gap-0">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small text-black">
+                                        Attachment
+                                        <i class="bi bi-arrow-down-circle cursor-pointer"
+                                           data-bs-toggle="collapse"
+                                           data-bs-target="#addressAttachmentInfoCollapse"
+                                           aria-expanded="true"
+                                           aria-controls="addressAttachmentInfoCollapse"></i>
+                                    </div>
+                                    <div id="addressAttachmentInfoCollapse" class="accordion-collapse collapse show mt-0 rounded-bottom"
+                                         data-bs-parent="#addressAttachmentInfoAccordion">
+                                        <div class="accordion-body al-bg px-2 pt-1 mt-0 rounded-bottom">
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="file-preview file-preview-sm bg-white rounded-2 border border-fsm d-flex flex-column">
+                                                    <div class="d-flex align-items-start gap-1 p-2">
+                                                        <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
+                                                        <div class="flex-grow-1 min-width-0 small gap-0">
+                                                            <span class="fw-bold d-block text-truncate file-name mt-1" id="uploadedFileName-Companies">filename.csv</span>
+                                                            <span class="text-muted smaller mt-n3" id="uploadedFileInfo-Companies">0 MB • CSV File</span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="addressesUploader.removeFile()" style="line-height: 1;">
+                                                            <i class="bi bi-trash fs-6 text-danger"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div id="uploadProgressContainer-Companies" class="w-100 d-none">
+                                                        <div class="progress" style="height: 3px;">
+                                                            <div id="uploadProgressBar-notes" class="progress-bar bg-primary" role="progressbar"
+                                                                 style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="mt-1 text-muted small d-flex gap-2">
+                                                    <span class="d-flex gap-1">
+                                                        <i class="bi bi-info-circle text-info"></i>
+                                                        The file will be parsed using the character set
+                                                    </span>
+                                                    <span class="text-primary">ISO-8859-1 (Western Europe)</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span id="upload-error-addresses" class="bg-danger d-none text-white small p-1 px-2 d-flex justify-content-between align-items-center gap-2">
+                                <span><i class="bi bi-exclamation-circle-fill"></i> <span id="uploadErrorMsg-addresses"></span></span>
+                                <span id="close-error-addresses" style="cursor:pointer;"><i class="bi bi-x-circle"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ==================== NOTES ==================== -->
+                    <div id="notesSection" class="bg-white rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden">
+                        <div class="fsm-upload-container rounded-2 overflow-hidden">
+                            <input type="file" class="d-none" id="notes" accept=".csv" />
+                            <label for="notes" class="fsm-upload-label w-100 rounded-2">
+                                <span class="px-2 d-flex flex-column gap-2 mt-2">
+                                    <span class="text-black fw-semibold">Notes</span>
+                                    <span class="al-text small">Upload the file you wish to import as Notes for Companies</span>
+                                    <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
+                                </span>
+                            </label>
+                            <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-notes">
+                                <span class="px-2 d-flex flex-column gap-2 mt-2">
+                                    <span class="text-black fw-semibold">Notes</span>
+                                    <span class="al-text small">Upload the file you wish to import as Notes for Companies</span>
+                                </span>
+                            </span>
+                            <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 rounded-bottom border-start-0 d-none" id="notesAttachmentInfoAccordion">
+                                <div class="accordion-item rounded-2 gap-0">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small text-black">
+                                        Attachment
+                                        <i class="bi bi-arrow-down-circle cursor-pointer"
+                                           data-bs-toggle="collapse"
+                                           data-bs-target="#notesAttachmentInfoCollapse"
+                                           aria-expanded="true"
+                                           aria-controls="notesAttachmentInfoCollapse"></i>
+                                    </div>
+                                    <div id="notesAttachmentInfoCollapse" class="accordion-collapse collapse show mt-0 rounded-bottom"
+                                         data-bs-parent="#notesAttachmentInfoAccordion">
+                                        <div class="accordion-body al-bg px-2 pt-1 mt-0 rounded-bottom">
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="file-preview file-preview-sm bg-white rounded-2 border border-fsm d-flex flex-column">
+                                                    <div class="d-flex align-items-start gap-1 p-2">
+                                                        <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
+                                                        <div class="flex-grow-1 min-width-0 small gap-0">
+                                                            <span class="fw-bold d-block text-truncate file-name mt-1" id="uploadedFileName-Companies">filename.csv</span>
+                                                            <span class="text-muted smaller mt-n3" id="uploadedFileInfo-Companies">0 MB • CSV File</span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="notesUploader.removeFile()" style="line-height: 1;">
+                                                            <i class="bi bi-trash fs-6 text-danger"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div id="uploadProgressContainer-Companies" class="w-100 d-none">
+                                                        <div class="progress" style="height: 3px;">
+                                                            <div id="uploadProgressBar-notes" class="progress-bar bg-primary" role="progressbar"
+                                                                 style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="mt-1 text-muted small d-flex gap-2">
+                                                    <span class="d-flex gap-1">
+                                                        <i class="bi bi-info-circle text-info"></i>
+                                                        The file will be parsed using the character set
+                                                    </span>
+                                                    <span class="text-primary">ISO-8859-1 (Western Europe)</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span id="upload-error-notes" class="bg-danger d-none text-white small p-1 px-2 d-flex justify-content-between align-items-center gap-2">
+                                <span><i class="bi bi-exclamation-circle-fill"></i> <span id="uploadErrorMsg-notes"></span></span>
+                                <span id="close-error-notes" style="cursor:pointer;"><i class="bi bi-x-circle"></i></span>
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="d-none d-md-block bg-white border border-warning rounded-2 p-2 overflow-hidden overflow-y-auto"
+                     style="flex-basis: 40%; height: calc(100vh - 210px);">
+                    @await Html.PartialAsync("~/Views/Components/ImportInformation/_CompaniesImportInformation.cshtml")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="fsm-cancel-import-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="delete-title" class="dialog-title">Exit Data Import?</p>
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <i class="bi bi-exclamation-lg"></i>
+            </div>
+            <div class="warn-text">
+                <p>Confirmation Required</p>
+                <p class="warn-sub">Are you sure you want to Exit Data Import</p>
+            </div>
+        </div>
+
+        <div class="bd-callout bd-callout-info my-0 mt-2 mx-2 p-2 bg-opacity-10">
+            <strong>Note</strong>
+            <br />
+            <span class="smaller">
+                Uploaded files will be permanently deleted and data import will be discarded. Do you want to exit?
+            </span>
+        </div>
+
+        <div class="dialog-body">
+            Please select <strong>Yes, Exit</strong> to exit data import, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-reinvite-cancel>Cancel</button>
+            <a href="/Customers/Companies@(Model.callBack != null ? "/" + Model.callBack : "")" class="btn-confirm" id="fsm-cancel-confirm">
+                Yes, Exit
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-bottom pb-4" tabindex="-1" id="infoOffcanvas" style="height: 91vh;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        @await Html.PartialAsync("~/Views/Components/ImportInformation/_CompaniesImportInformation.cshtml")
+    </div>
+</div>
+
+<script>
+    class FileUploader {
+        constructor(sectionId, inputId) {
+            this.section = document.getElementById(sectionId);
+            if (!this.section) return;
+
+            this.input = document.getElementById(inputId);
+            this.uploadLabel = this.section.querySelector('.fsm-upload-label');
+            this.noUploadLabel = this.section.querySelector('.bg-white.w-100.rounded-2.d-none');
+            this.attachmentAccordion = this.section.querySelector('.accordion');
+            this.howto = this.section.id === 'CompaniesSection' ? document.getElementById('howto') : null;
+
+            this.fileNameEl = this.section.querySelector('.file-name');
+            this.fileInfoEl = this.section.querySelector('.text-muted.smaller');
+            this.progressContainer = this.section.querySelector('[id^="uploadProgressContainer"]');
+            this.progressBar = this.section.querySelector('[id^="uploadProgressBar"]');
+            this.errorEl = this.section.querySelector('[id^="upload-error"]');
+            this.errorMsg = this.section.querySelector('[id^="uploadErrorMsg"]');
+
+            this.currentFile = null;
+            this.init();
+        }
+
+        init() {
+            if (this.input) this.input.addEventListener('change', e => this.handleFileSelect(e));
+            const closeBtn = this.section.querySelector('[id^="close-error"]');
+            if (closeBtn) closeBtn.addEventListener('click', () => this.hideError());
+        }
+
+        handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            this.hideError();
+
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                this.showError("Only .CSV files are allowed.");
+                e.target.value = '';
+                return;
+            }
+            if (file.size > 1 * 1024 * 1024) {
+                this.showError("File size must be less than 1MB.");
+                e.target.value = '';
+                return;
+            }
+
+            this.currentFile = file;
+            this.updateFilePreview(file);
+            this.showUploadedUI();
+        }
+
+        updateFilePreview(file) {
+            if (this.fileNameEl) this.fileNameEl.textContent = this.truncateFileName(file.name);
+            if (this.fileInfoEl) this.fileInfoEl.textContent = `Size: ${this.formatFileSize(file.size)}`;
+        }
+
+        formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + " B";
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+            return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+        }
+
+        truncateFileName(name, max = 22) {
+            if (name.length <= max) return name;
+            const ext = name.substring(name.lastIndexOf('.'));
+            return name.substring(0, max - 3) + '...' + ext;
+        }
+
+        showUploadedUI() {
+            this.uploadLabel?.classList.add("d-none");
+            this.noUploadLabel?.classList.remove("d-none");
+            this.attachmentAccordion?.classList.remove("d-none");
+            if (this.howto) this.howto.classList.remove("d-none");
+
+            if (this.progressContainer) {
+                this.progressContainer.classList.remove("d-none");
+                this.simulateUploadProgress();
+            }
+        }
+
+        simulateUploadProgress() {
+            let progress = 0;
+            if (!this.progressBar) return;
+            this.progressBar.style.width = '0%';
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 25;
+                if (progress > 100) progress = 100;
+                this.progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => this.progressContainer.classList.add("d-none"), 800);
+                    enableNextButton();
+                }
+            }, 150);
+        }
+
+        showError(message) {
+            if (this.errorMsg) this.errorMsg.textContent = message;
+            this.errorEl?.classList.remove('d-none');
+            this.uploadLabel?.classList.remove("rounded-2");
+            this.uploadLabel?.classList.add("rounded-top");
+        }
+
+        hideError() {
+            this.errorEl?.classList.add('d-none');
+            this.uploadLabel?.classList.add("rounded-2");
+            this.uploadLabel?.classList.remove("rounded-top");
+        }
+
+        removeFile() {
+            if (this.input) this.input.value = '';
+            this.currentFile = null;
+            this.uploadLabel?.classList.remove("d-none");
+            this.noUploadLabel?.classList.add("d-none");
+            this.attachmentAccordion?.classList.add("d-none");
+            if (this.howto) this.howto.classList.add("d-none");
+            this.progressContainer?.classList.add("d-none");
+            if(this.CompaniesUploader.currentFile == null){
+                document.getElementById("nextBtn").toggleAttribute("disabled", true);
+            }
+        }
+    }
+
+    // Initialize all uploaders
+    const CompaniesUploader = new FileUploader('CompaniesSection', 'Companies');
+    const addressesUploader = new FileUploader('addressesSection', 'addresses');
+    const notesUploader = new FileUploader('notesSection', 'notes');
+
+    function enableNextButton(){
+        const CompaniesFile = CompaniesUploader.currentFile;
+        if(CompaniesFile)
+        {
+            document.getElementById("nextBtn").toggleAttribute("disabled", false);
+        }
+    };
+
+    // ==================== COLLECT ALL FORM DATA ====================
+    function getImportData() {
+        const importOption = document.querySelector('input[name="importOption"]:checked')?.value || 'new';
+
+        return {
+            CompaniesFile: CompaniesUploader.currentFile,
+            addressesFile: addressesUploader.currentFile,
+            notesFile: notesUploader.currentFile,
+
+            importOption: importOption,
+            skipExistingBasedOn: document.getElementById('skipBasedOn')?.value,
+            findExistingBasedOn: (importOption === 'update' ?
+                document.getElementById('findBasedOnUpdate')?.value :
+                document.getElementById('findBasedOnBoth')?.value),
+
+            dontUpdateEmpty: {
+                update: document.getElementById('chkNoEmptyUpdate')?.checked ?? true,
+                both: document.getElementById('chkNoEmptyBoth')?.checked ?? true
+            }
+        };
+    }
+
+    // Example: Next button handler
+    function handleNext() {
+        const data = getImportData();
+        console.log("Import Data:", data);
+
+        // You can now send this data via fetch/FormData
+        // Example:
+        // const formData = new FormData();
+        // if (data.CompaniesFile) formData.append('CompaniesFile', data.CompaniesFile);
+        // ... etc
+
+        alert("Data collected! Check console.");
+    }
+
+    // Cancel Dialog
+    document.querySelectorAll('[data-fsm-cancel-trigger]').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            document.getElementById('fsm-cancel-import-dialog').classList.add('show');
+        });
+    });
+
+    document.querySelectorAll('[data-fsm-reinvite-cancel]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('fsm-cancel-import-dialog').classList.remove('show');
+        });
+    });
+
+    // Radio sub-options toggle
+    const radios = document.querySelectorAll('input[name="importOption"]');
+    const subOptions = {
+        new: document.getElementById("subNew"),
+        update: document.getElementById("subUpdate"),
+        both: document.getElementById("subBoth")
+    };
+
+    function toggleSubOptions(selected) {
+        Object.keys(subOptions).forEach(key => {
+            subOptions[key].classList.toggle('d-none', key !== selected);
+        });
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', () => toggleSubOptions(radio.value));
+    });
+
+    toggleSubOptions("new");
+</script>

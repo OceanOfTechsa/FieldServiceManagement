@@ -1,0 +1,93 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="~/js/theme.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Roboto:wght@300;400;500&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <title>@ViewData["Title"] | OOT FSM • The end-to-end field service management platform</title>
+    <meta name="description" content="Automate the entire spectrum of field operations with the one stop field service management platform." />
+</head>
+<body style="height: calc(100vh - 8px);">
+    <div class="container-fluid p-0">
+        <div class="row g-0  min-vh-100">
+            <div class="col-md-6 d-none d-md-flex flex-column justify-content-between p-5 bg-soft border-end border-fsm position-relative overflow-hidden">
+                <div class="position-absolute top-0 start-0 w-100 h-100 grid-overlay opacity-50 pointer-events-none"></div>
+        
+                <div class="position-relative z-1 -mt-1">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center"
+                             style="width:36px;height:36px;">
+                            <img src="~/Assets/Images/Brand/logo.svg" alt="FSM" width="30" height="30" />
+                        </div>
+                        <span class="font-monospace fw-semibold text-uppercase ls-wide small">
+                            Field Service Mgmt
+                        </span>
+                    </div>
+                </div>
+
+              
+                <div class="position-relative z-1">
+                    @* <span class="eyebrow ml-4">Platform v1.0</span> *@
+                    <h1 class="font-sans fw-bold -ml-5 lh-sm" style="font-size:clamp(4rem,3.5vw,2.8rem);">
+                        Operational<br />
+                        Control For<br />
+                        <strong class="fw-semibold text-accent">Field Teams.</strong>
+                    </h1>
+                    <p class="fs-6">
+                        Replace manual processes with efficient workflows <br /> and give your team the tools to grow confidently.
+                    </p>
+                </div>
+    
+                <div class="d-flex justify-content-between align-items-end">
+                    <div class="position-relative z-1">
+                        <p class="text-muted mb-0" style="font-size:0.7rem;">
+                            © @DateTime.Now.Year <a href="https://www.oceanoftech.co.za" target="_blank"
+                                                class="text-dim text-decoration-none">
+                            Ocean Of Tech.
+                        </a> All rights reserved.
+                        </p>
+                    </div>
+
+                    @* <div class="position-relative z-1 d-flex gap-4">
+                        <div>
+                            <span class="eyebrow">Stack</span>
+                            <p class="text-dim small mb-0">ASP.NET Core</p>
+                        </div>
+                        <div>
+                            <span class="eyebrow">Powered by</span>
+                            <p class="mb-0 small">
+                                <a href="https://www.oceanoftech.co.za" target="_blank"
+                                       class="text-dim text-decoration-none">
+                                    Ocean Of Tech
+                                </a>
+                            </p>
+                        </div>
+                    </div> *@
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 d-flex align-items-center justify-content-center p-4 p-md-5">
+                <div class="w-100" style="max-width:440px;">
+                    <div class="d-flex d-md-none align-items-center justify-content-center mb-3"
+                         style="width:36px;height:36px;">
+                        <img src="~/Assets/Images/Brand/logo.svg" alt="FSM" width="35" height="35" />
+                    </div>
+                    @RenderBody()
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="~/js/BtnLoader.js" defer></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

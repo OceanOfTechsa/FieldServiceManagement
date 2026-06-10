@@ -1,0 +1,458 @@
+﻿@model FieldServiceManagement.Areas.Identity.Models.OnboardingViewModel
+@using FieldServiceManagement.Helpers
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment Env
+
+
+@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Set Up Your Account";
+}
+
+<div class="mb-4">
+    <span class="eyebrow">Welcome</span>
+    <h2 class="font-sans fw-semibold mb-1" style="font-size:1.75rem;">Set up your account</h2>
+    <p class="text-muted small mb-0">Complete the steps below to get started.</p>
+</div>
+
+<div class="d-flex align-items-center mb-4" id="onboarding-stepper">
+    <div class="step-item active" data-step="1">
+        <div class="step-circle">1</div>
+        <span class="step-label">Your Details</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="2">
+        <div class="step-circle">2</div>
+        <span class="step-label">Organisation</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="3">
+        <div class="step-circle">3</div>
+        <span class="step-label">Locale</span>
+    </div>
+</div>
+
+@using (Html.BeginForm("Submit", "Onboarding", FormMethod.Post, new { id = "onboarding-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Email)
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+    }
+
+
+    <div id="onboarding-app">
+        <div class="step-panel" id="step-1">
+            <div class="mb-4">
+                <div class="form-group mb-3">
+                    @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Name, new {
+                        @class = "form-control",
+                        @placeholder = "Jane",
+                        @autocomplete = "given-name"
+                    })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group mb-3">
+                    @Html.LabelFor(m => m.Surname, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Surname, new {
+                        @class = "form-control",
+                        @placeholder = "Smith",
+                        @autocomplete = "family-name"
+                    })
+                    @Html.ValidationMessageFor(m => m.Surname, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group mb-3">
+                    @Html.LabelFor(m => m.Phone, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Phone, new {
+                        @class = "form-control",
+                        @placeholder = "+27 82 000 0000",
+                        @autocomplete = "tel",
+                        @type = "tel"
+                    })
+                    @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-error" })
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary w-100" v-on:click="goToStep(2)">
+                Continue <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+
+
+        <div class="step-panel d-none" id="step-2">
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.OrganisationName, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.OrganisationName, new {
+                    @class = "form-control",
+                    @placeholder = "Acme Field Services"
+                })
+                @Html.ValidationMessageFor(m => m.OrganisationName, "", new { @class = "field-error" })
+            </div>
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.IndustryId, new { @class = "form-label" })
+                <input type="hidden" id="IndustryId" name="IndustryId" v-bind:value="selectedIndustry ? selectedIndustry.id : ''" />
+                <v-select
+                    placeholder="Search industry..."
+                    v-model="selectedIndustry"
+                    v-bind:options="industryOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onIndustrySearch">
+                    <template slot="no-options">
+                        <span class="text-muted small">Type to search industries.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.IndustryId, "", new { @class = "field-error" })
+            </div>
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.IndustryCategoryId, new { @class = "form-label" })
+                <input type="hidden" id="IndustryCategoryId" name="IndustryCategoryId" v-bind:value="selectedIndustryCategory ? selectedIndustryCategory.id : ''" />
+                <v-select
+                    placeholder="Search industry category..."
+                    v-model="selectedIndustryCategory"
+                    v-bind:options="industryCategoryOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onIndustryCategorySearch"
+                    v-bind:disabled="!selectedIndustry">
+                    <template slot="no-options">
+                        <span class="text-muted small">Select an industry first.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.IndustryCategoryId, "", new { @class = "field-error" })
+            </div>
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.CountryId, new { @class = "form-label" })
+                <input type="hidden" id="CountryId" name="CountryId" v-bind:value="selectedCountry ? selectedCountry.id : ''" />
+                <v-select
+                    placeholder="Search country..."
+                    v-model="selectedCountry"
+                    v-bind:options="countryOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onCountrySearch">
+                    <template slot="no-options">
+                        <span class="text-muted small">Type to search countries.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.CountryId, "", new { @class = "field-error" })
+            </div>
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.StateId, new { @class = "form-label" })
+                <input type="hidden" id="StateId" name="StateId" v-bind:value="selectedState ? selectedState.id : ''" />
+                <v-select
+                    placeholder="Search state / province..."
+                    v-model="selectedState"
+                    v-bind:options="stateOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onStateSearch"
+                    v-bind:disabled="!selectedCountry">
+                    <template slot="no-options">
+                        <span class="text-muted small">Select a country first.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.StateId, "", new { @class = "field-error" })
+            </div>
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.CurrencyId, new { @class = "form-label" })
+                <input type="hidden" id="CurrencyId" name="CurrencyId" v-bind:value="selectedCurrency ? selectedCurrency.id : ''" />
+                <v-select
+                    placeholder="Search currency..."
+                    v-model="selectedCurrency"
+                    v-bind:options="currencyOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onCurrencySearch">
+                    <template slot="no-options">
+                        <span class="text-muted small">Type to search currencies.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.CurrencyId, "", new { @class = "field-error" })
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary w-50" v-on:click="goToStep(1)">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <button type="button" class="btn btn-primary w-50" v-on:click="goToStep(3)">
+                    Continue <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="step-panel d-none" id="step-3">
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.TimezoneId, new { @class = "form-label" })
+                <input type="hidden" id="TimezoneId" name="TimezoneId" v-bind:value="selectedTimezone ? selectedTimezone.id : ''" />
+                <v-select
+                    placeholder="Search timezone..."
+                    v-model="selectedTimezone"
+                    v-bind:options="timezoneOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onTimezoneSearch">
+                    <template slot="no-options">
+                        <span class="text-muted small">Type to search timezones.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.TimezoneId, "", new { @class = "field-error" })
+            </div>
+
+
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.LanguageId, new { @class = "form-label" })
+                <input type="hidden" id="LanguageId" name="LanguageId" v-bind:value="selectedLanguage ? selectedLanguage.id : ''" />
+                <v-select
+                    placeholder="Search language..."
+                    v-model="selectedLanguage"
+                    v-bind:options="languageOptions"
+                    label="name"
+                    v-bind:filterable="false"
+                    v-on:search="onLanguageSearch">
+                    <template slot="no-options">
+                        <span class="text-muted small">Type to search languages.</span>
+                    </template>
+                </v-select>
+                @Html.ValidationMessageFor(m => m.LanguageId, "", new { @class = "field-error" })
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary w-50" v-on:click="goToStep(2)">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <button type="submit" class="btn btn-primary w-50" data-loading-text="Setting up...">
+                    Complete setup <i class="bi bi-check2 ms-1"></i>
+                </button>
+            </div>
+        </div>
+
+    </div> 
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/vue@@2.6.14/dist/vue.min.js"></script>
+    <script src="https://unpkg.com/vue-select@@2.6.4/dist/vue-select.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/vue-select@@2.6.4/dist/vue-select.css" />
+
+    <script src="~/js/onboarding/GetIndustries.js"></script>
+    <script src="~/js/onboarding/GetIndustryCategories.js"></script>
+    <script src="~/js/onboarding/GetCountries.js"></script>
+    <script src="~/js/onboarding/GetStates.js"></script>
+    <script src="~/js/onboarding/GetCurrencies.js"></script>
+    <script src="~/js/onboarding/GetTimezones.js"></script>
+    <script src="~/js/onboarding/GetLanguages.js"></script>
+
+    <script>
+    $(document).ready(function () {
+        Vue.component('v-select', VueSelect.VueSelect);
+
+        new Vue({
+            el: '#onboarding-app',
+
+            data: {
+                currentStep: 1,
+
+                // ── Industry ──────────────────────────────────────────────────
+                selectedIndustry:         null,
+                industryOptions:          [],
+
+                // ── Industry Category ─────────────────────────────────────────
+                selectedIndustryCategory: null,
+                industryCategoryOptions:  [],
+
+                // ── Country ───────────────────────────────────────────────────
+                selectedCountry:          null,
+                countryOptions:           [],
+
+                // ── State ─────────────────────────────────────────────────────
+                selectedState:            null,
+                stateOptions:             [],
+
+                // ── Currency ──────────────────────────────────────────────────
+                selectedCurrency:         null,
+                currencyOptions:          [],
+
+                // ── Timezone ──────────────────────────────────────────────────
+                selectedTimezone:         null,
+                timezoneOptions:          [],
+
+                // ── Language ──────────────────────────────────────────────────
+                selectedLanguage:         null,
+                languageOptions:          [],
+            },
+
+            watch: {
+                // Reset category when industry changes
+                selectedIndustry(val) {
+                    if (!val) {
+                        this.selectedIndustryCategory = null;
+                        this.industryCategoryOptions  = [];
+                    }
+                },
+                // Reset state when country changes
+                selectedCountry(val) {
+                    if (!val) {
+                        this.selectedState  = null;
+                        this.stateOptions   = [];
+                    }
+                },
+            },
+
+            methods: {
+
+                // ── Step navigation ───────────────────────────────────────────
+                goToStep(step) {
+                    if (step > this.currentStep && !this.validateStep(this.currentStep)) return;
+
+                    $('.step-panel').addClass('d-none');
+                    $('#step-' + step).removeClass('d-none');
+
+                    $('.step-item').removeClass('active completed');
+                    for (let i = 1; i < step; i++) {
+                        $('[data-step="' + i + '"]').addClass('completed');
+                    }
+                    $('[data-step="' + step + '"]').addClass('active');
+
+                    this.currentStep = step;
+                },
+
+                // ── Validation ────────────────────────────────────────────────
+                validateStep(step) {
+                    let valid = true;
+
+                    if (step === 1) {
+                        const name    = $('input[name="Name"]').val().trim();
+                        const surname = $('input[name="Surname"]').val().trim();
+                        const phone   = $('input[name="Phone"]').val().trim();
+                        if (!name)    { this.showFieldError('Name',    'Name is required.');    valid = false; }
+                        if (!surname) { this.showFieldError('Surname', 'Surname is required.'); valid = false; }
+                        if (!phone)   { this.showFieldError('Phone',   'Phone is required.');   valid = false; }
+                    }
+
+                    if (step === 2) {
+                        const orgName = $('input[name="OrganisationName"]').val().trim();
+                        if (!orgName)                    { this.showFieldError('OrganisationName', 'Organisation name is required.'); valid = false; }
+                        if (!this.selectedIndustry)      { this.showInlineError('IndustryId',   'Industry is required.');            valid = false; }
+                        if (!this.selectedCountry)       { this.showInlineError('CountryId',    'Country is required.');             valid = false; }
+                        if (!this.selectedCurrency)      { this.showInlineError('CurrencyId',   'Currency is required.');            valid = false; }
+                    }
+
+                    return valid;
+                },
+
+                showFieldError(fieldName, message) {
+                    $('input[name="' + fieldName + '"]')
+                        .addClass('is-invalid')
+                        .next('.field-error')
+                        .text(message)
+                        .show();
+                },
+
+                showInlineError(fieldId, message) {
+                    $('#' + fieldId)
+                        .closest('.form-group')
+                        .find('.field-error')
+                        .text(message)
+                        .show();
+                },
+
+                // ── Search helpers ────────────────────────────────────────────
+                makeVm(listKey, loadingFn) {
+                    const self = this;
+                    return {
+                        set options(val) { self[listKey] = val; loadingFn(false); },
+                        get options()    { return self[listKey]; }
+                    };
+                },
+
+                // ── Industry ──────────────────────────────────────────────────
+                onIndustrySearch(search, loading) {
+                    if (!search || search.length < 4) { this.industryOptions = []; return; }
+                    loading(true);
+                    GetIndustries(search, loading, this.makeVm('industryOptions', loading));
+                },
+
+                // ── Industry Category ─────────────────────────────────────────
+                onIndustryCategorySearch(search, loading) {
+                    if (!this.selectedIndustry)       return;
+                    if (!search || search.length < 4) { this.industryCategoryOptions = []; return; }
+                    loading(true);
+                    GetIndustryCategories(
+                        search,
+                        this.selectedIndustry.id,
+                        loading,
+                        this.makeVm('industryCategoryOptions', loading)
+                    );
+                },
+
+                // ── Country ───────────────────────────────────────────────────
+                onCountrySearch(search, loading) {
+                    if (!search || search.length < 4) { this.countryOptions = []; return; }
+                    loading(true);
+                    GetCountries(search, loading, this.makeVm('countryOptions', loading));
+                },
+
+                // ── State ─────────────────────────────────────────────────────
+                onStateSearch(search, loading) {
+                    if (!this.selectedCountry)        return;
+                    if (!search || search.length < 4) { this.stateOptions = []; return; }
+                    loading(true);
+                    GetStates(
+                        search,
+                        this.selectedCountry.id,
+                        loading,
+                        this.makeVm('stateOptions', loading)
+                    );
+                },
+
+                // ── Currency ──────────────────────────────────────────────────
+                onCurrencySearch(search, loading) {
+                    if (!search || search.length < 4) { this.currencyOptions = []; return; }
+                    loading(true);
+                    GetCurrencies(search, loading, this.makeVm('currencyOptions', loading));
+                },
+
+                // ── Timezone ──────────────────────────────────────────────────
+                onTimezoneSearch(search, loading) {
+                    if (!search || search.length < 4) { this.timezoneOptions = []; return; }
+                    loading(true);
+                    GetTimezones(search, loading, this.makeVm('timezoneOptions', loading));
+                },
+
+                // ── Language ──────────────────────────────────────────────────
+                onLanguageSearch(search, loading) {
+                    if (!search || search.length < 4) { this.languageOptions = []; return; }
+                    loading(true);
+                    GetLanguages(search, loading, this.makeVm('languageOptions', loading));
+                },
+            }
+        });
+
+        // Clear field errors on input (outside Vue — jQuery handles native inputs)
+        $(document).on('input change', '.form-control', function () {
+            $(this).removeClass('is-invalid');
+            $(this).next('.field-error').text('').hide();
+        });
+    });
+    </script>
+}

@@ -1,0 +1,220 @@
+﻿/* fsm-breadcrumb.css */
+/* Modern rewrite — retains .fsm-breadcrumb-* class names */
+
+:root {
+    --bc-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --bc-active-bg: #f97316;
+    --bc-active-text: #ffffff;
+    --bc-done-bg: #fde8d0;
+    --bc-done-text: #92400e;
+    --bc-done-badge-bg: #f97316;
+    --bc-done-badge-text: #ffffff;
+    --bc-pending-bg: #e9eaec;
+    --bc-pending-text: #9ca3af;
+    --bc-pending-badge-bg: #d1d5db;
+    --bc-pending-badge-text: #6b7280;
+    --bc-shadow: 0 1px 3px rgba(0,0,0,.1);
+    --bc-arrow: 13px;
+    --bc-gap: 2px;
+    --bc-h: 40px;
+}
+
+/* ── Container ─────────────────────────────────────────────── */
+.fsm-breadcrumb-lg,
+.fsm-breadcrumb-md,
+.fsm-breadcrumb-sm {
+    display: inline-flex;
+    align-items: stretch;
+    gap: var(--bc-gap);
+    background: transparent;
+    font-family: var(--bc-font);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: fit-content; /* Important */
+    max-width: var(--bc-max-width, none); /* For manual control */
+}
+
+/* ── Step ──────────────────────────────────────────────────── */
+.fsm-breadcrumb-item {
+    flex: 0 1 auto; /* allows growth with content */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--bc-h);
+    width: auto;
+    min-width: 130px; /* Ensures it respects content */
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: default;
+    color: var(--bc-pending-text);
+    background: var(--bc-pending-bg);
+    box-shadow: var(--bc-shadow);
+    padding: 0 calc(var(--bc-arrow) + 14px) 0 16px;
+    clip-path: polygon(0% 0%, calc(100% - var(--bc-arrow)) 0%, 100% 50%, calc(100% - var(--bc-arrow)) 100%, 0% 100%);
+    border-radius: 0px 50px 50px 0px !important;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+    /* ── Step 2+: inward notch on left ─────────────────────────── */
+    .fsm-breadcrumb-item:not(:first-child) {
+        padding-left: calc(var(--bc-arrow) + 10px);
+        clip-path: polygon( var(--bc-arrow) 50%, 0% 0%, calc(100% - var(--bc-arrow)) 0%, 100% 50%, calc(100% - var(--bc-arrow)) 100%, 0% 100% );
+        border-radius: 0;
+    }
+
+    /* ── Last child: no right arrow, fully rounded on the right ── */
+    .fsm-breadcrumb-item:last-child {
+        padding-right: 16px;
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        border-radius: 4px;
+    }
+
+    /* ── Last child that is NOT the first child (keep left notch) ─ */
+    .fsm-breadcrumb-item:not(:first-child):last-child {
+        padding-left: calc(var(--bc-arrow) + 10px);
+        clip-path: polygon( var(--bc-arrow) 50%, 0% 0%, 100% 0%, 100% 100%, 0% 100% );
+        border-radius: 0 4px 4px 0;
+    }
+
+    /* ── States ─────────────────────────────────────────────────── */
+    .fsm-breadcrumb-item.done {
+        background: var(--bc-done-bg);
+        color: var(--bc-done-text);
+        cursor: pointer;
+    }
+
+    .fsm-breadcrumb-item.active {
+        background: var(--bc-active-bg);
+        color: var(--bc-active-text);
+    }
+
+/* ── Badge ──────────────────────────────────────────────────── */
+.fsm-breadcrumb-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--bc-pending-badge-bg);
+    color: var(--bc-pending-badge-text);
+    transition: background 150ms ease, color 150ms ease;
+}
+
+/* Complete (Check) Badge - Shown only when .done */
+.fsm-breadcrumb-complete-badge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--bc-done-badge-bg);
+    color: var(--bc-done-badge-text);
+    transition: background 150ms ease, color 150ms ease;
+}
+
+/* Show/Hide Logic */
+.fsm-breadcrumb-item.done .fsm-breadcrumb-badge {
+    display: none;
+}
+
+.fsm-breadcrumb-item.done .fsm-breadcrumb-complete-badge {
+    display: inline-flex;
+}
+
+/* ── Text span ──────────────────────────────────────────────── */
+.fsm-breadcrumb-text {
+    display: inline-block;
+    line-height: 1.2;
+}
+
+/* ── Width Control ──────────────────────────────────────────── */
+.fsm-breadcrumb-w-full {
+    width: 100%;
+}
+
+/* ── Medium ─────────────────────────────────────────────────── */
+.fsm-breadcrumb-md {
+    --bc-h: 32px;
+    --bc-arrow: 11px;
+    --bc-gap: 4px;
+}
+
+    .fsm-breadcrumb-md .fsm-breadcrumb-item {
+        font-size: 13px;
+        gap: 6px;
+        padding: 0 calc(var(--bc-arrow)+11px) 0 13px;
+    }
+
+        .fsm-breadcrumb-md .fsm-breadcrumb-item:not(:first-child) {
+            padding-left: calc(var(--bc-arrow)+8px);
+        }
+
+    .fsm-breadcrumb-md .fsm-breadcrumb-badge,
+    .fsm-breadcrumb-md .fsm-breadcrumb-complete-badge {
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+    }
+
+/* ── Small ──────────────────────────────────────────────────── */
+.fsm-breadcrumb-sm {
+    --bc-h: 26px;
+    --bc-arrow: 9px;
+    --bc-gap: 3px;
+}
+
+    .fsm-breadcrumb-sm .fsm-breadcrumb-item {
+        font-size: 12px;
+        gap: 5px;
+        padding: 0 calc(var(--bc-arrow)+9px) 0 11px;
+    }
+
+        .fsm-breadcrumb-sm .fsm-breadcrumb-item:not(:first-child) {
+            padding-left: calc(var(--bc-arrow)+6px);
+        }
+
+    .fsm-breadcrumb-sm .fsm-breadcrumb-badge,
+    .fsm-breadcrumb-sm .fsm-breadcrumb-complete-badge {
+        width: 15px;
+        height: 15px;
+        font-size: 9px;
+    }
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 540px) {
+    .fsm-breadcrumb-lg,
+    .fsm-breadcrumb-md,
+    .fsm-breadcrumb-sm {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 1px;
+    }
+
+    .fsm-breadcrumb-item,
+    .fsm-breadcrumb-item:not(:first-child),
+    .fsm-breadcrumb-item:last-child,
+    .fsm-breadcrumb-item:not(:first-child):last-child {
+        border-radius: 0px 50px 50px 0px !important;
+        padding: 5px 14px !important;
+        min-height: auto !important;
+    }
+}
+
+/* ── Focus ──────────────────────────────────────────────────── */
+.fsm-breadcrumb-item:focus-visible {
+    outline: 2px solid var(--bc-active-bg);
+    outline-offset: 2px;
+}

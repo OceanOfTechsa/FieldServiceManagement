@@ -1,0 +1,15 @@
+﻿@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Forgot Password Confirmation";
+}
+
+
+<h1 class="text-2xl font-bold mb-2">Email has been confirmed</h1>
+<p class="text-gray-600 mb-4">
+    You can now start the onboarding process, provide your details, create organisation, etc.
+</p>
+
+<a asp-area="Identity" asp-controller="Onboarding" asp-action="Details"
+       class="btn btn-primary">
+    Start Onboarding
+</a>

@@ -1,0 +1,163 @@
+﻿// ─── Sidebar admin ────────────────────────────────────────────────────────────
+.sidebar {
+    position: relative;
+    padding: 0;
+    background-color: var(--sidebar);
+    border-right: 1px solid var(--sidebar-border);
+
+    &.navbar-expand {
+        @each $breakpoint in map-keys($grid-breakpoints) {
+            $next: breakpoint-next($breakpoint, $grid-breakpoints);
+            $infix: breakpoint-infix($next, $grid-breakpoints);
+
+            &#{$infix} {
+
+                .sidebar-content {
+                    padding: 0 1rem 1rem;
+                    width: 16.25rem;
+                    height: 100%;
+                }
+
+                .offcanvas {
+                    width: auto;
+                }
+                // Active/hover nav links
+                .sidebar-content .navbar-nav > .nav-item > .nav-link[data-bs-toggle=collapse][aria-expanded=true] {
+                    background: rgba($fsm-accent, 0.1);
+                    color: $fsm-accent !important;
+                    border-radius: $border-radius;
+                }
+
+                .sidebar-content .navbar-nav .nav-link {
+                    color: var(--foreground);
+                    line-height: 40px;
+                    transition: $transition-base;
+
+                    &:focus {
+                        color: var(--foreground) !important;
+                    }
+
+                    &.active {
+                        color: $fsm-accent !important;
+                    }
+
+                    &:hover {
+                        color: $fsm-accent !important;
+                        background-color: rgba($fsm-accent, 0.08);
+                        border-radius: $border-radius;
+                    }
+                }
+                // Collapse arrow
+                .sidebar-content .nav-item [data-bs-toggle=collapse] {
+                    position: relative;
+
+                    &:before, &:after {
+                        content: "";
+                        background: $gray-500;
+                        border-radius: 1px;
+                        display: block;
+                        position: absolute;
+                        height: 2px;
+                        width: 7px;
+                        margin: auto 12px;
+                        transition: transform 0.3s cubic-bezier(0.8, 0.2, 0.5, 0.1), background 0.2s ease-in-out;
+                        top: 0;
+                        bottom: 0;
+                    }
+
+                    &:before {
+                        transform: rotate(-40deg);
+                        right: 0;
+                    }
+
+                    &:after {
+                        transform: rotate(40deg);
+                        right: 5px;
+                    }
+
+                    &[aria-expanded=true] {
+                        &:before {
+                            transform: rotate(40deg);
+                            background: $fsm-accent;
+                        }
+
+                        &:after {
+                            transform: rotate(-40deg);
+                            background: $fsm-accent;
+                        }
+                    }
+                }
+                // Submenu indent
+                .sidebar-content .nav.flex-column:not(.nav-pills) .nav-link {
+                    padding-left: 2.5rem;
+                    padding-top: 0;
+                    padding-bottom: 0;
+                }
+                // Sidebar section label
+                .sidebar-section-label {
+                    font-size: 0.7rem;
+                    font-weight: 600;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: var(--foreground-subtle);
+                    padding: 1.25rem 1rem 0.4rem;
+                    display: block;
+                }
+                // Fixed sidebar on desktop
+                @include media-breakpoint-up($next) {
+                    position: fixed;
+                    z-index: 1030;
+                    top: 0;
+                    left: 0;
+                    height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: stretch;
+
+                    .offcanvas {
+                        position: relative;
+                    }
+
+                    .navbar-brand {
+                        padding: 1.3rem;
+                    }
+
+                    .navbar-nav .nav-item {
+                        position: relative;
+                    }
+                }
+                // Mobile sidebar
+                @include media-breakpoint-down($next) {
+                    position: absolute;
+                    left: -300px;
+                    height: 100vh;
+                    z-index: 9;
+
+                    .navbar-brand {
+                        display: none;
+                    }
+
+                    .sidebar-content {
+                        padding: 1rem;
+                    }
+
+                    .navbar-nav > .nav-item > .nav-link {
+                        padding: 0.2rem;
+                        margin-bottom: 0;
+                        font-size: $font-size-sm;
+                    }
+
+                    .offcanvas .offcanvas-body .navbar-nav .nav-item {
+                        border-bottom: 0;
+                        padding: 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.sidebar-offcanvas-menu {
+    background-color: rgba($fsm-accent, 0.1);
+    border-radius: $border-radius;
+}

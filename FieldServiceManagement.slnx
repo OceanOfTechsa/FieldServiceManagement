@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="FieldServiceManagement.Business/FieldServiceManagement.Business.csproj" />
+  <Project Path="FieldServiceManagement.Data/FieldServiceManagement.Data.csproj" />
+  <Project Path="FieldServiceManagement.Enum/FieldServiceManagement.Enum.csproj" />
+  <Project Path="FieldServiceManagement.Repository/FieldServiceManagement.Repository.csproj" />
+  <Project Path="FieldServiceManagement.TwoFactorAuth/FieldServiceManagement.TwoFactorAuth.csproj" />
+  <Project Path="FieldServiceManagement.ViewModels/FieldServiceManagement.ViewModels.csproj" />
+  <Project Path="FieldServiceManagement/FieldServiceManagement.csproj" />
+</Solution>

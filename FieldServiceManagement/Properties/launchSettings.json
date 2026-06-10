@@ -1,0 +1,45 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        //"ASPNETCORE_ENVIRONMENT": "Development",
+        //"mvcDecryptFilterSecret": "f7K#mP2$vQx9Yw&NzR4eLdA8cTjBsH6G"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5051"
+    },
+    "https": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "mvcDecryptFilterSecret": "f7K#mP2$vQx9Yw&NzR4eLdA8cTjBsH6G",
+        "RESEND_APITOKEN": "re_hzpfhdSU_KGnJT5N5Ujo33zbxxBqLLXCn",
+        "FSMFromEmail": "OOT FSM <noreply.notifications@oceanoftechsa.com>"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7053;http://localhost:5051"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "mvcDecryptFilterSecret": "f7K#mP2$vQx9Yw&NzR4eLdA8cTjBsH6G",
+        "RESEND_APITOKEN": "re_hzpfhdSU_KGnJT5N5Ujo33zbxxBqLLXCn",
+        "FSMFromEmail": "OOT FSM<noreply.notifications@oceanoftechsa.com>"
+      }
+    }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:64875/",
+      "sslPort": 44370
+    }
+  }
+}

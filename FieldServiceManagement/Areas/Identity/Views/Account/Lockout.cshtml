@@ -1,0 +1,25 @@
+﻿@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Account Locked";
+}
+
+<style>
+    :root { --error: #ff4444; }
+    .code { font-size: 5rem; font-weight: 600; color: var(--error); letter-spacing: -0.02em; line-height: 1; margin-bottom: 1rem; }
+    .title { font-family: var(--sans); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 2rem; }
+    .detail { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); border-left: 2px solid var(--border); padding-left: 1rem; margin-bottom: 2rem; line-height: 1.8; }
+    .btn { display: inline-block; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.75rem 1.5rem; text-decoration: none; transition: border-color 0.15s, color 0.15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<div class="container">
+    <div class="code">Locked</div>
+    <h1 class="title">Account temporarily locked</h1>
+    <p class="desc">Too many failed sign-in attempts have been detected on this account.</p>
+    <div class="detail">
+        <span>Lockout duration — 15 minutes</span><br />
+        <span>Reason — Excessive failed attempts</span>
+    </div>
+    <a href="@Url.Action("Login", "Account", new { area = "Identity" })" class="btn">Back to login</a>
+</div>

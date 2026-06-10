@@ -1,0 +1,13 @@
+﻿@model IEnumerable<string>
+
+@if (Model != null && Model.Any())
+{
+    <div class="bd-callout bd-callout-danger">
+        <ul class="list-unstyled mb-0">
+            @foreach (var error in Model)
+            {
+                <li>• @error</li>
+            }
+        </ul>
+    </div>
+}

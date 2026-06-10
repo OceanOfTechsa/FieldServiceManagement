@@ -1,0 +1,25 @@
+﻿@{
+    Layout = "~/Areas/Identity/Views/Shared/_ErrorLayout.cshtml";
+    ViewData["Title"] = "Access Denied";
+
+    var returnUrl = ViewData["ReturnUrl"] as string;
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+    var fallbackUrl = isAuthenticated
+        ? Url.Action("Index", "Home", new { area = "" })
+        : Url.Action("Login", "Account", new { area = "Identity" });
+
+    var backUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : fallbackUrl;
+    var backLabel = !string.IsNullOrEmpty(returnUrl)
+        ? "Go back"
+        : (isAuthenticated ? "Return home" : "Go to login");
+}
+
+<div class="error-code">403</div>
+<h1 class="error-title">Access denied</h1>
+
+<p class="error-desc">
+    You don’t have permission to access this resource.
+</p>
+
+<a href="@backUrl" class="error-btn">@backLabel</a>

@@ -1,0 +1,667 @@
+﻿@using FieldServiceManagement.ViewModels.Audit
+@using FieldServiceManagement.ViewModels.User
+@model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
+
+@{
+    /* ── Icon SVG map ── */
+    var IconPath = new Dictionary<string, string>
+    {
+        ["ProfileCreated"] = "<path d='M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='8.5' cy='7' r='4'/><line x1='20' y1='8' x2='20' y2='14'/><line x1='23' y1='11' x2='17' y2='11'/>",
+        ["ProfileUpdated"] = "<path d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z'/>",
+        ["ProfileViewed"] = "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/>",
+        ["RoleChanged"] = "<path d='M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z'/><circle cx='16.5' cy='7.5' r='.5'/>",
+        ["PermissionGranted"] = "<path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><polyline points='9 12 11 14 15 10'/>",
+        ["PermissionRevoked"] = "<path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/>",
+        ["UserLockedOut"] = "<rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/>",
+        ["UserUnblocked"] = "<rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 9.9-1'/>",
+        ["ProfileDeleted"] = "<polyline points='3 6 5 6 21 6'/><path d='M19 6l-1 14H6L5 6'/><path d='M10 11v6'/><path d='M14 11v6'/><path d='M9 6V4h6v2'/>",
+        ["UserCreatedViaInvitation"] = "<path d='M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='8.5' cy='7' r='4'/><polyline points='17 11 19 13 23 9'/>",
+        ["OrganisationCreated"] = "<path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/>",
+    };
+
+    /* ── Event Configuration ── */
+    var EventConfig = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
+    {
+        ["ProfileCreated"] = ("#eff6ff", "#bfdbfe", "#2563eb", "Profile created"),
+        ["ProfileUpdated"] = ("#fffbeb", "#fde68a", "#d97706", "Profile updated"),
+        ["ProfileViewed"] = ("#f8fafc", "#e2e8f0", "#64748b", "Profile viewed"),
+        ["RoleChanged"] = ("#eef2ff", "#c7d2fe", "#4f46e5", "Role changed"),
+        ["PermissionGranted"] = ("#ecfdf5", "#a7f3d0", "#059669", "Permission granted"),
+        ["PermissionRevoked"] = ("#fef2f2", "#fecaca", "#ef4444", "Permission revoked"),
+        ["UserLockedOut"] = ("#fafafa", "#e4e4e7", "#52525b", "Locked out"),
+        ["UserUnblocked"] = ("#ecfdf5", "#a7f3d0", "#059669", "Unblocked"),
+        ["ProfileDeleted"] = ("#fce9e9", "#ee9393", "#dc2626", "Deleted"),
+        ["UserCreatedViaInvitation"] = ("#f0fdf4", "#bbf7d0", "#16a34a", "Invited"),
+        ["OrganisationCreated"] = ("#f0f9ff", "#bae6fd", "#0284c7", "Organisation created"),
+    };
+
+    /* ── Helpers ── */
+    string FormatGroup(DateTime d) => d.ToString("dd MMM yyyy");
+    string FormatTime(DateTime d) => d.ToString("h:mm tt");
+    bool IsSameDay(DateTime a, DateTime b) => a.Date == b.Date;
+    bool IsToday(DateTime d) => d.ToLocalTime().Date == DateTime.Today;
+
+    var sortedEvents = Model.ProfileAudits.OrderByDescending(e => e.CreatedAt).ToList();
+
+    var groups = new List<(string Label, DateTime Date, List<UserProfileAuditViewModel> Events)>();
+    foreach (var ev in sortedEvents)
+    {
+        if (groups.Count > 0 && IsSameDay(groups.Last().Date, ev.CreatedAt))
+            groups.Last().Events.Add(ev);
+        else
+            groups.Add((FormatGroup(ev.CreatedAt), ev.CreatedAt, new List<UserProfileAuditViewModel> { ev }));
+    }
+
+    string GetIcon(string action) =>
+        IconPath.TryGetValue(action, out var path) ? path : "<circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/>";
+}
+
+<style>
+    .al-root {
+        --al-primary: #009966;
+        --al-muted: #6b7280;
+        --al-border: #e5e7eb;
+        --al-bg: #ffffff;
+        --al-font-mono: 'Source Code Pro', ui-monospace, monospace;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        font-size: 14px;
+        color: #111827;
+    }
+
+    /* ==================== All your existing styles ==================== */
+    .al-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .al-subtitle {
+        font-size: 12px;
+        color: var(--al-muted);
+        margin: 0;
+    }
+
+    .al-filter-wrap {
+        position: relative;
+        display: inline-block;
+    }
+
+    .al-filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        font-size: 11.5px;
+        font-weight: 500;
+        color: var(--al-muted);
+        background: #fff;
+        border: 1px solid var(--al-border);
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .al-filter-btn:hover {
+        color: #111827;
+        border-color: #9ca3af;
+    }
+
+    .al-dropdown {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 6px);
+        min-width: 160px;
+        background: #fff;
+        border: 1px solid var(--al-border);
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.10);
+        z-index: 50;
+        overflow: hidden;
+    }
+
+        .al-dropdown.open {
+            display: block;
+        }
+
+    .al-dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 14px;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+    }
+
+        .al-dropdown-item:hover {
+            background: #f9fafb;
+        }
+
+        .al-dropdown-item.active {
+            color: var(--al-primary);
+            font-weight: 500;
+        }
+
+    .al-body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .al-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+        gap: 8px;
+        color: var(--al-muted);
+    }
+
+    .al-day-divider {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        margin: 0 -1px;
+        padding: 6px 0 6px;
+        background: rgba(255,255,255,.95);
+        backdrop-filter: blur(4px);
+        margin-bottom: 10px;
+    }
+
+    .al-day-label {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--al-muted);
+    }
+
+    .al-row {
+        display: flex;
+        gap: 14px;
+    }
+
+    .al-spine {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .al-icon-box {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .al-icon-box svg {
+            width: 14px;
+            height: 14px;
+        }
+
+    .al-line {
+        width: 1px;
+        flex: 1;
+        min-height: 16px;
+        margin-top: 6px;
+    }
+
+    .al-line-dashed {
+        border-left: 1px dashed #d1d5db;
+    }
+
+    .al-line-solid {
+        background: #d1d5db;
+    }
+
+    .al-content {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 2px;
+    }
+
+    .al-action {
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.3;
+        margin: 0;
+        color: #111827;
+    }
+
+        .al-action span {
+            font-weight: 400;
+            color: #374151;
+            font-family: var(--al-font-mono);
+            text-transform: capitalize;
+        }
+
+    .al-meta {
+        font-size: 11.5px;
+        color: var(--al-muted);
+        margin: 0;
+        margin-top: -2px;
+    }
+
+    .al-actor {
+        /* color: var(--al-primary); */
+        font-weight: 500;
+    }
+
+    /* New Styles */
+    .al-today-pill {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 9px;
+        border-radius: 9999px;
+        background: #2563eb;
+        color: white;
+        margin-left: 8px;
+    }
+
+    .al-details-box {
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 4px;
+        font-size: 12.8px;
+        line-height: 1.4;
+        border: 1px solid;
+    }
+
+    .al-dropdown-item.active {
+        color: var(--al-primary);
+        font-weight: 500;
+        background: #f0f9ff; /* Optional: light highlight */
+    }
+
+    /* Hide check by default */
+    .al-dropdown-item .al-check {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    /* Show check only on active item */
+    .al-dropdown-item.active .al-check {
+        opacity: 1;
+        color: var(--al-primary);
+    }
+
+    .date-input {
+        height: 30px;
+        font-size: 12px;
+        width: 180px;
+    }
+</style>
+
+<div class="al-root" id="auditLog">
+    <!-- Header -->
+    <div class="al-header sticky-top bg-white z-10">
+        <div>
+            <p class="al-subtitle">All the actions and events related to <strong>@(Model.User.Name + " " + Model.User.Surname) </strong>are recorded in a chronological order.</p>
+        </div>
+        <div class="al-filter-wrap align-items-center">
+            <button class="al-filter-btn" id="alFilterBtn" onclick="alToggleDropdown()" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span id="alFilterLabel">All time</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
+                    <path d="m7 15 5 5 5-5" />
+                    <path d="m7 9 5-5 5 5" />
+                </svg>
+            </button>
+
+            <div class="al-dropdown" id="alDropdown" role="listbox">
+                @{
+                    var rangeOptions = new[]
+                    {
+                        ("all",    "All time",       (int?)null),
+                        ("7d",     "Last 7 days",    (int?)7),
+                        ("30d",    "Last 30 days",   (int?)30),
+                        ("4m",     "Last 4 months",  (int?)120),
+                        ("12m",    "Last 12 months", (int?)365),
+                        ("custom", "Custom range",   (int?)null),
+                    };
+                }
+
+                @foreach (var (val, lbl, _) in rangeOptions)
+                {
+                    <div class="al-dropdown-item @(val == "all" ? "active" : "")"
+                         role="option"
+                         data-value="@val"
+                         data-label="@lbl"
+                         onclick="alSelectRange(this)">
+
+                        @lbl
+
+                        <!-- Check icon always present, shown via CSS -->
+                        <svg class="al-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </div>
+                }
+
+                <div class="al-custom-range p-2 gap-1 align-items-center" id="alCustomRange" style="display:none">
+                    <input class="border-fsm form-control date-input" type="date" id="alFrom" onchange="alFilterCustom()" />
+                    <span>to</span>
+                    <input class="border-fsm form-control date-input" type="date" id="alTo" onchange="alFilterCustom()" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="al-body" id="alBody" data-events='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+             Model.ProfileAudits.Select(e => new
+             {
+                 id = e.Id,
+                 type = e.Action,
+                 actor = e.PerformedByName ?? "System",
+                 timestamp = e.CreatedAt.ToString("o"),
+                 comment = e.Comment,
+                 fieldName = e.FieldName,
+                 oldValue = e.OldValue,
+                 newValue = e.NewValue
+             })
+         ))'>
+
+        @if (!groups.Any())
+        {
+            <div class="fsm-empty-state">
+                <div class="fsm-empty-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h6 class=" mb-1">No profile activity found</h6>
+            </div>
+        }
+        else
+        {
+            int totalEvents = Model.ProfileAudits.Count;
+            int globalEventIdx = 0;
+
+            @foreach (var (groupLabel, groupDate, groupEvents) in groups)
+            {
+                <div class="al-group" data-date="@groupDate.ToString("yyyy-MM-dd")">
+                    <div class="al-day-divider">
+                        <span class="al-day-label">@groupLabel</span>
+                        @if (IsToday(groupDate))
+                        {
+                            <span class="fsm-pill bg-warning-subtle">Today</span>
+                        }
+                    </div>
+
+                    @for (int i = 0; i < groupEvents.Count; i++)
+                    {
+                        var ev = groupEvents[i];
+                        var isLast = globalEventIdx == totalEvents - 1;
+                        var isLastInGroup = i == groupEvents.Count - 1;
+
+                        var config = EventConfig.TryGetValue(ev.Action, out var c) ? c : ("#f8fafc", "#e2e8f0", "#64748b", "event");
+                        string bg = config.Item1;
+                        string border = config.Item2;
+                        string iconColor = config.Item3;
+                        string label = config.Item4;
+
+                        var actorLabel = string.IsNullOrEmpty(ev.PerformedByName) ? "System (Automated)" : ev.PerformedByName;
+                        var iconData = GetIcon(ev.Action);
+
+                        <div class="al-row">
+                            <div class="al-spine">
+                                <div class="al-icon-box" style="background:@bg;border-color:@border;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="@iconColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        @Html.Raw(iconData)
+                                    </svg>
+                                </div>
+                                @if (!isLast)
+                                {
+                                    <div class="al-line @(isLastInGroup ? "al-line-solid" : "al-line-dashed")"></div>
+                                }
+                            </div>
+                            <div class="al-content">
+                                <p class="al-action"><span>@label</span></p>
+                                <p class="al-meta">
+                                    @FormatTime(ev.CreatedAt) &nbsp;·&nbsp; <span class="al-actor">@actorLabel</span>
+                                </p>
+
+                                <!-- Details Box -->
+                                @if (!string.IsNullOrWhiteSpace(ev.Comment) || !string.IsNullOrWhiteSpace(ev.FieldName) || !string.IsNullOrWhiteSpace(ev.NewValue))
+                                {
+                                    <div class="al-details-box mb-2" style="background:@bg; border-color:@border; color:@iconColor;">
+                                        @if (!string.IsNullOrWhiteSpace(ev.FieldName))
+                                        {
+                                            <strong>@ev.FieldName</strong>
+                                            @if (!string.IsNullOrWhiteSpace(ev.OldValue) && !string.IsNullOrWhiteSpace(ev.NewValue))
+                                            {
+                                                <span> changed from </span><strong>@ev.OldValue</strong><span> → </span><strong>@ev.NewValue</strong>
+                                            }
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(ev.Comment))
+                                        {
+                                            <div style="margin-top:5px; opacity:0.9;">@ev.Comment</div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        globalEventIdx++;
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+<script>
+    (function () {
+        const EVENT_CONFIG = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+            EventConfig.ToDictionary(kv => kv.Key, kv => new
+            {
+                bg = kv.Value.Bg,
+                border = kv.Value.Border,
+                iconColor = kv.Value.IconColor,
+                label = kv.Value.Label,
+                iconPath = IconPath.TryGetValue(kv.Key, out var p) ? p : ""
+            })
+        ));
+        let currentRange = 'all';
+        let customFrom = null;
+        let customTo = null;
+
+        const bodyEl = document.getElementById('alBody');
+
+        const allEvts = JSON.parse(bodyEl.dataset.events || '[]').map(e => ({
+            ...e,
+            timestamp: new Date(e.timestamp)
+        }));
+
+        window.alToggleDropdown = function () {
+            const dd = document.getElementById('alDropdown');
+            const btn = document.getElementById('alFilterBtn');
+            const open = dd.classList.toggle('open');
+            btn.setAttribute('aria-expanded', String(open));
+        };
+
+        document.addEventListener('click', e => {
+            if (!document.querySelector('.al-filter-wrap').contains(e.target))
+                document.getElementById('alDropdown').classList.remove('open');
+        });
+
+        window.alSelectRange = function (el) {
+            currentRange = el.dataset.value;
+            document.querySelectorAll('.al-dropdown-item').forEach(item =>
+                item.classList.toggle('active', item.dataset.value === currentRange)
+            );
+            document.getElementById('alFilterLabel').textContent = el.dataset.label;
+
+            const customPanel = document.getElementById('alCustomRange');
+            if (currentRange === 'custom') {
+                customPanel.style.display = 'flex';
+                return;
+            }
+            customPanel.style.display = 'none';
+            customFrom = customTo = null;
+            render();
+        };
+
+        window.alFilterCustom = function () {
+            const fromVal = document.getElementById('alFrom').value;
+            const toVal = document.getElementById('alTo').value;
+            customFrom = fromVal ? new Date(fromVal) : null;
+            customTo = toVal ? new Date(toVal) : null;
+            if (customFrom && customTo) render();
+        };
+
+        function getCutoff(range) {
+            const days = { '7d': 7, '30d': 30, '4m': 120, '12m': 365 };
+            if (!days[range]) return null;
+            const d = new Date();
+            d.setDate(d.getDate() - days[range]);
+            return d;
+        }
+
+        function filterEvents() {
+            if (currentRange === 'custom') {
+                if (!customFrom || !customTo) return allEvts;
+                const to = new Date(customTo);
+                to.setHours(23,59,59,999);
+                return allEvts.filter(e => e.timestamp >= customFrom && e.timestamp <= to);
+            }
+            const cutoff = getCutoff(currentRange);
+            return cutoff ? allEvts.filter(e => e.timestamp >= cutoff) : allEvts;
+        }
+
+      // Date format: "May 14, 2026"
+        const dateGroupFmt = new Intl.DateTimeFormat('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        // Time format: "12:20 AM"
+        const timeFmt = new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        function sameDay(a, b) {
+            return a.getFullYear() === b.getFullYear() &&
+                   a.getMonth() === b.getMonth() &&
+                   a.getDate() === b.getDate();
+        }
+
+        function groupByDay(evts) {
+            const sorted = [...evts].sort((a, b) => b.timestamp - a.timestamp);
+            const groups = [];
+            for (const ev of sorted) {
+                const last = groups[groups.length - 1];
+                if (last && sameDay(last.date, ev.timestamp))
+                    last.events.push(ev);
+                else
+                    groups.push({ label: dateGroupFmt.format(ev.timestamp), date: ev.timestamp, events: [ev] });
+            }
+            return groups;
+        }
+
+        function render() {
+            const filtered = filterEvents();
+            const groups = groupByDay(filtered);
+
+            if (!groups.length) {
+                bodyEl.innerHTML = `
+                    <div class="fsm-empty-state">
+                        <div class="fsm-empty-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h6 class=" mb-1">No profile activity found</h6>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            let globalIdx = 0;
+            const total = filtered.length;
+
+            for (const group of groups) {
+            const groupDate = new Date(group.date);
+            const today = new Date();
+            const isTodayGroup = groupDate.getFullYear() === today.getFullYear() &&
+                                 groupDate.getMonth() === today.getMonth() &&
+                                 groupDate.getDate() === today.getDate();
+                html += `<div class="al-group" data-date="${group.date.toISOString().slice(0,10)}">
+                            <div class="al-day-divider">
+                                <span class="al-day-label">${group.label}</span>
+                                ${isTodayGroup ? '<span class="fsm-pill bg-warning-subtle">Today</span>' : ''}
+                            </div>`;
+
+                group.events.forEach((ev, i) => {
+                    const isLast = globalIdx === total - 1;
+                    const isLastInGroup = i === group.events.length - 1;
+                    const cfg = EVENT_CONFIG[ev.type] || { bg:'#f8fafc', border:'#e2e8f0', iconColor:'#64748b', label:'event', iconPath:'' };
+                     const actorLabel =
+                        !ev.actor || ev.actor.trim() === ''
+                          ? 'Unknown'
+                          : ev.actor.toLowerCase().includes('system')
+                            ? 'System (Automated)'
+                            : ev.actor;
+
+                    let detailsHTML = '';
+                    const hasDetails = ev.comment || ev.fieldName || ev.newValue;
+
+                    if (hasDetails) {
+                        detailsHTML = `<div class="al-details-box mb-2" style="background:${cfg.bg};border-color:${cfg.border};color:${cfg.iconColor};">`;
+
+                        if (ev.fieldName) {
+                            detailsHTML += `<strong>${ev.fieldName}</strong>`;
+                            if (ev.oldValue && ev.newValue) {
+                                detailsHTML += ` changed from <strong>${ev.oldValue}</strong> → <strong>${ev.newValue}</strong>`;
+                            } else if (ev.newValue) {
+                                detailsHTML += `: <strong>${ev.newValue}</strong>`;
+                            }
+                        }
+                        if (ev.comment) {
+                            detailsHTML += `<div style="opacity:0.9;">${ev.comment}</div>`;
+                        }
+                        detailsHTML += `</div>`;
+                    }
+
+                    html += `
+                    <div class="al-row">
+                        <div class="al-spine">
+                            <div class="al-icon-box" style="background:${cfg.bg};border-color:${cfg.border};">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${cfg.iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    ${cfg.iconPath}
+                                </svg>
+                            </div>
+                            ${!isLast ? `<div class="al-line ${isLastInGroup ? 'al-line-solid' : 'al-line-dashed'}"></div>` : ''}
+                        </div>
+                        <div class="al-content">
+                            <p class="al-action"><span>${cfg.label}</span></p>
+                            <p class="al-meta">
+                                ${timeFmt.format(ev.timestamp)} &nbsp;·&nbsp; <span class="al-actor">${actorLabel}</span>
+                            </p>
+                            ${detailsHTML}
+                        </div>
+                    </div>`;
+                    globalIdx++;
+                });
+
+                html += '</div>';
+            }
+
+            bodyEl.innerHTML = html;
+        }
+
+        render();   // Initial render
+    })();
+</script>
