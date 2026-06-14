@@ -5,7 +5,7 @@ using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.SubscriptionPlan;
 using FieldServiceManagement.ViewModels.User;
 
-namespace FieldServiceManagement.Business.SubscriptionPlanBusiness
+namespace FieldServiceManagement.Business
 {
     public class SubscriptionPlanBusiness
     {

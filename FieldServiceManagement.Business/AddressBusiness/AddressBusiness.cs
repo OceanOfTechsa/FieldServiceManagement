@@ -22,5 +22,11 @@ namespace FieldServiceManagement.Business.AddressBusiness
             var addresses = new AddressRepository().GetAddressesBySearchTerm(SearchName, Email);
             return ObjectMapper.Mapper.Map<List<AddressViewModel>>(addresses);
         }
+
+        public async Task<AddressViewModel> GetAddressByIdAsync(Guid Id)
+        {
+            var result = await new AddressRepository().GetAddressByIdAsync(Id);
+            return ObjectMapper.Mapper.Map<AddressViewModel>(result);
+        }
     }
 }

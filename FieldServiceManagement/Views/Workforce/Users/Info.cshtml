@@ -170,7 +170,7 @@
                         @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Calendar.cshtml", Model)
                     </div>
                     <div class="fsm-tab-panel active" data-panel="timeline">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Timeline.cshtml", Model)
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", Model.ProfileAudits)
                     </div>
                     <div class="fsm-tab-panel" data-panel="appointments">
                         @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_ServiceAppointments.cshtml", Model)

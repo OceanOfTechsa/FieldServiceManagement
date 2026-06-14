@@ -1,0 +1,37 @@
+﻿@model FieldServiceManagement.ViewModels.Shared.ResourceNotFoundViewModel
+
+@{
+    Layout = "~/Areas/Identity/Views/Shared/_ErrorLayout.cshtml";
+    ViewData["Title"] = Model.Title;
+
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+    var fallbackUrl = isAuthenticated
+        ? Url.Action("Index", "Home", new { area = "" })
+        : Url.Action("Login", "Account", new { area = "Identity" });
+
+    var backUrl = !string.IsNullOrWhiteSpace(Model.ReturnUrl)
+        ? Model.ReturnUrl
+        : fallbackUrl;
+
+    var backLabel = !string.IsNullOrWhiteSpace(Model.ReturnUrl)
+        ? "Go Back"
+        : (isAuthenticated ? "Return Home" : "Go to Login");
+}
+<div class="d-flex flex-column justify-items-center align-items-center">
+    <div class="fsm-empty-icon text-danger">
+        <i class="bi bi-folder-x"></i>
+    </div>
+
+
+    <h1 class="error-title">@Model.ResourceName Not Found</h1>
+
+    <p class="error-desc">
+        The requested <strong>@Model.ResourceName </strong>could not be found, may have been removed,
+        or is no longer available.
+    </p>
+
+    <a href="@backUrl" class="error-btn">
+        @backLabel
+    </a>
+</div>

@@ -42,7 +42,6 @@ namespace FieldServiceManagement.Areas.Identity.Factories
                 identity.RemoveClaim(existingRoleClaim);
 
             identity.AddClaim(new Claim(ClaimTypes.Role, role));
-            identity.AddClaim(new Claim("OrgId", profile.OrganisationId.ToString()));
             return identity;
         }
 

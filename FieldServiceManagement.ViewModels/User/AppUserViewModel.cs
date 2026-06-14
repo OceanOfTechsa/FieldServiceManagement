@@ -23,5 +23,6 @@ namespace FieldServiceManagement.ViewModels.User
         public Guid? UpdatedById { get; set; }
 
         public string? EmployeeNumber { get; set; }
+        public bool? TwoFactorEnabled { get; set; }
     }
 }

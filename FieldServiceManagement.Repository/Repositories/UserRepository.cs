@@ -33,12 +33,21 @@ namespace FieldServiceManagement.Repository.Repositories
             return _repository.Find(x => x.Id == Id)?.FirstOrDefault();
         }
 
-        public async Task<AppUser?> GetUserProfileByUsernameAsync(string username)
+        public async Task<List<UserProfileDetails>> GetUserProfileAsync(Guid? userId, string? email)
         {
-            var param = new SqlParameter("@Email", username);
-            var query = "EXEC [dbo].[GetUserProfileByEmail] @Email";
-            var results = await _dbContext.Set<AppUser>().FromSqlRaw(query, param).ToListAsync();
-            return results.FirstOrDefault();
+            var parameters = new List<SqlParameter>();
+
+            if (userId.HasValue)
+                parameters.Add(new SqlParameter("@UserId", userId.Value));
+            else
+                parameters.Add(new SqlParameter("@UserId", DBNull.Value));
+
+            if (!string.IsNullOrEmpty(email))
+                parameters.Add(new SqlParameter("@Email", email));
+            else
+                parameters.Add(new SqlParameter("@Email", DBNull.Value));
+
+            return await _dbContext.Database.SqlQueryRaw<UserProfileDetails>("EXEC [dbo].[GetUserProfile] @UserId, @Email", parameters.ToArray()).ToListAsync();
         }
 
         public async void Insert(AppUser model)
@@ -113,7 +122,6 @@ namespace FieldServiceManagement.Repository.Repositories
                 new SqlParameter("@CurrencyId",          SqlDbType.Int)              { Value = (object?)model.CurrencyId  ?? DBNull.Value },
                 new SqlParameter("@TimezoneId",          SqlDbType.Int)              { Value = (object?)model.TimezoneId  ?? DBNull.Value },
                 new SqlParameter("@LanguageId",          SqlDbType.Int)              { Value = (object?)model.LanguageId  ?? DBNull.Value },
-                new SqlParameter("@PlanId",              SqlDbType.Int)              { Value = (int)SubscriptionPlanEnum.Free },
                 new SqlParameter("@IpAddress",           SqlDbType.NVarChar)         { Value = (object?)ipAddress ?? DBNull.Value },
                 pNewUserId,
                 pNewOrganisationId,
@@ -124,7 +132,7 @@ namespace FieldServiceManagement.Repository.Repositories
             @UserId, @Name, @Surname, @Email, @Phone,
             @UserRoleId, @PreferredLanguageId,
             @OrganisationName, @IndustryId, @CountryId, @StateId,
-            @CurrencyId, @TimezoneId, @LanguageId, @PlanId,
+            @CurrencyId, @TimezoneId, @LanguageId,
             @IpAddress,
             @NewUserId OUTPUT, @NewOrganisationId OUTPUT",
                 parameters);

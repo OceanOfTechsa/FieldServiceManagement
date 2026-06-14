@@ -32,7 +32,7 @@ namespace FieldServiceManagement.Business.NotificationBusiness.IdentityNotificat
                 "To activate your account and verify your email address, please click the link below:" +
             "</p>" +
             $"<p>" +
-                $"<a href='{_confirmationLink}'>Confirm Email Address</a>" +
+                $"<a href='{_confirmationLink}'  style=\"color: #2e7d32; text-decoration: none;\">Confirm Email Address</a>" +
             $"</p>" +
             "<p>" +
                 "For security purposes, this confirmation link will expire in <strong>24 hours</strong>." +

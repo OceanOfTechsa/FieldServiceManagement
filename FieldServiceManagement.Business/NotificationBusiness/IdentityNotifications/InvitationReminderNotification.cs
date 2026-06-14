@@ -48,7 +48,7 @@ namespace FieldServiceManagement.Business.NotificationBusiness.IdentityNotificat
                 "</p>" +
 
                 $"<p>" +
-                $"<a href='{AppSettings.BaseUrl}'>Accept Invitation</a>" +
+                $"<a href='{AppSettings.BaseUrl}'  style=\"color: #2e7d32; text-decoration: none;\">Accept Invitation</a>" +
                 $"</p>" +
 
                 $"<p>" +

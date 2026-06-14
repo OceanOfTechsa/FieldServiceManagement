@@ -11,7 +11,6 @@
         public int? CurrencyId { get; set; }
         public int? TimezoneId { get; set; }
         public int? LanguageId { get; set; }
-        public int PlanId { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }

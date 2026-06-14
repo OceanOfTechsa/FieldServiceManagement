@@ -64,8 +64,7 @@ namespace FieldServiceManagement.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User.Identity?.Name!);
-            var result = await new UserBusiness().SendUserInvitationAsync(model, user, _userManager);
+            var result = await new UserBusiness().SendUserInvitationAsync(model, User?.Identity?.Name!, _userManager);
             if (!result.Success)
             {
                 ModelState.AddModelError(string.Empty, result.Message!);

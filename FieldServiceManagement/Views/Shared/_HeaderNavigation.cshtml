@@ -114,7 +114,7 @@
                     </p>
                 </div>
                 <div class="oc-actions">
-                    <button class="btn-account">My Account</button>
+                    <a href="/Identity/Account/Manage/Personal" class="btn-account">My Account</a>
                     <button class="btn-signout-trigger" data-fsm-signout-trigger>Sign Out</button>
                 </div>
             </div>
@@ -173,18 +173,33 @@
                     </div>
                 </div>
                 <p class="sub-appt">Appointments Credit: <strong>0 / 6</strong></p>
-                @if(Model?.SubscriptionPlan?.Id == (int)SubscriptionPlanEnum.Enterprise)
+                @if (Model?.OrgSubscription?.PlanId == (int)SubscriptionPlanEnum.Enterprise)
                 {
                     <div class="bg-success-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
                         <i class="bi bi-check-circle-fill text-primary"></i>
                         Enterprise edition, Enjoy FMS with no limits.
                     </div>
                 }
+                else if (Model?.OrgSubscription?.IsTrial == false && Model?.OrgSubscription?.EndDate < DateTime.UtcNow)
+                {
+                    <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                        Your subscription expired on <strong>@Model?.OrgSubscription?.EndDate.ToString("MMM dd, yyyy hh:mm") @Model?.OrgSubscription?.EndDate.ToString("tt").ToLower()</strong>.
+                    </div>
+                }
+                else if (Model?.OrgSubscription?.IsTrial == true && Model?.OrgSubscription?.EndDate >= DateTime.UtcNow && Model.OrgSubscription.PlanId != (int)SubscriptionPlanEnum.Free)
+                {
+                    var daysLeft = (int)Math.Ceiling((Model.OrgSubscription.EndDate - DateTime.UtcNow).TotalDays);
+                    <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                        @Model?.SubscriptionPlan?.Name edition trial expires in <strong>@daysLeft</strong> day(s)
+                    </div>
+                }
                 else
                 {
                     <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
                         <i class="bi bi-exclamation-circle-fill text-warning"></i>
-                        Professional edition trial expires in <strong>10</strong> day(s)
+                        You are on the free edition
                     </div>
                 }
                 <div class="sub-footer">
@@ -311,11 +326,11 @@
         }
 
         @* Settings (admin/dispatcher only — gate in C# if needed) *@
-        <a href="/fsm/@organisationId/settings"
+        @* <a href="/fsm/@organisationId/settings"
                class="mobile-nav-link @(settingsActive ? "active" : "")"
                data-fsm-mobile-close>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
-            Settings
+            Settings *@
         </a>
     </nav>
 

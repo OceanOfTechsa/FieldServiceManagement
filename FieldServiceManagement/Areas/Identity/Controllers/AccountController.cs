@@ -66,13 +66,18 @@ public class AccountController : Controller
                 lockoutOnFailure: true
             );
 
-            if (result.Succeeded)
-                return RedirectToLocal(model.ReturnUrl);
+            if (result.RequiresTwoFactor)
+                return RedirectToAction(nameof(LoginWith2FA), new
+                {
+                    rememberMe = model.RememberMe,
+                    returnUrl = model.ReturnUrl
+                });
 
-            if (result.IsLockedOut)
-                return RedirectToAction("Lockout");
+            var guardResult = ApplyGuards(result, model.ReturnUrl);
+            if (guardResult != null)
+                return guardResult;
 
-            ModelState.AddModelError("", "Invalid email or password.");
+            ModelState.AddModelError("", "Invalid login attempt.");
             return View(model);
         }
         catch (InvalidLoginException exception)
@@ -119,12 +124,7 @@ public class AccountController : Controller
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
-        {
-            if (model.CalledFromBusiness)
-                return BadRequest(ModelState);
-
-            return View(model);
-        }
+            return model.CalledFromBusiness ? BadRequest(ModelState) : View(model);
 
         var user = new ApplicationUser
         {
@@ -134,47 +134,42 @@ public class AccountController : Controller
 
         var result = await _userManager.CreateAsync(user, model.Password);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            var confirmationLink = Url.Action("ConfirmEmail", "Account", new
+            if (result.Errors.Any(e => e.Code == "DuplicateUserName" || e.Code == "DuplicateEmail"))
             {
-                token = await _userManager.GenerateEmailConfirmationTokenAsync(user),
-                email = model.Email
-            },
-                protocol: Request.Scheme
-            );
+                _ = Task.Run(() => new DuplicateRegistrationNotification(model.Email).SendNotification());
+                string message = "If this email isn't already registered, your account has been created. Please check your inbox to continue..";
 
-            if (model.CalledFromBusiness)
-                return Ok(new { Succeeded = true, Email = model.Email });
+                if (model.CalledFromBusiness)
+                    return Conflict(new { Succeeded = false, Message = message });
 
-            if (_env.IsDevelopment())
-            {
-                ViewBag.DevConfirmationLink = confirmationLink;
+                ModelState.AddModelError(string.Empty, message);
                 return View(model);
             }
-            else
-            {
-                new WelcomeNotification(model.Email, confirmationLink!).SendNotificationWithoutQueue();
-                return RedirectToAction("RegistrationConfirmation", "Account",new { token = UrlEncryptionBusiness.EncryptParam(model.Email) });
-            }
+            return RegistrationFailure(model, result.Errors);
         }
 
-        foreach (var error in result.Errors)
-            ModelState.AddModelError(string.Empty, error.Description);
-
         if (model.CalledFromBusiness)
-            return BadRequest(new
-            {
-                Succeeded = false,
-                Errors = result.Errors.Select(e => e.Description)
-            });
+            return Ok(new { Succeeded = true, Email = model.Email });
 
-        return View(model);
+        var confirmationLink = Url.Action("ConfirmEmail", "Account", new { 
+            token = await _userManager.GenerateEmailConfirmationTokenAsync(user), 
+            email = model.Email
+        }, protocol: Request.Scheme);
+
+        if (_env.IsDevelopment())
+        {
+            ViewBag.DevConfirmationLink = confirmationLink;
+            return View(model);
+        }
+
+        _ = Task.Run(() => new WelcomeNotification(model.Email, confirmationLink!).SendNotificationWithoutQueue());
+        return RedirectToAction("RegistrationConfirmation", "Account", new { token = UrlEncryptionBusiness.EncryptParam(model.Email) });
     }
 
     [HttpGet]
     [AllowAnonymous]
-    //[MVCDecryptFilter]
     public async Task<IActionResult> ConfirmEmail(string token, string email)
     {
         if (email == null || token == null)
@@ -308,15 +303,51 @@ public class AccountController : Controller
     [AllowAnonymous]
     public IActionResult LoginError(InvalidLoginReason? reason) => View(reason);
 
-
-    #region MANAGE
-
-    [Route("Identity/Account/Manage")]
-    public IActionResult Index()
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginWith2FA(bool rememberMe = false, string? returnUrl = null)
     {
-        return View();
+        var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+        if (user == null)
+        {
+            return RedirectToAction(nameof(Login));
+        }
+
+        var model = new LoginWith2FAViewModel
+        {
+            RememberMe = rememberMe,
+            ReturnUrl = returnUrl
+        };
+
+        return View(model);
     }
-    #endregion
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LoginWith2FA(LoginWith2FAViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var code = model.TwoFactorCode
+            .Replace(" ", string.Empty)
+            .Replace("-", string.Empty);
+
+        var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(
+            code,
+            model.RememberMe,
+            model.RememberMachine
+        );
+
+        var guardResult = ApplyGuards(result, model.ReturnUrl);
+        if (guardResult != null)
+            return guardResult;
+
+        ModelState.AddModelError(string.Empty, "Invalid authentication code.");
+        return View(model);
+    }
 
 
     #region PPRIVATE METHODS
@@ -381,6 +412,27 @@ public class AccountController : Controller
     private bool GetEnv()
     {
         return _env.IsDevelopment();
+    }
+
+    private IActionResult RegistrationFailure(RegisterViewModel model, IEnumerable<IdentityError> errors)
+    {
+        foreach (var error in errors)
+            ModelState.AddModelError(string.Empty, error.Description);
+
+        return model.CalledFromBusiness
+            ? BadRequest(new { Succeeded = false, Errors = errors.Select(e => e.Description) })
+            : View(model);
+    }
+
+    private IActionResult? ApplyGuards(Microsoft.AspNetCore.Identity.SignInResult result, string? returnUrl)
+    {
+        if (result.Succeeded)
+            return RedirectToLocal(returnUrl);
+
+        if (result.IsLockedOut)
+            return RedirectToAction(nameof(Lockout));
+
+        return null;
     }
     #endregion
 }

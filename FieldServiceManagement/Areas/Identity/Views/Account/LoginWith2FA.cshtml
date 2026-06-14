@@ -1,0 +1,109 @@
+﻿@using FieldServiceManagement.Helpers
+@model FieldServiceManagement.Areas.Identity.Models.LoginWith2FAViewModel
+
+@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Two-Factor Authentication";
+}
+
+@if (!string.IsNullOrEmpty(Model.Browser) &&
+     (Model.Browser.Contains("Trident/") || Model.Browser.Contains("MSIE ")))
+{
+    @await Html.PartialAsync("~/Views/Shared/_BrowserNotice.cshtml")
+}
+
+<div class="mb-4">
+    <h2 class="font-sans fw-semibold mb-0" style="font-size:1.75rem;">
+        Two-Factor Authentication
+    </h2>
+
+    <p class="text-dim">
+        Enter the 6-digit code from your authenticator application to complete sign in 
+        <a asp-area="Identity"
+           asp-controller="Account"
+           asp-action="Login"
+           class="small text-dim text-decoration-none border-bottom border-fsm pb-1">
+            Back to Login
+        </a>.
+    </p>
+</div>
+
+@using (Html.BeginForm("LoginWith2FA", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(m => m.ReturnUrl)
+    @Html.HiddenFor(m => m.RememberMe)
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+    }
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.TwoFactorCode, new { @class = "form-label" })
+
+        @Html.TextBoxFor(m => m.TwoFactorCode,
+        new
+        {
+            @class = "form-control text-center",
+            @placeholder = "123 456",
+            @autocomplete = "one-time-code",
+            maxlength = "7",
+            inputmode = "numeric",
+            style = "letter-spacing:0.2rem;font-size:1.25rem;"
+        })
+
+        <small class="text-muted">
+            Open your authenticator app and enter the current verification code.
+        </small>
+    </div>
+
+    <div class="form-check">
+        @Html.CheckBoxFor(m => m.RememberMachine,
+            new { @class = "form-check-input", id = "RememberMachine" })
+
+        @Html.LabelFor(m => m.RememberMachine,
+            "Don't ask again on this device",
+            new { @class = "form-check-label" })
+    </div>
+
+    <div id="rememberMachineNotice"
+         class="bd-callout bd-callout-info mt-2 d-none">
+        <i class="bi bi-info-circle me-1"></i>
+        You will not normally be asked for a two-factor authentication code again on this device until your trusted device session expires.
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary w-100 mt-2"
+            data-loading-text="Verifying">
+        Verify & Sign In
+    </button>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('TwoFactorCode').addEventListener('input', function (e) {
+
+            let value = e.target.value.replace(/\D/g, '');
+
+            if (value.length > 3) {
+                value = value.substring(0, 3) + ' ' + value.substring(3, 6);
+            }
+
+            e.target.value = value;
+        });
+
+        const rememberMachine = document.getElementById('RememberMachine');
+        const notice = document.getElementById('rememberMachineNotice');
+
+        function toggleRememberMachineNotice() {
+            notice.classList.toggle('d-none', !rememberMachine.checked);
+        }
+
+        rememberMachine.addEventListener('change', toggleRememberMachineNotice);
+
+        toggleRememberMachineNotice();
+    </script>
+}

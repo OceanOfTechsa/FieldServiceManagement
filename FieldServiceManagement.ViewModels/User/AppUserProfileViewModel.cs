@@ -1,5 +1,7 @@
-﻿using FieldServiceManagement.ViewModels.Audit;
+﻿using FieldServiceManagement.ViewModels.Address;
+using FieldServiceManagement.ViewModels.Audit;
 using FieldServiceManagement.ViewModels.Organisation;
+using FieldServiceManagement.ViewModels.OrganisationSubscription;
 using FieldServiceManagement.ViewModels.SubscriptionPlan;
 
 namespace FieldServiceManagement.ViewModels.User
@@ -48,7 +50,11 @@ namespace FieldServiceManagement.ViewModels.User
         /// Chronological list of changes made directly to this user's profile
         /// (from [dbo].[UserProfileAudits]).
         /// </summary>
-        public List<UserProfileAuditViewModel> ProfileAudits { get; set; } = new();
+        public List<AuditLogViewModel> ProfileAudits { get; set; } = new();
+
+        public OrganisationSubscriptionViewModel? OrgSubscription { get; set; }
+
+        public AddressViewModel? Address { get; set; }
 
         /// <summary>
         /// Chronological list of form-submission audit events associated with

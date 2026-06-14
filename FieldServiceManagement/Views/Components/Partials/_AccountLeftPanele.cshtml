@@ -1,0 +1,215 @@
+﻿@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    Func<string, bool> isController = currentController =>
+        controller.Equals(currentController, StringComparison.OrdinalIgnoreCase);
+
+    Func<string, string, bool> isAction = (currentController, currentAction) =>
+        controller.Equals(currentController, StringComparison.OrdinalIgnoreCase)
+        && action.Equals(currentAction, StringComparison.OrdinalIgnoreCase);
+
+    Func<string, string, string> navClass = (currentController, currentAction) =>
+        isAction(currentController, currentAction)
+            ? "text-primary fw-semibold"
+            : "text-muted";
+
+    bool profileOpen = isController("Manage");
+
+    bool securityOpen =
+        isController("Security") &&
+        action != "EnableAuthenticator" &&
+        action != "Disable2FA";
+
+    bool mfaOpen =
+        isController("Security") &&
+        (action == "Index"
+        || action == "EnableAuthenticator"
+        || action == "Disable2FA");
+
+    bool settingsOpen = isController("Settings");
+}
+
+<style>
+    .accordion-button.text-primary,
+    .accordion-button.text-primary strong,
+    .accordion-button.text-primary i {
+        color: var(--bs-primary) !important;
+    }
+</style>
+
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0" id="account">
+
+    <!-- PROFILE -->
+
+    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white rounded-2 shadow-none @(profileOpen ? "text-primary" : "text-dark collapsed")"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#profileInfoCollapse"
+                    aria-expanded="@profileOpen.ToString().ToLower()">
+
+                <i class="bi bi-person-circle me-2"></i>
+                <strong>Profile</strong>
+
+            </button>
+        </h2>
+
+        <div id="profileInfoCollapse"
+             class="accordion-collapse collapse @(profileOpen ? "show" : "")"
+             data-bs-parent="#account">
+
+            <div class="accordion-body px-2 pt-1">
+                <div class="d-flex flex-column gap-2">
+                    <a asp-area="Identity"
+                       asp-controller="Manage"
+                       asp-action="Personal"
+                       class="text-decoration-none @navClass("Manage", "Personal")">
+                        Personal Information
+                    </a>
+
+                    @* <a href="#"
+                       class="text-decoration-none text-muted">
+                        Email Address
+                    </a>
+
+                    <a href="#"
+                       class="text-decoration-none text-muted">
+                        Mobile Number
+                    </a> *@
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECURITY -->
+
+    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white rounded-2 shadow-none @(securityOpen ? "text-primary" : "text-dark collapsed")"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#securityInfoCollapse"
+                    aria-expanded="@securityOpen.ToString().ToLower()">
+
+                <i class="bi bi-shield me-2"></i>
+                <strong>Security</strong>
+
+            </button>
+        </h2>
+
+        <div id="securityInfoCollapse"
+             class="accordion-collapse collapse @(securityOpen ? "show" : "")"
+             data-bs-parent="#account">
+
+            <div class="accordion-body px-2 pt-1">
+                <div class="d-flex flex-column gap-2">
+
+                    <a asp-area="Identity"
+                       asp-controller="Security"
+                       asp-action="ChangePassword"
+                       class="text-decoration-none @navClass("Security", "ChangePassword")">
+                        Change Password
+                    </a>
+                 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MFA -->
+
+    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white rounded-2 shadow-none @(mfaOpen ? "text-primary" : "text-dark collapsed")"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mfaInfoCollapse"
+                    aria-expanded="@mfaOpen.ToString().ToLower()">
+
+                <i class="bi bi-shield-check me-2"></i>
+                <strong>Multi-Factor Authentication</strong>
+
+            </button>
+        </h2>
+
+        <div id="mfaInfoCollapse"
+             class="accordion-collapse collapse @(mfaOpen ? "show" : "")"
+             data-bs-parent="#account">
+
+            <div class="accordion-body px-2 pt-1">
+                <div class="d-flex flex-column gap-2">
+
+                    <a asp-area="Identity"
+                       asp-controller="Security"
+                       asp-action="Index"
+                       class="text-decoration-none @navClass("Security", "Index")">
+                        Manage Authentication
+                    </a>
+
+                    <a asp-area="Identity"
+                       asp-controller="Security"
+                       asp-action="EnableAuthenticator"
+                       class="text-decoration-none @navClass("Security", "EnableAuthenticator")">
+                        Enable Authenticator
+                    </a>
+
+                    <a asp-area="Identity"
+                       asp-controller="Security"
+                       asp-action="Disable2FA"
+                       class="text-decoration-none @navClass("Security", "Disable2FA")">
+                        Disable Authenticator
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+
+    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white rounded-2 shadow-none @(settingsOpen ? "text-primary" : "text-dark collapsed")"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#settingsInfoCollapse"
+                    aria-expanded="@settingsOpen.ToString().ToLower()">
+
+                <i class="bi bi-gear me-2"></i>
+                <strong>Settings</strong>
+
+            </button>
+        </h2>
+
+        <div id="settingsInfoCollapse"
+             class="accordion-collapse collapse @(settingsOpen ? "show" : "")"
+             data-bs-parent="#account">
+
+            <div class="accordion-body px-2 pt-1">
+                <div class="d-flex flex-column gap-2">
+
+                    <a asp-area="Identity"
+                       asp-controller="Settings"
+                       asp-action="Index"
+                       class="text-decoration-none @navClass("Settings", "Index")">
+                        Preferences
+                    </a>
+
+                    <a href="#"
+                       class="text-decoration-none text-muted">
+                        Notifications
+                    </a>
+
+                    <a href="#"
+                       class="text-decoration-none text-danger">
+                        Close Account
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

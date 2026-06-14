@@ -1,5 +1,4 @@
 ﻿using FieldServiceManagement.Data.DataModels.BaseClass;
-using FieldServiceManagement.Enum;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FieldServiceManagement.Data.DataModels.User

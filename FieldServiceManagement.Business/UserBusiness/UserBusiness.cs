@@ -44,13 +44,14 @@ namespace FieldServiceManagement.Business.UserBusiness
             return result;
         }
 
-        public async Task<BusinessResult> SendUserInvitationAsync(UserInvitationViewModel model, AppUserProfileViewModel currentUser, UserManager<ApplicationUser> userManager)
+        public async Task<BusinessResult> SendUserInvitationAsync(UserInvitationViewModel model, string email, UserManager<ApplicationUser> userManager)
         {
             var existingUser = new UserRepository().GetByUserName(model.Email);
             if (existingUser != null)
                 return BusinessResult.Fail("A user account already exists with this email address.");
 
-            var result = await new SubscriptionPlanBusiness.SubscriptionPlanBusiness().ApplySubscriptionPlanRules(currentUser, SubscriptionRuleContext.AddUser);
+            var currentUser = await new UserBusiness().GetAllUserDetailsByUsernameAsync(email!);
+            var result = await new SubscriptionPlanBusiness().ApplySubscriptionPlanRules(currentUser, SubscriptionRuleContext.AddUser);
             if (!result.Success) return result;
 
             try
@@ -114,19 +115,20 @@ namespace FieldServiceManagement.Business.UserBusiness
 
             var Model = new AppUserProfileViewModel { User = user };
             Model.Organisation = await new OrganisationBusiness().GetOrganisationById(Model.User.OrganisationId);
-
-            bool canSeePlan = Model.Organisation?.CreatedById == Model.User.Id || Model.User.UserRoleId == (int)UserRole.SuperAdmin;
-            if (canSeePlan && Model.Organisation?.PlanId is not null)
+            
+            bool canSeePlan = Model.Organisation?.CreatedById == Model.User.Id || Model.User.UserRoleId == (int)UserRole.SuperAdmin || Model.User.UserRoleId == (int)UserRole.Administrator;
+            if (canSeePlan)
             {
-                Model.SubscriptionPlan = await new SubscriptionPlanBusiness.SubscriptionPlanBusiness().GetSubscriptionPlanByIdAsync(Model.Organisation.PlanId);
+                Model.OrgSubscription = await new OrganisationSubscriptionBusiness().GetOrganisationSubscriptionByOrgIdAsync(Model!.Organisation!.Id!);
+                Model.SubscriptionPlan = await new SubscriptionPlanBusiness().GetSubscriptionPlanByIdAsync(Model.OrgSubscription.PlanId);
             }
             if (user.StatusId == (int)UserStatus.Invited)
             {
                 Model.Invitation = await new UserInvitationBusiness().GetUserInvitationByEmail(user.Email);
             }
-            Model.ProfileAudits = await new ProfileAuditsBusiness().GetUserProfileAuditsByUserdAsync(Model.User.Id);
+            var entiityName = "Profile";
+            Model.ProfileAudits = await new AuditLogBusiness().GetByEntityAsync(entiityName, Model.User);
             Model.CreatedBy = await GetUserDetailsByIdAsync(Model.User.CreatedById);
-
             return Model;
         }
 

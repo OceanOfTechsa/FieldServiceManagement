@@ -55,7 +55,7 @@ namespace FieldServiceManagement.Business.NotificationBusiness.IdentityNotificat
                 "<p>Please click the link below to set your password and continue with your account setup:</p>" +
 
                 $"<p>" +
-                $"<a href='{AppSettings.BaseUrl}'>Set Password & Complete Registration</a>" +
+                $"<a href='{AppSettings.BaseUrl}'  style=\"color: #2e7d32; text-decoration: none;\">Set Password & Complete Registration</a>" +
                 $"</p>" +
 
                 $"<p>" +

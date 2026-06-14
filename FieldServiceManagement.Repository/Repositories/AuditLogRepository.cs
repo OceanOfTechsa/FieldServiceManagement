@@ -31,7 +31,7 @@ namespace FieldServiceManagement.Repository.Repositories
         {
             return _dbContext.AuditLogs
                 .Where(x => x.EntityName == EntityName && x.EntityId == EntityId && !x.IsDeleted && x.OrganisationId == OrgId)
-                .OrderByDescending(x => x.CreatedAt).ToList();
+                .ToList();
         }
 
         #region DISPOSE

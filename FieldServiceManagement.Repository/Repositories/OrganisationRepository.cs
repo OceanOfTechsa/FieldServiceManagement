@@ -17,7 +17,6 @@ namespace FieldServiceManagement.Repository.Repositories
             _repository = new RepositoryService<Organisation>(_dbContext);
         }
 
-
         public async void InsertAsync(Organisation model)
         {
             _repository.Insert(model);

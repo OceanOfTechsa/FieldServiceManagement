@@ -20,5 +20,7 @@ namespace FieldServiceManagement.Data.DataModels.Audits
         public Guid? OrganisationId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow.SaDateTime();
         public bool IsDeleted { get; set; } = false;
+        public bool ShowComment { get; set; }
+        public string? VisibleTo { get; set; }
     }
 }

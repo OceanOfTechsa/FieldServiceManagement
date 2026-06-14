@@ -31,6 +31,11 @@ namespace FieldServiceManagement.Repository
             const string query = "EXEC [dbo].[GetAddressesBySearchTerm] @SearchTerm, @Email";
             return [.. _dbContext.Set<Address>().FromSqlRaw(query, parameters)];
         }
+        public Task<Address> GetAddressByIdAsync(Guid Id)
+        {
+            var entity = _repository.Find(x => x.Id == Id).FirstOrDefault();
+            return Task.FromResult(entity);
+        }
 
         #region DISPOSE
         public void Dispose()
