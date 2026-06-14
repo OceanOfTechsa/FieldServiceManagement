@@ -218,7 +218,7 @@
                             <!-- Status -->
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Status</label>
-                                <p class="mb-0 d-flex @statusColor">
+                                <p class="mb-0 d-flex align-items-center gap-2 @statusColor">
                                     @Html.Raw(iconSvg)
                                     <span>@label</span>
                                 </p>
@@ -455,8 +455,8 @@
             restoreOriginalValues();
 
             if (discardChanges) {
-                avatarPreview.src = originalAvatarSrc; // 👈 restore original avatar
-                avatarInput.value = '';                 // 👈 clear the file input
+                avatarPreview.src = originalAvatarSrc; 
+                avatarInput.value = '';                 
             }
 
             infoDiv.classList.remove('d-none');

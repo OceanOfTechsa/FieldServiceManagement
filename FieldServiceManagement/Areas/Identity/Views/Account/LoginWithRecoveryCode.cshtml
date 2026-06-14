@@ -1,0 +1,103 @@
+﻿@using FieldServiceManagement.Helpers
+@model FieldServiceManagement.Areas.Identity.Models.LoginWithRecoveryCode
+
+@{
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = "Sign In with Recovery Code";
+}
+
+<div class="bd-callout bd-callout-info mt-2 mb-3">
+    <i class="bi bi-info-circle me-1"></i>
+    If you no longer have access to your recovery codes, please contact your organisation administrator.
+</div>
+
+<div class="mb-4">
+    <h2 class="font-sans fw-semibold mb-0" style="font-size:1.75rem;">
+        Recovery Code Sign In
+    </h2>
+
+    <p class="text-dim">
+        Enter one of your saved recovery codes to access your account.
+        <a asp-area="Identity"
+           asp-controller="Account"
+           asp-action="Login"
+           class="small text-dim text-decoration-none border-bottom border-fsm pb-1">
+            Go Back to Login
+        </a>.
+    </p>
+</div>
+
+@using (Html.BeginForm("LoginWithRecoveryCode", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+    }
+
+    <div class="form-group mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            @Html.LabelFor(m => m.RecoveryCode, new { @class = "form-label" })
+            <a class="text-primary small"
+               asp-area="Identity"
+               asp-controller="Account"
+               asp-action="LoginWith2FA">
+                Use authenticator app instead
+            </a>
+        </div>
+
+        @Html.TextBoxFor(m => m.RecoveryCode,
+        new
+        {
+            @class = "form-control text-center",
+            @placeholder = "XXXXX-XXXXX",
+            @autocomplete = "off",
+            id = "RecoveryCode",
+            maxlength = "11",
+            style = "letter-spacing:0.2rem;font-size:1.25rem;text-transform:uppercase;"
+        })
+
+        @Html.ValidationMessageFor(m => m.RecoveryCode, "", new { @class = "field-error" })
+
+        <small class="text-muted">
+            Recovery codes are in the format <strong>XXXXX-XXXXX</strong>. Each code can only be used once.
+        </small>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary w-100 mt-2"
+            data-loading-text="Verifying">
+        Verify & Sign In
+    </button>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+<script>
+    const recoveryInput = document.getElementById('RecoveryCode');
+
+    recoveryInput.addEventListener('input', function (e) {
+        let value = e.target.value
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, '');
+
+        if (value.length > 5) {
+            value = value.substring(0, 5) + '-' + value.substring(5, 10);
+        }
+
+        e.target.value = value;
+    });
+
+    recoveryInput.addEventListener('keydown', function (e) {
+        const pos = e.target.selectionStart;
+        const val = e.target.value;
+
+        if ((e.key === 'Backspace' || e.key === 'Delete') && val[pos - 1] === '-') {
+            e.preventDefault();
+            e.target.value = val.substring(0, pos - 2) + val.substring(pos);
+            e.target.setSelectionRange(pos - 2, pos - 2);
+        }
+    });
+</script>
+}

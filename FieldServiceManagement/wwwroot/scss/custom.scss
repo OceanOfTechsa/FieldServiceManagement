@@ -982,6 +982,11 @@ hr {
     --bd-callout-border: var(--bs-danger-border-subtle);
 }
 
+.bd-callout-success {
+    --bd-callout-color: var(--bs-success-text-emphasis);
+    --bd-callout-bg: var(--bs-success-bg-subtle);
+    --bd-callout-border: var(--bs-success-border-subtle);
+}
 .color-accent{
     color: var(--accent);
 }

@@ -349,6 +349,39 @@ public class AccountController : Controller
         return View(model);
     }
 
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginWithRecoveryCode()
+    {
+        var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        if (user == null)
+            return RedirectToAction("Login", "Account", new { error = "Session expired. Please log in again." });
+
+        return View(new LoginWithRecoveryCode());
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCode model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        if (user == null)
+        {
+            ModelState.AddModelError(string.Empty, "Your 2FA session expired. Please re-enter your email and password.");
+            return View(model);
+        }
+        var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(model.RecoveryCode);
+        var guardResult = ApplyGuards(result, null);
+        if (guardResult != null)
+            return guardResult;
+
+        ModelState.AddModelError(string.Empty, "Invalid recovery code. Please check the code and try again.");
+        return View(model);
+    }
 
     #region PPRIVATE METHODS
     private IActionResult RedirectToLocal(string? returnUrl)

@@ -1,4 +1,5 @@
-﻿@{
+﻿@using FieldServiceManagement.Enum
+@{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
 
@@ -144,13 +145,6 @@
 
                     <a asp-area="Identity"
                        asp-controller="Security"
-                       asp-action="Index"
-                       class="text-decoration-none @navClass("Security", "Index")">
-                        Manage Authentication
-                    </a>
-
-                    <a asp-area="Identity"
-                       asp-controller="Security"
                        asp-action="EnableAuthenticator"
                        class="text-decoration-none @navClass("Security", "EnableAuthenticator")">
                         Enable Authenticator
@@ -191,6 +185,15 @@
             <div class="accordion-body px-2 pt-1">
                 <div class="d-flex flex-column gap-2">
 
+                    @if (User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()))
+                    {
+                        <a asp-area="Identity"
+                           asp-controller="Settings"
+                           asp-action="Index"
+                           class="text-decoration-none @navClass("Settings", "Organisation")">
+                            Organisation
+                        </a>
+                    }
                     <a asp-area="Identity"
                        asp-controller="Settings"
                        asp-action="Index"

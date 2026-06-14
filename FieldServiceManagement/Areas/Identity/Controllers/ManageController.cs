@@ -29,13 +29,6 @@ namespace FieldServiceManagement.Areas.Identity.Controllers
             _env = env;
         }
 
-
-        [HttpGet("")]
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [HttpGet("Personal")]
         public async Task<IActionResult> Personal()
         {

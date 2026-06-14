@@ -10,5 +10,7 @@ namespace FieldServiceManagement.Areas.Identity.Models
 
         [Required]
         public string VerificationCode { get; set; }
+
+        public bool? TwoFactorEnabled { get; set; }
     }
 }

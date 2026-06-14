@@ -22,44 +22,22 @@ public class SecurityController : Controller
         _signInManager = signInManager;
     }
 
-
-    [HttpGet("")]
-    public async Task<IActionResult> Index()
-    {
-        var user = await _userManager.GetUserAsync(User);
-
-        var model = new TwoFactorAuthenticationViewModel
-        {
-            Is2FaEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
-            HasAuthenticator =
-                !string.IsNullOrEmpty(
-                    await _userManager.GetAuthenticatorKeyAsync(user)),
-            RecoveryCodesLeft =
-                await _userManager.CountRecoveryCodesAsync(user)
-        };
-
-        return View(model);
-    }
-
     [HttpGet("EnableAuthenticator")]
     public async Task<IActionResult> EnableAuthenticator()
     {
         var user = await _userManager.GetUserAsync(User);
-
-        var key = await _userManager.GetAuthenticatorKeyAsync(user);
-
+        var key = await _userManager.GetAuthenticatorKeyAsync(user!);
         if (string.IsNullOrEmpty(key))
         {
-            await _userManager.ResetAuthenticatorKeyAsync(user);
-            key = await _userManager.GetAuthenticatorKeyAsync(user);
+            await _userManager.ResetAuthenticatorKeyAsync(user!);
+            key = await _userManager.GetAuthenticatorKeyAsync(user!);
         }
 
         var model = new EnableAuthenticatorViewModel
         {
-            SharedKey = key,
-            AuthenticatorUri = GenerateQrCodeUri(
-                user.Email,
-                key)
+            SharedKey = key!,
+            AuthenticatorUri = GenerateQrCodeUri(user!.Email!, key!),
+            TwoFactorEnabled = user.TwoFactorEnabled
         };
 
         return View(model);
@@ -84,13 +62,12 @@ public class SecurityController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EnableAuthenticator(EnableAuthenticatorViewModel model)
     {
-        var user = await _userManager.GetUserAsync(User); // moved to top
-
+        var user = await _userManager.GetUserAsync(User);
         if (!ModelState.IsValid)
         {
-            var key = await _userManager.GetAuthenticatorKeyAsync(user);
-            model.SharedKey = key;
-            model.AuthenticatorUri = GenerateQrCodeUri(user.Email, key);
+            var key = await _userManager.GetAuthenticatorKeyAsync(user!);
+            model.SharedKey = key!;
+            model.AuthenticatorUri = GenerateQrCodeUri(user!.Email!, key!);
             return View(model);
         }
 
@@ -98,52 +75,35 @@ public class SecurityController : Controller
             .Replace(" ", string.Empty)
             .Replace("-", string.Empty);
 
-        var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
-            user,
+        var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user!,
             _userManager.Options.Tokens.AuthenticatorTokenProvider,
             verificationCode);
 
         if (!is2faTokenValid)
         {
-            ModelState.AddModelError("VerificationCode", "Invalid verification code, please try again.");
-
-            var key = await _userManager.GetAuthenticatorKeyAsync(user);
-            model.SharedKey = key;
-            model.AuthenticatorUri = GenerateQrCodeUri(user.Email, key);
-
-            return View(model);
+            return Json(new { success = false, error = "Invalid verification code, please try again." });
         }
 
-        await _userManager.SetTwoFactorEnabledAsync(user, true);
+        await _userManager.SetTwoFactorEnabledAsync(user!, true);
+        return Json(new { success = true });
+    }
 
-        return RedirectToAction("Index");
-    }
     [HttpGet("Disable2FA")]
-    public IActionResult Disable2FA()
-    {
-        return View();
-    }
+    public IActionResult Disable2FA() =>  View();
+    
 
     [HttpPost("Disable2FA")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Disable2FAConfirmed()
     {
         var user = await _userManager.GetUserAsync(User);
-
-        await _userManager.SetTwoFactorEnabledAsync(
-            user,
-            false);
-
-        await _signInManager.RefreshSignInAsync(user);
-
-        return RedirectToAction(nameof(Index));
+        await _userManager.SetTwoFactorEnabledAsync(user!,false);
+        await _signInManager.RefreshSignInAsync(user!);
+        return RedirectToAction(nameof(EnableAuthenticator));
     }
 
     [HttpGet("ChangePassword")]
-    public IActionResult ChangePassword()
-    {
-        return View();
-    }
+    public IActionResult ChangePassword() => View();
 
     [HttpPost("ChangePassword")]
     [ValidateAntiForgeryToken]
@@ -152,16 +112,7 @@ public class SecurityController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        if (model.NewPassword != model.ConfirmPassword)
-        {
-            ModelState.AddModelError(nameof(model.ConfirmPassword),
-                "The new password and confirmation password do not match.");
-
-            return View(model);
-        }
-
         var user = await _userManager.GetUserAsync(User);
-
         if (user == null)
             return Challenge();
 
@@ -170,17 +121,11 @@ public class SecurityController : Controller
 
         if (!passwordValid)
         {
-            ModelState.AddModelError(nameof(model.CurrentPassword),
-                "The current password entered is incorrect.");
-
+            ModelState.AddModelError(nameof(model.CurrentPassword),"The current password entered is incorrect.");
             return View(model);
         }
 
-        var result = await _userManager.ChangePasswordAsync(
-            user,
-            model.CurrentPassword,
-            model.NewPassword);
-
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -192,11 +137,27 @@ public class SecurityController : Controller
         }
 
         await _signInManager.SignOutAsync();
-
-        TempData["Success"] =
-            "Your password has been changed successfully. Please sign in again using your new password.";
-
         return RedirectToAction("Login", "Account");
+    }
+
+    [HttpGet("RecoveryCodes")]
+    public async Task<IActionResult> DownloadRecoveryCodes()
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+            return Challenge();
+
+        var codes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+
+        if (codes == null || !codes.Any())
+            return BadRequest("Could not generate recovery codes.");
+
+        var content = string.Join(Environment.NewLine, codes);
+        var fileName = $"OOT FSM-RecoveryCodes_{DateTime.UtcNow:yyyyMMdd}.txt";
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+
+        return File(bytes, "text/plain", fileName);
     }
 
     private string GenerateQrCodeUri(string email, string unformattedKey)

@@ -1,4 +1,5 @@
-﻿@model EnableAuthenticatorViewModel
+﻿@using FieldServiceManagement.Helpers
+@model EnableAuthenticatorViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Enable 2FA";
@@ -12,58 +13,266 @@
                     <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
                     <li class="breadcrumb-item text-blue">Account</li>
                     <li class="breadcrumb-item text-blue">Manage</li>
-                    <li class="breadcrumb-item text-blue">Security</li>
+                    <li class="breadcrumb-item text-blue"><a href="/Identity/Account/Manage/Security">Security</a></li>
                     <li class="breadcrumb-item link-success" aria-current="page">Enable 2FA</li>
                 </ol>
             </nav>
         </div>
     </div>
 
-
     <div class="fsm-fixed-view-wrapper">
         <div class="d-flex gap-2 w-100 h-100">
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel">
+                @await Html.PartialAsync("~/Views/Components/Partials/_AccountLeftPanele.cshtml")
+            </div>
+
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
             <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
-                <div>
-                    <p>Scan the QR code below with your authenticator app:</p>
+                <div class="flex-grow-1 overflow-y-auto p-2 pt-0">
 
-                    <img src="@Url.Action("QrCode", "Security", new { qrCodeUri = Model.AuthenticatorUri })"
-                         alt="QR Code"
-                         style="width: 180px; height: 180px;" />
+                    @if (!ViewData.ModelState.IsValid)
+                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    
+                    @if (Model.TwoFactorEnabled == true)
+                    {
+                        <div class="d-flex bd-callout bd-callout-success gap-2 align-items-start">
+                            <i class="bi bi-shield-fill-check text-success fs-4 flex-shrink-0"></i>
+                            <div>
+                                <p class="fw-semibold mb-1">Two-Factor Authentication Enabled</p>
+                                <p class="small mb-2">
+                                    Your account is already protected with two-factor authentication.
+                                    You will be asked for a verification code each time you sign in.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <form id="enable-2fa-form" class="pt-3">
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(x => x.SharedKey)
+                            @Html.HiddenFor(x => x.AuthenticatorUri)
 
-                    <p>If you can't scan the QR code, enter this key manually:</p>
-                    <code>@Model.SharedKey</code>
+                            <!-- Step 1 -->
+                            <div class="mb-4" id="step-1">
+                                <h6 class="fw-semibold mb-1">
+                                    <span class="badge bg-primary me-2">1</span>
+                                    Scan QR Code with your authentication app.
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    Scan the QR Code below with a two-factor authentication app
+                                    (<a href="https://www.microsoft.com/en-us/security/mobile-authenticator-app" target="_blank">Microsoft Authenticator</a>,
+                                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&pli=1" target="_blank">Google Authenticator</a> or similar)
+                                    on your phone.
+                                </p>
+
+                                <div class="d-flex flex-column align-items-start gap-3">
+                                    <img src="@Url.Action("QrCode", "Security", new { area = "Identity", qrCodeUri = Model.AuthenticatorUri })"
+                                            alt="QR Code"
+                                            style="width: 180px; height: 180px; border: 1px solid #dee2e6; padding: 6px; border-radius: 6px;" />
+
+                                    <div>
+                                        <p class="text-muted small mb-1">
+                                            If you can't scan the QR Code, enter this key manually in your app:
+                                        </p>
+                                        <code class="bg-light border rounded px-2 py-1 pb-0 d-inline-block">
+                                            @Model.SharedKey
+                                        </code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <!-- Step 2 -->
+                            <div class="mb-4" id="step-2">
+                                <h6 class="fw-semibold mb-1">
+                                    <span class="badge bg-primary me-2">2</span>
+                                    Enter the six-digit code from your authentication app.
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    After scanning the QR Code, your authentication app will display a six-digit code. Enter it below to confirm setup.
+                                </p>
+
+                                <div class="row g-2 align-items-start">
+                                    <div class="col-12 col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-shield-lock"></i>
+                                            </span>
+                                            <input asp-for="VerificationCode"
+                                                    id="TwoFactorCode"
+                                                    class="form-control"
+                                                    autocomplete="one-time-code"
+                                                    inputmode="numeric"
+                                                    maxlength="7"
+                                                    placeholder="6-digit code"
+                                                    style="letter-spacing:0.2rem;" />
+                                        </div>
+                                        <span asp-validation-for="VerificationCode" class="field-error"></span>
+                                        <div id="verify-error" class="field-error d-none"></div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button"
+                                                id="verify-code-btn"
+                                                class="btn btn-primary"
+                                                data-loading-text="Verifying"
+                                                data-spinner-size="spinner-xs">
+                                            Verify Code
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="d-none" id="step-3-divider" />
+
+                            <!-- Step 3 — hidden until code verified -->
+                            <div class="mb-4 d-none" id="step-3">
+                                <h6 class="fw-semibold mb-1">
+                                    <span class="badge bg-success me-2">3</span>
+                                    Save your recovery codes.
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    Recovery codes can be used to access your account if you lose access to your authentication app.
+                                    Store them somewhere safe — each code can only be used once.
+                                </p>
+
+                                <a href="/Identity/Account/Manage/Security/RecoveryCodes"
+                                    class="btn btn-outline-primary btn-xs"
+                                    id="download-codes-btn"
+                                    download>
+                                    <i class="bi bi-download me-1"></i>
+                                    Download Recovery Codes
+                                </a>
+                            </div>
+
+                            <!-- Success message — hidden until codes downloaded -->
+                            <div class="d-none" id="setup-complete">
+                                <div class="d-flex bd-callout bd-callout-success gap-2 align-items-start">
+                                    <i class="bi bi-shield-fill-check text-success fs-4 flex-shrink-0"></i>
+                                    <div>
+                                        <p class="fw-semibold mb-1">Two-Factor Authentication Enabled</p>
+                                        <p class="small mb-2">
+                                            Your account is now protected with two-factor authentication.
+                                            You will be asked for a verification code each time you sign in.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    }
                 </div>
-
-                <hr />
-
-                <h4>Verify your authenticator</h4>
-                <p>Once scanned, enter the 6-digit code from your app to confirm setup:</p>
-
-                <form asp-action="EnableAuthenticator" asp-controller="Security" method="post">
-                    @Html.AntiForgeryToken()
-                    @Html.HiddenFor(x => x.SharedKey)
-                    @Html.HiddenFor(x => x.AuthenticatorUri)
-
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                    <div>
-                        <label asp-for="VerificationCode">Verification Code</label>
-                        <input asp-for="VerificationCode"
-                               autocomplete="one-time-code"
-                               inputmode="numeric"
-                               maxlength="6"
-                               placeholder="6-digit code" />
-                        <span asp-validation-for="VerificationCode" class="text-danger"></span>
-                    </div>
-
-                    <button type="submit">Enable Authenticator</button>
-                </form>
-
             </div>
         </div>
     </div>
 </div>
 
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">User Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 overflow-y-auto">
+        @await Html.PartialAsync("~/Views/Components/Partials/_AccountLeftPanele.cshtml")
+    </div>
+</div>
+
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        const twoFactorInput = document.getElementById('TwoFactorCode');
+        const verifyBtn = document.getElementById('verify-code-btn');
+        const verifyError = document.getElementById('verify-error');
+        const step3 = document.getElementById('step-3');
+        const step3Divider = document.getElementById('step-3-divider');
+        const setupComplete = document.getElementById('setup-complete');
+        const warn = document.getElementById('warn');
+        const downloadBtn = document.getElementById('download-codes-btn');
+        const footer = document.getElementById('form-footer');
+
+        twoFactorInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 3) {
+                value = value.substring(0, 3) + ' ' + value.substring(3, 6);
+            }
+            e.target.value = value;
+        });
+
+        twoFactorInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyBtn.click();
+            }
+        });
+
+        verifyBtn.addEventListener('click', async function () {
+            verifyError.classList.add('d-none');
+            verifyError.textContent = '';
+
+            const code = twoFactorInput.value.trim();
+            if (!code) {
+                verifyError.textContent = 'Please enter your verification code.';
+                verifyError.classList.remove('d-none');
+                return;
+            }
+
+            const form = document.getElementById('enable-2fa-form');
+            const formData = new FormData(form);
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verifying...';
+
+            try {
+                const response = await fetch('/Identity/Account/Manage/Security/EnableAuthenticator', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    step3Divider.classList.remove('d-none');
+                    step3.classList.remove('d-none');
+
+                    twoFactorInput.disabled = true;
+                    verifyBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Verified';
+                    verifyBtn.classList.replace('btn-primary', 'btn-success');
+                    verifyBtn.disabled = true;
+
+                    step3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    verifyError.textContent = result.error ?? 'Invalid verification code, please try again.';
+                    verifyError.classList.remove('d-none');
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Verify Code';
+                }
+            } catch {
+                verifyError.textContent = 'Something went wrong. Please try again.';
+                verifyError.classList.remove('d-none');
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Verify Code';
+            }
+        });
+
+        downloadBtn.addEventListener('click', function () {
+            setTimeout(() => {
+                step3.classList.add('d-none');
+                step3Divider.classList.add('d-none');
+                setupComplete.classList.remove('d-none');
+                warn.classList.add("d-none");
+                footer.classList.add('d-none');
+                setupComplete.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 800);
+        });
+    </script>
 }
