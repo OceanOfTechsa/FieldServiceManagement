@@ -1,4 +1,6 @@
-﻿@{
+﻿@model bool
+
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Disable 2FA";
 }
@@ -33,96 +35,111 @@
             </button>
 
             <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
-                <div class="flex-grow-1 overflow-y-auto p-3">
+                <div class="flex-grow-1 overflow-y-auto">
+                    @if(!Model)
+                    {
+                       <div class="d-flex bd-callout bd-callout-danger gap-2 align-items-start mx-2 mt-2">
+                            <i class="bi bi-shield-fill-exclamation text-danger fs-4 flex-shrink-0"></i>
+                            <div>
+                                <p class="fw-semibold mb-1">Two-Factor Authentication Disabled</p>
+                                <p class="small mb-2">
+                                    Your account is not protected with two-factor authentication.
+                                    please click <a href="/Identity/Account/Manage/Security/EnableAuthenticator" class="text-success"><strong>Here</strong></a> to enable.
+                                </p>
+                            </div>
+                        </div> 
+                    }
+                    else
+                    {
+                        <!-- Warning callout -->
+                        <div class="bd-callout bd-callout-danger my-0 p-2 mb-4 bg-opacity-10 mx-2 mt-2">
+                            <span class="small">
+                                <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>
+                                <strong>Warning:</strong> Disabling two-factor authentication reduces the security of your account.
+                                <br />
+                                • You will no longer need a code from your authenticator app to sign in.
+                                <br />
+                                • Your existing recovery codes will be invalidated.
+                                <br />
+                                • We strongly recommend keeping 2FA enabled to protect your account.
+                            </span>
+                        </div>
 
-                    <!-- Warning callout -->
-                    <div class="bd-callout bd-callout-danger my-0 p-2 mb-4 bg-opacity-10">
-                        <span class="small">
-                            <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>
-                            <strong>Warning:</strong> Disabling two-factor authentication reduces the security of your account.
-                            <br />
-                            • You will no longer need a code from your authenticator app to sign in.
-                            <br />
-                            • Your existing recovery codes will be invalidated.
-                            <br />
-                            • We strongly recommend keeping 2FA enabled to protect your account.
-                        </span>
-                    </div>
-
-                    <!-- Why 2FA matters -->
-                    <h6 class="fw-semibold mb-3">
-                        <i class="bi bi-shield-check text-success me-1"></i>
-                        Why two-factor authentication matters
-                    </h6>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex gap-2">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-lock-fill text-primary fs-5"></i>
+                        <!-- Why 2FA matters -->
+                        <h6 class="fw-semibold mb-3 mx-2 mt-2">
+                            Why two-factor authentication matters?
+                        </h6>
+                        <div class="row g-3 mb-4 mx-2 mt-2">
+                            <div class="col-12 col-md-6">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-shrink-0 badge bg-primary flex align-content-center">
+                                        <i class="bi bi-lock-fill text-primary fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="fw-semibold small mb-0">Stronger Account Protection</p>
+                                        <p class="text-muted small mb-0">
+                                            Even if your password is stolen or guessed, attackers cannot access your account without the second factor from your device.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="fw-semibold small mb-0">Stronger Account Protection</p>
-                                    <p class="text-muted small mb-0">
-                                        Even if your password is stolen or guessed, attackers cannot access your account without the second factor from your device.
-                                    </p>
+                            </div>
+
+                            <div class="col-12 col-md-6 mt-3">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-shrink-0 badge bg-danger flex align-content-center">
+                                        <i class="bi bi-person-fill-slash text-danger fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="fw-semibold small mb-0">Prevents Unauthorised Access</p>
+                                        <p class="text-muted small mb-0">
+                                            2FA significantly reduces the risk of unauthorised logins, credential stuffing and phishing attacks targeting your account.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-shrink-0 badge bg-warning flex align-content-center">
+                                        <i class="bi bi-building-fill-lock text-warning fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="fw-semibold small mb-0">Protects Your Organisation</p>
+                                        <p class="text-muted small mb-0">
+                                            A compromised account can expose sensitive company data, customer records and operational information to bad actors.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-shrink-0 badge bg-success flex align-content-center">
+                                        <i class="bi bi-arrow-repeat text-success fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="fw-semibold small mb-0">Easy to Re-enable</p>
+                                        <p class="text-muted small mb-0">
+                                            You can re-enable two-factor authentication at any time from the Security page using your authenticator app.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex gap-2">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-person-fill-slash text-danger fs-5"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-semibold small mb-0">Prevents Unauthorised Access</p>
-                                    <p class="text-muted small mb-0">
-                                        2FA significantly reduces the risk of unauthorised logins, credential stuffing and phishing attacks targeting your account.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex gap-2">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-building-fill-lock text-warning fs-5"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-semibold small mb-0">Protects Your Organisation</p>
-                                    <p class="text-muted small mb-0">
-                                        A compromised account can expose sensitive company data, customer records and operational information to bad actors.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex gap-2">
-                                <div class="flex-shrink-0">
-                                    <i class="bi bi-arrow-repeat text-success fs-5"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-semibold small mb-0">Easy to Re-enable</p>
-                                    <p class="text-muted small mb-0">
-                                        You can re-enable two-factor authentication at any time from the Security page using your authenticator app.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                    }
                 </div>
 
-                <!-- Footer actions -->
-                <div class="border-top p-2 d-flex gap-2 justify-content-end flex-shrink-0 bg-white rounded-bottom-2">
-                    <button type="button"
-                            class="btn btn-danger btn-xs"
-                            id="fsm-disable-2fa-trigger">
-                        Disable 2FA
-                    </button>
-                </div>
+                @if (Model)
+                {
+                    <!-- Footer actions -->
+                    <div class="border-top p-2 d-flex gap-2 justify-content-end flex-shrink-0 bg-white rounded-bottom-2">
+                        <button type="button"
+                                class="btn btn-danger btn-xs"
+                                id="fsm-disable-2fa-trigger">
+                            Disable 2FA
+                        </button>
+                    </div>
+                }
 
                 <!-- Hidden form submitted only on dialog confirm -->
                 <form asp-action="Disable2FAConfirmed"
@@ -157,6 +174,7 @@
                     This makes it significantly easier for attackers to gain access
                     if your password is ever compromised.
                 </p>
+                <p class="text-danger mt-2"><i class="bi bi-exclamation-circle-fill"></i> We do not recommend disabling 2FA.</p>
             </div>
         </div>
 

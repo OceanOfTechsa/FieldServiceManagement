@@ -34,6 +34,17 @@
     setTimeout(hideLoader, 8000);
 })();
 
+function showLoader(text = 'Loading', sub = 'Please wait a moment...') {
+    document.querySelector('.fsm-loader-text').textContent = text;
+    document.querySelector('.fsm-loader-sub').textContent = sub;
+    document.getElementById('fsm-page-loader').classList.remove('fsm-loader-hidden');
+}
+
+function hideLoader() {
+    document.getElementById('fsm-page-loader').classList.add('fsm-loader-hidden');
+}
+//Then call showLoader('Saving changes', 'Hang tight...') before any slow operation and hideLoader() when done.
+
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.fsm-dialog-backdrop').forEach(backdrop => {
         backdrop.addEventListener('click', function (e) {

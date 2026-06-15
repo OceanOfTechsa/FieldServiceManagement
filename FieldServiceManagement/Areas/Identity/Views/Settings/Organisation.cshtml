@@ -1,0 +1,495 @@
+﻿@using FieldServiceManagement.Helpers
+@model FieldServiceManagement.ViewModels.Organisation.OrganisationViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Manage Organisation";
+}
+
+<style>
+    .avatar-upload-wrapper {
+        position: relative;
+        display: inline-block;
+        cursor: default;
+    }
+
+    .avatar-upload-wrapper.avatar-editable {
+        cursor: pointer;
+    }
+
+    .avatar-upload-image {
+        transition: all .2s ease;
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,.55);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        opacity: 0;
+        transition: opacity .2s ease;
+        pointer-events: none;
+    }
+
+    .avatar-upload-wrapper.avatar-editable:hover .avatar-overlay {
+        opacity: 1;
+    }
+
+    .avatar-loader {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,.65);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-2 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item text-blue">Account</li>
+                    <li class="breadcrumb-item text-blue"><a href="/Identity/Account/Manage/Personal">Manage</a></li>
+                    <li class="breadcrumb-item link-success" aria-current="page">Organisation</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel">
+                @await Html.PartialAsync("~/Views/Components/Partials/_AccountLeftPanele.cshtml")
+            </div>
+
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
+            @using (Html.BeginForm("Edit", "Organisation", new { area = "" }, FormMethod.Post, null, new { id = "edit-org-form", @class = "d-flex flex-column flex-grow-1 overflow-hidden" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.CreatedById)
+                @Html.HiddenFor(m => m.CreatedAt)
+                @Html.HiddenFor(m => m.AvatarUrl)
+                @Html.HiddenFor(m => m.IsActive)
+
+                <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+
+                    <!-- Header -->
+                    <div class="p-2 d-flex justify-content-between align-items-center border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+
+                            <div class="avatar-upload-wrapper">
+                                <img id="avatar-preview"
+                                     src="@(string.IsNullOrWhiteSpace(Model.AvatarUrl)
+                                         ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(Model.Name)}&background=random"
+                                         : Model.AvatarUrl)"
+                                     alt="@Model.Name"
+                                     class="fsm-avatar-xl avatar-upload-image" />
+
+                                <div class="avatar-overlay">
+                                    <i class="bi bi-camera-fill"></i>
+                                </div>
+
+                                <div id="avatar-loader" class="avatar-loader d-none">
+                                    <div class="spinner-border spinner-border-sm text-light"></div>
+                                </div>
+
+                                <input 
+                                    type="file"
+                                    id="avatar-upload"
+                                    name="AvatarFile"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    class="d-none" 
+                                />
+                            </div>
+
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold text-black">@Model.Name</span>
+                                <span class="text-muted small">
+                                    @(Model.IsActive
+                                        ? "Active Organisation"
+                                        : "Inactive Organisation")
+                                </span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-xs" id="toggleEdit" type="button">
+                            Edit
+                        </button>
+                    </div>
+
+                    <!-- Info view -->
+                    <div class="mt-2 p-3" id="infoDiv">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Organisation Name</label>
+                                <p class="fw-semibold mb-0">@Model.Name</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Status</label>
+                                <p class="mb-0">
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="fsm-status--active d-flex align-items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="2 8 6 12 14 4" />
+                                            </svg>
+                                            Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fsm-status--inactive d-flex align-items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                                <line x1="4" y1="8" x2="12" y2="8" />
+                                            </svg>
+                                            Inactive
+                                        </span>
+                                    }
+                                </p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Industry</label>
+                                <p class="fw-semibold mb-0">@(Model.IndustryId?.ToString() ?? "—")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Country</label>
+                                <p class="fw-semibold mb-0">@(Model.CountryId?.ToString() ?? "—")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">State / Province</label>
+                                <p class="fw-semibold mb-0">@(Model.StateId?.ToString() ?? "—")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Currency</label>
+                                <p class="fw-semibold mb-0">@(Model.CurrencyId?.ToString() ?? "—")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Timezone</label>
+                                <p class="fw-semibold mb-0">@(Model.TimezoneId?.ToString() ?? "—")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Language</label>
+                                <p class="fw-semibold mb-0">@(Model.LanguageId?.ToString() ?? "—")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Created</label>
+                                <p class="fw-semibold mb-0">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small mb-1">Last Updated</label>
+                                <p class="fw-semibold mb-0">
+                                    @(Model.UpdatedAt.HasValue
+                                        ? Model.UpdatedAt.Value.ToString("dd MMM yyyy, HH:mm")
+                                        : "—")
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Edit form -->
+                    <div class="flex-grow-1 d-none d-flex flex-column overflow-hidden" id="editForm">
+                        <div class="flex-grow-1 overflow-auto mt-3 px-2">
+
+                            <div class="bd-callout bd-callout-info my-0 p-2 mb-3 bg-opacity-10">
+                                <span class="small">
+                                    • Update your organisation's name, region and preferences below.
+                                    <br />
+                                    • <strong>Click the organisation logo above to upload a new avatar</strong>. Supported formats include JPG, PNG and WEBP.
+                                    <br />
+                                    • Changes are applied immediately once saved.
+                                    <br />
+                                    • Ensure all information is accurate before saving your changes.
+                                </span>
+                            </div>
+
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                            }
+
+                            <h5>Organisation Details</h5>
+                            <div class="row g-3">
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                                        <span class="text-danger">*</span>
+                                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Acme Corp" })
+                                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.IndustryId, new { @class = "form-label" })
+                                        @Html.DropDownListFor(m => m.IndustryId,
+                                            ViewBag.Industries as SelectList ?? new SelectList(Enumerable.Empty<object>()),
+                                            "Select industry",
+                                            new { @class = "form-select" })
+                                        @Html.ValidationMessageFor(m => m.IndustryId, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.CountryId, new { @class = "form-label" })
+                                        @Html.DropDownListFor(m => m.CountryId,
+                                            ViewBag.Countries as SelectList ?? new SelectList(Enumerable.Empty<object>()),
+                                            "Select country",
+                                            new { @class = "form-select" })
+                                        @Html.ValidationMessageFor(m => m.CountryId, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.StateId, new { @class = "form-label" })
+                                        @Html.DropDownListFor(m => m.StateId,
+                                            ViewBag.States as SelectList ?? new SelectList(Enumerable.Empty<object>()),
+                                            "Select state / province",
+                                            new { @class = "form-select" })
+                                        @Html.ValidationMessageFor(m => m.StateId, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.CurrencyId, new { @class = "form-label" })
+                                        @Html.DropDownListFor(m => m.CurrencyId,
+                                            ViewBag.Currencies as SelectList ?? new SelectList(Enumerable.Empty<object>()),
+                                            "Select currency",
+                                            new { @class = "form-select" })
+                                        @Html.ValidationMessageFor(m => m.CurrencyId, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.TimezoneId, new { @class = "form-label" })
+                                        @Html.DropDownListFor(m => m.TimezoneId,
+                                            ViewBag.Timezones as SelectList ?? new SelectList(Enumerable.Empty<object>()),
+                                            "Select timezone",
+                                            new { @class = "form-select" })
+                                        @Html.ValidationMessageFor(m => m.TimezoneId, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.LanguageId, new { @class = "form-label" })
+                                        @Html.DropDownListFor(m => m.LanguageId,
+                                            ViewBag.Languages as SelectList ?? new SelectList(Enumerable.Empty<object>()),
+                                            "Select language",
+                                            new { @class = "form-select" })
+                                        @Html.ValidationMessageFor(m => m.LanguageId, "", new { @class = "field-error" })
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="border-top p-2 d-flex gap-2 justify-content-end flex-shrink-0 bg-white">
+                            <button class="btn btn-light btn-xs border d-none" id="cancelEdit" type="button">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    id="save-org-btn"
+                                    class="btn btn-primary btn-xs"
+                                    data-loading-text="Saving"
+                                    data-spinner-size="spinner-xs">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">Organisation</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 overflow-y-auto">
+        @await Html.PartialAsync("~/Views/Components/Partials/_AccountLeftPanele.cshtml")
+    </div>
+</div>
+
+<div id="fsm-cancel-edit-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="cancel-edit-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="cancel-edit-title" class="dialog-title">Cancel Editing</p>
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="warn-text">
+                <p>Discard Changes?</p>
+                <p class="warn-sub">
+                    You have unsaved changes to this organisation.
+                    If you continue, all modifications will be lost.
+                </p>
+            </div>
+        </div>
+        <div class="dialog-body">
+            Select <strong>Continue Editing</strong> to keep working,
+            or <strong>Discard Changes</strong> to cancel and restore the original values.
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" id="fsm-cancel-edit-close">
+                Continue Editing
+            </button>
+            <button type="button" class="btn-confirm" id="fsm-cancel-edit-confirm">
+                Discard Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        const editToggleBtn = document.getElementById('toggleEdit');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+
+        const infoDiv = document.getElementById('infoDiv');
+        const editFormDiv = document.getElementById('editForm');
+
+        const form = document.getElementById('edit-org-form');
+
+        const cancelDialog = document.getElementById('fsm-cancel-edit-dialog');
+        const cancelDialogClose = document.getElementById('fsm-cancel-edit-close');
+        const cancelDialogConfirm = document.getElementById('fsm-cancel-edit-confirm');
+
+        const avatarWrapper = document.querySelector('.avatar-upload-wrapper');
+        const avatarInput = document.getElementById('avatar-upload');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const avatarLoader = document.getElementById('avatar-loader');
+
+        let originalValues = {};
+        const originalAvatarSrc = avatarPreview.src;
+
+        function captureInitialValues() {
+            originalValues = {};
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'hidden') return;
+                originalValues[field.name] = field.type === 'checkbox'
+                    ? field.checked
+                    : field.value;
+            });
+        }
+
+        function hasChanges() {
+            let changed = false;
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'hidden') return;
+                const currentValue = field.type === 'checkbox'
+                    ? field.checked
+                    : field.value;
+                if (originalValues[field.name] !== currentValue) {
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
+        function restoreOriginalValues() {
+            Object.keys(originalValues).forEach(key => {
+                const field = form.querySelector(`[name="${key}"]`);
+                if (!field) return;
+                if (field.type === 'checkbox') {
+                    field.checked = originalValues[key];
+                } else {
+                    field.value = originalValues[key];
+                }
+            });
+        }
+
+        function enterEditMode() {
+            captureInitialValues();
+            infoDiv.classList.add('d-none');
+            editFormDiv.classList.remove('d-none');
+            editToggleBtn.classList.add('d-none');
+            cancelEditBtn.classList.remove('d-none');
+            avatarWrapper.classList.add('avatar-editable');
+        }
+
+        function exitEditMode(discardChanges = false) {
+            restoreOriginalValues();
+            if (discardChanges) {
+                avatarPreview.src = originalAvatarSrc;
+                avatarInput.value = '';
+            }
+            infoDiv.classList.remove('d-none');
+            editFormDiv.classList.add('d-none');
+            editToggleBtn.classList.remove('d-none');
+            cancelEditBtn.classList.add('d-none');
+            avatarWrapper.classList.remove('avatar-editable');
+        }
+
+        editToggleBtn.addEventListener('click', () => enterEditMode());
+
+        cancelEditBtn.addEventListener('click', function () {
+            if (!hasChanges()) {
+                exitEditMode(true);
+                return;
+            }
+            cancelDialog.classList.add('show');
+        });
+
+        cancelDialogClose.addEventListener('click', () => cancelDialog.classList.remove('show'));
+
+        cancelDialogConfirm.addEventListener('click', function () {
+            cancelDialog.classList.remove('show');
+            exitEditMode(true);
+        });
+
+        avatarWrapper.addEventListener('click', () => {
+            const isEditMode = !editFormDiv.classList.contains('d-none');
+            if (!isEditMode) return;
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            avatarLoader.classList.remove('d-none');
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                avatarPreview.src = e.target.result;
+                avatarLoader.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+}

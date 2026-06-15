@@ -89,7 +89,13 @@ public class SecurityController : Controller
     }
 
     [HttpGet("Disable2FA")]
-    public IActionResult Disable2FA() =>  View();
+    public async Task<IActionResult> Disable2FA()
+    {
+        var user = await _userManager.GetUserAsync(User!);
+        if(user is null)
+            return RedirectToAction("Login", "Account");
+        return View(user.TwoFactorEnabled);
+    }
     
 
     [HttpPost("Disable2FA")]
