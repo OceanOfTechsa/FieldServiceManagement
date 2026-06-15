@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="~/Vendor/fontawesome/css/all.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/FSMreadcrumbs.css" asp-append-version="true" />   
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/Loader.css" asp-append-version="true" />
         <title>@ViewData["Title"] | OOT FSM • The end-to-end field service management platform</title>
         <meta name="description" content="Automate the entire spectrum of field operations with the one stop field service management platform." />
     </head>
@@ -36,6 +37,13 @@
                 </div>
                 @await Html.PartialAsync("_Footer")
             </div>
+            <div id="fsm-page-loader" class="fsm-loader-backdrop">
+                <div class="fsm-loader-content">
+                    <div class="fsm-loader-spinner"></div>
+                    <p class="fsm-loader-text">Loading</p>
+                    <p class="fsm-loader-sub">Please wait a moment...</p>
+                </div>
+            </div>
         </div>
 
         <script src="~/js/header.js" defer></script>
@@ -49,10 +57,10 @@
         <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        lucide.createIcons();
-    </script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script>
+            lucide.createIcons();
+        </script>
         @await RenderSectionAsync("Scripts", required: false)
     </body>
 </html>

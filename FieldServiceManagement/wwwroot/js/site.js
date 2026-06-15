@@ -17,6 +17,23 @@
 
 })();
 
+(function () {
+    const loader = document.getElementById('fsm-page-loader');
+
+    function hideLoader() {
+        loader.classList.add('fsm-loader-hidden');
+    }
+
+    if (document.readyState === 'complete') {
+        hideLoader();
+    } else {
+        window.addEventListener('load', hideLoader);
+    }
+
+    // Safety fallback — hide after 8s no matter what
+    setTimeout(hideLoader, 8000);
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.fsm-dialog-backdrop').forEach(backdrop => {
         backdrop.addEventListener('click', function (e) {

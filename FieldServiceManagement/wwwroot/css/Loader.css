@@ -1,0 +1,58 @@
+﻿
+.fsm-loader-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0;
+    opacity: 1;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+    .fsm-loader-backdrop.fsm-loader-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+.fsm-loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.fsm-loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 0, 0, 0.08);
+    border-top-color: #0cbc87;
+    border-radius: 50%;
+    animation: fsm-spin 0.75s linear infinite;
+}
+
+.fsm-loader-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
+.fsm-loader-sub {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0;
+}
+
+@keyframes fsm-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
