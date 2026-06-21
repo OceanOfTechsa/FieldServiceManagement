@@ -2,6 +2,9 @@
 @using FieldServiceManagement.Enum
 @model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
 
+@{
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
+}
 <div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0" id="userInfoAccordion">
 
     @if(Model.User.StatusId == (int)UserStatus.Invited)
@@ -162,7 +165,7 @@
                         <span class="text-muted">Employee Id</span>
                         <span class="text-black">
                             @(string.IsNullOrWhiteSpace(Model?.User.EmployeeNumber)
-                                           ? "--"
+                                           ? @EmptyFieldReplacer
                                            : Model?.User.EmployeeNumber)
                         </span>
                     </div>
@@ -172,7 +175,7 @@
                         <span class="text-muted">Phone</span>
                         <span class="text-black">
                             @(string.IsNullOrWhiteSpace(Model?.User.Phone)
-                                           ? "--"
+                                           ? @EmptyFieldReplacer
                                            : Model?.User.Phone)
                         </span>
                     </div>
@@ -180,7 +183,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-telephone"></i>
                         <span class="text-muted">Mobile</span>
-                        <span class="text-black">--</span>
+                        <span class="text-black">@EmptyFieldReplacer</span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">

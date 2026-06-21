@@ -51,13 +51,11 @@ namespace FieldServiceManagement.Repository.Repositories
             return await _dbContext.Database.SqlQueryRaw<ContactDetails>("EXEC [dbo].[GetContactById] @Id", param).ToListAsync();
         }
 
-
         public async Task<List<ContactListItem>> GetContactsByUserEmailAsync(string email)
         {
             var param = new SqlParameter("@Email", email);
             return await _dbContext.Database.SqlQueryRaw<ContactListItem>("EXEC [dbo].[GetContactsByUserEmail] @Email", param).ToListAsync();
         }
-
 
         #region DISPOSE
         public void Dispose()

@@ -1,0 +1,425 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.ViewModels.Address
+
+@model IEnumerable<AddressListItemViewModel>
+
+@{
+    ViewData["Title"] = "All Addresses";
+    var addresses = Model?.ToList() ?? new List<AddressListItemViewModel>();
+    var selectedStatus = ViewBag.SelectedStatus?.ToString() ?? "All";
+
+    var filteredAddresses = selectedStatus switch
+    {
+        "Active" => addresses.Where(x => x.IsActive && !x.IsDeleted).ToList(),
+        "InActive" => addresses.Where(x => !x.IsActive && !x.IsDeleted).ToList(),
+        "Deleted" => addresses.Where(x => x.IsDeleted).ToList(),
+        _ => addresses
+    };
+
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+
+    <!-- Toolbar -->
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <i class="bi bi-funnel"></i>
+            <div id="app" class="mt-2">
+                <enum-dropdown :options="statusOptions"
+                               v-model="selectedStatus"
+                               placeholder="All"
+                               param-name="status"
+                               suffix="Addresses">
+                </enum-dropdown>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-start">
+            <div class="d-flex align-items-center position-relative">
+                <button type="button" class="btn border-fsm btn-xs" id="searchBtn">
+                    <i class="bi bi-search"></i>
+                </button>
+                <div id="searchWrapper" class="search-wrapper">
+                    <input class="border-fsm form-control search-input"
+                           placeholder="Search by street or city..."
+                           id="searchInput" />
+                    <button id="cancelSearch" class="cancel-btn">✕</button>
+                </div>
+            </div>
+            <button class="btn btn-info-soft btn-xs">
+                <i class="bi bi-question-circle-fill"></i>
+            </button>
+            <a href="/Addresses/Create" class="btn btn-primary btn-xs"
+               title="New Address"
+               aria-label="New Address">
+                <i class="fa-solid fa-plus"></i>
+                New Address
+            </a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="border-0 rounded-2 overflow-hidden mx-2">
+        <div class="table-responsive fsm-table-wrapper">
+            <table class="table align-middle mb-0 fsm-table">
+                <thead>
+                    <tr>
+                        <th class="fsm-sortable" data-sort="street">
+                            Street
+                            <span class="fsm-sort-icon">
+                                <i class="bi bi-chevron-expand"></i>
+                            </span>
+                        </th>
+                        <th>City</th>
+                        <th>Zip Code</th>
+                        <th>State / Province</th>
+                        <th>Country</th>
+                        <th>Coordinates</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredAddresses.Any())
+                    {
+                        foreach (var item in filteredAddresses)
+                        {
+                            <tr data-sort-value="@item.Street">
+
+                                <!-- Street -->
+                                <td>
+                                    <a href="/Addresses/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())"
+                                       class="d-flex align-items-center gap-2 full-name-wrapper">
+                                        <img src="@($"https://ui-avatars.com/api/?name={item.City}&background=random")" class="fsm-avatar" alt="@item.City" />
+                                        <span class="fsm-user-name">
+                                            @item.Street
+                                        </span>
+                                    </a>
+                                </td>
+
+                                <!-- City -->
+                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.City) ? EmptyFieldReplacer : item.City)</span></td>
+
+                                <!-- Zip Code -->
+                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.ZipCode) ? EmptyFieldReplacer : item.ZipCode)</span></td>
+
+                                <!-- State -->
+                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.StateName) ? EmptyFieldReplacer : item.StateName)</span></td>
+
+                                <!-- Country -->
+                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.CountryName) ? EmptyFieldReplacer : item.CountryName)</span></td>
+
+                                <!-- Coordinates -->
+                                <td>
+                                    @if (item.Latitude.HasValue && item.Longitude.HasValue)
+                                    {
+                                        <span class="fsm-meta-text">
+                                            @item.Latitude.Value.ToString(), @item.Longitude.Value.ToString()
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fsm-meta-text">@EmptyFieldReplacer</span>
+                                    }
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    @{
+                                        var (statusLabel, statusCss) = item.IsDeleted
+                                            ? ("Deleted", "bg-danger")
+                                            : item.IsActive
+                                                ? ("Active", "bg-success")
+                                                : ("Inactive", "bg-secondary");
+                                    }
+                                    <span class="d-inline-flex align-items-center gap-2">
+                                        <span class="fsm-status-dot @statusCss"></span>
+                                        <span>@statusLabel</span>
+                                    </span>
+                                </td>
+
+                                <!-- Created By -->
+                                <td>
+                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.CreatedById?.ToString() ?? string.Empty) })"
+                                       class="d-flex align-items-center gap-2 full-name-wrapper">
+                                        @if (item.CreatedByAvatar is not null)
+                                        {
+                                            <img src="@($"https://ui-avatars.com/api/?name={item.CreatedByName}&background=random")"
+                                                 class="fsm-avatar-sm" alt="@item.CreatedByName" />
+                                        }
+                                        <span class="fsm-user-name">@(string.IsNullOrWhiteSpace(item.CreatedByName) ? "-" : item.CreatedByName)</span>
+                                    </a>
+                                </td>
+
+                                <!-- Created At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @item.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item.CreatedAt.ToString("tt").ToUpper()
+                                    </span>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9">
+                                <div class="fsm-empty-state">
+                                    <div class="fsm-empty-icon">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">No addresses found</h6>
+                                    <p class="text-muted small mb-3">No addresses match the selected filter.</p>
+                                    <a href="/Addresses/Create" class="btn btn-primary btn-xs">
+                                        <i class="fa-solid fa-plus"></i>
+                                        New Address
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (selectedStatus == "Deleted" && filteredAddresses.Any())
+                    {
+                        <tr data-static="true">
+                            <td colspan="9">
+                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                                    <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    @(filteredAddresses.Count > 1 ? "These addresses have" : "This address has")
+                                    been permanently deleted. All associated data has been archived.
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="fsm-table-footer">
+            <span>
+                Total Addresses: <strong>@filteredAddresses.Count</strong>
+                @if (selectedStatus != "All")
+                {
+                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
+                }
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                <span class="fsm-page-current">1</span>
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                <select class="fsm-per-page">
+                    <option value="10">10 Records per page</option>
+                    <option value="25">25 Records per page</option>
+                    <option value="50">50 Records per page</option>
+                    <option value="100">100 Records per page</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        Vue.component('enum-dropdown', {
+            props: {
+                options:     Array,
+                value:       String,
+                placeholder: { type: String, default: 'Select...' },
+                paramName:   { type: String, default: 'status' },
+                suffix:      { type: String, default: '' }
+            },
+            data() { return { search: '', open: false }; },
+            computed: {
+                filtered() {
+                    return this.options.filter(o => o.toLowerCase().includes(this.search.toLowerCase()));
+                },
+                display() { return this.value || this.placeholder; }
+            },
+            methods: {
+                select(option) {
+                    this.$emit('input', option);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set(this.paramName, option);
+                    window.location.href = url.toString();
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) this.$nextTick(() => this.$refs.search.focus());
+                },
+                close() { this.open = false; this.search = ''; }
+            },
+            template: `
+                <div style="position:relative;display:inline-block;" v-click-outside="close">
+                    <button class="btn btn-sm border-0 bg-transparent text-black px-2" type="button" @@click="toggle">
+                        {{ display }}<span v-if="suffix"> {{ suffix }}</span>
+                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
+                    </button>
+                    <div v-if="open" style="position:absolute;top:100%;left:0;z-index:1000;min-width:220px;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;background:#fff;">
+                        <div class="d-flex align-items-center px-3 py-2" style="border-bottom:1px solid #f0f0f0;gap:8px;">
+                            <i class="bi bi-search" style="color:#adb5bd;font-size:13px;"></i>
+                            <input ref="search" v-model="search" type="text" class="border-0 bg-transparent w-100" placeholder="Search" style="outline:none;font-size:13px;color:#495057;" />
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li v-if="filtered.length === 0">
+                                <span class="dropdown-item small text-danger"><i class="bi bi-exclamation-circle me-2"></i>No results</span>
+                            </li>
+                            <li v-for="option in filtered" :key="option">
+                                <button type="button" class="dropdown-item py-2 px-3 border-0 text-start w-100"
+                                        @@click="select(option)"
+                                        style="font-size:13px;color:#212529;"
+                                        :style="value === option ? 'background:rgba(16,185,129,.10);color:#059669;font-weight:500;' : ''">
+                                    {{ option }}<span v-if="suffix"> {{ suffix }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        });
+
+        Vue.directive('click-outside', {
+            bind(el, binding) {
+                el._clickOutside = (e) => { if (!el.contains(e.target)) binding.value(); };
+                document.addEventListener('click', el._clickOutside);
+            },
+            unbind(el) {
+                document.removeEventListener('click', el._clickOutside);
+            }
+        });
+
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    statusOptions:  ['All', 'Active', 'InActive', 'Deleted'],
+                    selectedStatus: '@(ViewBag.SelectedStatus ?? "All")'
+                };
+            }
+        });
+
+        // ── DOM refs ──────────────────────────────────────────────────────
+        const searchBtn     = document.getElementById('searchBtn');
+        const searchWrapper = document.getElementById('searchWrapper');
+        const cancelSearch  = document.getElementById('cancelSearch');
+        const searchInput   = document.getElementById('searchInput');
+        const table         = document.querySelector('.fsm-table');
+        const tbody         = table.querySelector('tbody');
+
+        // ── Empty state row (search) ──────────────────────────────────────
+        const emptyStateRow = document.createElement('tr');
+        emptyStateRow.id = 'emptyStateRow';
+        emptyStateRow.style.display = 'none';
+        emptyStateRow.dataset.static = 'true';
+        emptyStateRow.innerHTML = `
+            <td colspan="9">
+                <div class="fsm-empty-state">
+                    <div class="fsm-empty-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                    <h6 class="fw-semibold mb-1">No addresses found</h6>
+                    <p class="text-muted small mb-3">No addresses match your search.</p>
+                </div>
+            </td>`;
+        tbody.appendChild(emptyStateRow);
+
+        const dataRows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.dataset.static);
+
+        // ── Search ────────────────────────────────────────────────────────
+        searchBtn.addEventListener('click', () => {
+            searchWrapper.classList.add('active');
+            searchBtn.classList.add('d-none');
+            setTimeout(() => searchInput.focus(), 200);
+        });
+
+        cancelSearch.addEventListener('click', () => {
+            searchWrapper.classList.remove('active');
+            searchBtn.classList.remove('d-none');
+            searchInput.value = '';
+            dataRows.forEach(r => r.style.display = '');
+            emptyStateRow.style.display = 'none';
+            currentPage = 1;
+            render();
+        });
+
+        searchInput.addEventListener('keyup', () => {
+            const value = searchInput.value.toLowerCase().trim();
+            let visible = 0;
+
+            dataRows.forEach(row => {
+                // search across: street, city, zip, state, country (cols 0–4)
+                const match = [0, 1, 2, 3, 4].some(i => row.cells[i]?.textContent.toLowerCase().includes(value));
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+
+            emptyStateRow.style.display = visible === 0 ? '' : 'none';
+        });
+
+        // ── Sort + Pagination ─────────────────────────────────────────────
+        const headers    = table.querySelectorAll('th.fsm-sortable');
+        const prevBtn    = document.querySelector('.fsm-page-btn:first-of-type');
+        const nextBtn    = document.querySelector('.fsm-page-btn:last-of-type');
+        const pageLabel  = document.querySelector('.fsm-page-current');
+        const perPageSel = document.querySelector('.fsm-per-page');
+
+        let allRows     = dataRows.slice();
+        let currentCol  = null;
+        let ascending   = true;
+        let currentPage = 1;
+        let perPage     = 10;
+
+        function render() {
+            const total      = allRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+            currentPage      = Math.min(currentPage, totalPages);
+            const start      = (currentPage - 1) * perPage;
+
+            allRows.forEach((row, i) => {
+                row.style.display = (i >= start && i < start + perPage) ? '' : 'none';
+            });
+
+            if (pageLabel) pageLabel.textContent = `${currentPage} / ${totalPages}`;
+            if (prevBtn)   prevBtn.disabled = currentPage <= 1;
+            if (nextBtn)   nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        headers?.forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const col  = th.dataset.sort;
+                ascending  = currentCol === col ? !ascending : true;
+                currentCol = col;
+
+                headers.forEach(h => h.querySelector('.fsm-sort-icon i').className = 'bi bi-chevron-expand');
+                th.querySelector('.fsm-sort-icon i').className = ascending ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+
+                allRows.sort((a, b) => {
+                    const aText = a.dataset.sortValue ?? a.cells[0]?.innerText.trim() ?? '';
+                    const bText = b.dataset.sortValue ?? b.cells[0]?.innerText.trim() ?? '';
+                    return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                });
+
+                allRows.forEach(row => tbody.appendChild(row));
+                currentPage = 1;
+                render();
+            });
+        });
+
+        prevBtn?.addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; render(); }
+        });
+
+        nextBtn?.addEventListener('click', () => {
+            if (currentPage < Math.ceil(allRows.length / perPage)) { currentPage++; render(); }
+        });
+
+        perPageSel?.addEventListener('change', () => {
+            perPage     = parseInt(perPageSel.value) || 10;
+            currentPage = 1;
+            render();
+        });
+
+        render();
+    </script>
+}

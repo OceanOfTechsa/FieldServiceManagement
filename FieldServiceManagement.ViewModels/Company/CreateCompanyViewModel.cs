@@ -39,5 +39,7 @@ namespace FieldServiceManagement.ViewModels.Company
         public Guid? OrganisationId { get; set; }
         public Guid? CreatedBy { get; set; }
         public Guid? UpdatedBy { get; set; }
+
+        public string? ReturnUrl { get; set; }
     }
 }

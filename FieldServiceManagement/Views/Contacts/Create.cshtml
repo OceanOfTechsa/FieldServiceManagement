@@ -1,6 +1,6 @@
-﻿@using System.Text.RegularExpressions
+﻿@model FieldServiceManagement.ViewModels.Contact.CreateContactViewModel
+@using System.Text.RegularExpressions
 @using FieldServiceManagement.Enum
-@model FieldServiceManagement.ViewModels.Contact.CreateContactViewModel
 
 @{
     ViewData["Title"] = "Create New Contact";
@@ -93,7 +93,7 @@
                             <div class="form-group">
                                 @Html.LabelFor(m => m.Phone, new { @class = "form-label" })
                                 <span class="text-danger mt-2">*</span>
-                                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", @placeholder = "+27 69 890 2422", @autocomplete = "phone" })
+                                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", @placeholder = "+27 69 890 2422", @autocomplete = "phone", @id = "cell" })
                                 @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-error" })
                             </div>
                         </div>
@@ -102,7 +102,7 @@
                         <div class="col-12 col-md-6">
                             <div class="form-group">
                                 @Html.LabelFor(m => m.Mobile, new { @class = "form-label" })
-                                @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", @placeholder = "082 686 7925", @autocomplete = "mobile" })
+                                @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", @placeholder = "082 686 7925", @autocomplete = "mobile", @id = "cell" })
                                 @Html.ValidationMessageFor(m => m.Mobile, "", new { @class = "field-error" })
                             </div>
                         </div>
@@ -151,13 +151,13 @@
                             <div class="form-group">
                                 @Html.LabelFor(m => m.ServiceAddressId, new { @class = "form-label" })
                                 <span class="text-danger mt-2">*</span>
-                                @if (Model.OrganisationAddresses == null || !Model.OrganisationAddresses.Any())
+                                @if (Model?.OrganisationAddresses == null || !Model.OrganisationAddresses.Any())
                                 {
                                     <select class="form-select" disabled>
                                         <option>No addresses available</option>
                                     </select>
                                     <div class="mt-1">
-                                        <a href="/addresses/Create?returnUrl=/Customers/Companies/Create" class="small text-decoration-none">
+                                        <a href="/Addresses/Create?returnUrl=/Customers/Contacts/Create" class="small text-decoration-none">
                                             <i class="bi bi-plus-circle-dotted"></i> Create a new address
                                         </a>
                                     </div>
@@ -185,13 +185,13 @@
                                 @Html.LabelFor(m => m.BillingAddressId, new { @class = "form-label" })
                                 <span class="text-danger mt-2">*</span>
 
-                                @if (Model.OrganisationAddresses == null || !Model.OrganisationAddresses.Any())
+                                @if (Model?.OrganisationAddresses == null || !Model.OrganisationAddresses.Any())
                                 {
                                     <select class="form-select" disabled>
                                         <option>No addresses available</option>
                                     </select>
                                     <div class="mt-1">
-                                        <a href="/addresses/Create?returnUrl=/Customers/Companies/Create" class="small text-decoration-none">
+                                        <a href="/Addresses/Create?returnUrl=/Customers/Contacts/Create" class="small text-decoration-none">
                                             <i class="bi bi-plus-circle-dotted"></i> Create a new address
                                         </a>
                                     </div>
@@ -211,7 +211,7 @@
                                 }
                                 @Html.ValidationMessageFor(m => m.BillingAddressId, "", new { @class = "field-error" })
 
-                                @if (Model.OrganisationAddresses != null)
+                                @if (Model?.OrganisationAddresses != null)
                                 {
                                     <div class="mt-2 d-flex gap-1 align-items-center">
                                         <label for="same">Same as Service Address?</label>
@@ -239,76 +239,82 @@
 
 @section scripts {
     <script>
-        new Choices('#salutation', {
-            searchEnabled: true,
-            searchPlaceholderValue: 'Search...',
-            itemSelectText: '',
-            shouldSort: false,
-            removeItemButton: true,
-            noResultsText: 'No Salutation found',
-            noChoicesText: 'Type to search Salutations',
-            loadingText: 'Loading...',
-        });
+        const salutationEl = document.getElementById('salutation');
+        if (salutationEl) {
+            new Choices(salutationEl, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Search...',
+                itemSelectText: '',
+                shouldSort: false,
+                removeItemButton: true,
+                noResultsText: 'No Salutation found',
+                noChoicesText: 'Type to search Salutations',
+                loadingText: 'Loading...',
+            });
+        }
 
-        new Choices('#company', { 
-            searchEnabled: true,
-            searchPlaceholderValue: 'Search...',
-            itemSelectText: '',
-            shouldSort: false,
-            removeItemButton: true,
-            noResultsText: 'No Company found',
-            noChoicesText: 'Type to search Companies',
-            loadingText: 'Loading...',
-        });
+        const companyEl = document.getElementById('company');
+        if (companyEl) {
+            new Choices(companyEl, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Search...',
+                itemSelectText: '',
+                shouldSort: false,
+                removeItemButton: true,
+                noResultsText: 'No Company found',
+                noChoicesText: 'Type to search Companies',
+                loadingText: 'Loading...',
+            });
+        }
 
-        const serviceAddressChoices = new Choices('#serviceAddress', {
-            searchEnabled: true,
-            searchPlaceholderValue: 'Search address...',
-            itemSelectText: '',
-            shouldSort: false,
-            removeItemButton: true,
-            noResultsText: 'No addresses found',
-            noChoicesText: 'Type to search addresses',
-            loadingText: 'Loading...',
-        });
+        const serviceAddressEl = document.getElementById('serviceAddress');
+        const serviceAddressChoices = serviceAddressEl
+            ? new Choices(serviceAddressEl, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Search address...',
+                itemSelectText: '',
+                shouldSort: false,
+                removeItemButton: true,
+                noResultsText: 'No addresses found',
+                noChoicesText: 'Type to search addresses',
+                loadingText: 'Loading...',
+            })
+            : null;
 
-        const billingAddressChoices = new Choices('#billingAddress', {
-            searchEnabled: true,
-            searchPlaceholderValue: 'Search address...',
-            itemSelectText: '',
-            shouldSort: false,
-            removeItemButton: true,
-            noResultsText: 'No addresses found',
-            noChoicesText: 'Type to search addresses',
-            loadingText: 'Loading...',
-        });
+        const billingAddressEl = document.getElementById('billingAddress');
+        const billingAddressChoices = billingAddressEl
+            ? new Choices(billingAddressEl, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Search address...',
+                itemSelectText: '',
+                shouldSort: false,
+                removeItemButton: true,
+                noResultsText: 'No addresses found',
+                noChoicesText: 'Type to search addresses',
+                loadingText: 'Loading...',
+            })
+            : null;
 
-        // Initialize bootstrap-switch on the checkbox
-        $('#same').bootstrapSwitch();
+        const sameEl = document.getElementById('same');
+        if (sameEl && serviceAddressChoices && billingAddressChoices) {
+            $('#same').bootstrapSwitch();
 
-        // When the toggle is switched
-        $('#same').on('switchChange.bootstrapSwitch', function (e, state) {
-            if (state) {
-                // ON — copy service address value into billing
-                const selectedValue = serviceAddressChoices.getValue(true);
-                if (selectedValue) {
-                    billingAddressChoices.setChoiceByValue(selectedValue);
+            $('#same').on('switchChange.bootstrapSwitch', function (e, state) {
+                if (state) {
+                    const selectedValue = serviceAddressChoices.getValue(true);
+                    if (selectedValue) billingAddressChoices.setChoiceByValue(selectedValue);
+                } else {
+                    billingAddressChoices.setChoiceByValue('');
                 }
-            } else {
-                // OFF — clear billing address
-                billingAddressChoices.setChoiceByValue('');
-            }
-        });
+            });
 
-        // If the user changes the service address while the toggle is ON, keep billing in sync
-        document.getElementById('serviceAddress').addEventListener('change', function () {
-            const isSynced = $('#same').bootstrapSwitch('state');
-            if (isSynced) {
-                const selectedValue = serviceAddressChoices.getValue(true);
-                if (selectedValue) {
-                    billingAddressChoices.setChoiceByValue(selectedValue);
+            serviceAddressEl.addEventListener('change', function () {
+                const isSynced = $('#same').bootstrapSwitch('state');
+                if (isSynced) {
+                    const selectedValue = serviceAddressChoices.getValue(true);
+                    if (selectedValue) billingAddressChoices.setChoiceByValue(selectedValue);
                 }
-            }
-        });
+            });
+        }
     </script>
 }

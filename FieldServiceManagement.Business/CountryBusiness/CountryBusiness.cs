@@ -14,5 +14,11 @@ namespace FieldServiceManagement.Business.CountryBusiness
             var dbModel = new CountryRepository().GetCountriesBySearchName(SearchName);
             return ObjectMapper.Mapper.Map<List<CountryViewModel>>(dbModel);
         }
+
+        public async Task<List<CountryViewModel>> GetAllCountries()
+        {
+            var dbModel = await new CountryRepository().GetAllCountries();
+            return ObjectMapper.Mapper.Map<List<CountryViewModel>>(dbModel);
+        }
     }
 }

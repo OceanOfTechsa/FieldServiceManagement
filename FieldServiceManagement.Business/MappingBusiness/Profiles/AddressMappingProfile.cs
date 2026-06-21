@@ -9,6 +9,8 @@ namespace FieldServiceManagement.Business.MappingBusiness.Profiles
         public AddressMappingProfile()
         {
             CreateMap<Address, AddressViewModel>().ReverseMap();
+            CreateMap<CreateAddress, CreateAddressViewModel>().ReverseMap();
+            CreateMap<AddressListItem, AddressListItemViewModel>().ReverseMap();
         }
     }
 }

@@ -29,6 +29,8 @@
     {
         filteredUsers = filteredUsers.Where(x => x.User.UserRoleId == (int?)parsedRole).ToList();
     }
+
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
@@ -124,7 +126,7 @@
                                 <td>
                                     <span class="fsm-meta-text">
                                         @(string.IsNullOrWhiteSpace(item.User.EmployeeNumber)
-                                            ? "-"
+                                            ? @EmptyFieldReplacer
                                             : item.User.EmployeeNumber)
                                     </span>
                                 </td>

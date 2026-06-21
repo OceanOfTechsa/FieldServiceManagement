@@ -13,5 +13,11 @@ namespace FieldServiceManagement.Business.StateBusiness
             var dbModel = new StateRepository().GetStateBySearchName(SearchName, CountryId);
             return ObjectMapper.Mapper.Map<List<StateViewModel>>(dbModel);  
         }
+
+        public async Task<List<StateViewModel>> GetAllStates()
+        {
+            var dbModel = await new StateRepository().GetAllStates();
+            return ObjectMapper.Mapper.Map<List<StateViewModel>>(dbModel);
+        }
     }
 }

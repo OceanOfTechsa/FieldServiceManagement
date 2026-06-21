@@ -1,10 +1,13 @@
 ﻿@using System.Text.RegularExpressions
 @using FieldServiceManagement.Enum
 @using FieldServiceManagement.Helpers
+@using FieldServiceManagement.Models
 @model FieldServiceManagement.ViewModels.User.AppUserViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Personal Information";
+
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
 }
 
 <style>
@@ -206,13 +209,13 @@
                             <!-- Phone -->
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Phone</label>
-                                <p class="fw-semibold mb-0">@(Model.Phone ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.Phone ?? @EmptyFieldReplacer)</p>
                             </div>
 
                             <!-- Employee Number -->
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Employee Number</label>
-                                <p class="fw-semibold mb-0">@(Model.EmployeeNumber ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.EmployeeNumber ?? @EmptyFieldReplacer)</p>
                             </div>
 
                             <!-- Status -->
@@ -236,7 +239,13 @@
                             <!-- Preferred Language -->
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Preferred Language</label>
-                                <p class="fw-semibold mb-0">@(Model.PreferredLanguageId?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">
+                                    @{
+                                        var selectedLanguage = (ViewBag.Languages as SelectList)
+                                            ?.FirstOrDefault(x => x.Value == Model.PreferredLanguageId?.ToString());
+                                    }
+                                    @(selectedLanguage?.Text ?? EmptyFieldReplacer)
+                                </p>
                             </div>
 
                         </div>

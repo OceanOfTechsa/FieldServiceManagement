@@ -1,6 +1,6 @@
 ﻿@model FieldServiceManagement.ViewModels.Company.CreateCompanyViewModel
-@using FieldServiceManagement.Enum
 @using System.Text.RegularExpressions
+@using FieldServiceManagement.Enum
 
 @{
     ViewData["Title"] = "Create New Company";
@@ -66,7 +66,7 @@
                             <div class="form-group">
                                 @Html.LabelFor(m => m.Phone, new { @class = "form-label" })
                                 <span class="text-danger mt-2">*</span>
-                                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", @placeholder = "+27 69 890 2422", @autocomplete = "phone" })
+                                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", @id = "cell", @placeholder = "+27 69 890 2422", @autocomplete = "phone" })
                                 @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-error" })
                             </div>
                         </div>
@@ -75,7 +75,7 @@
                         <div class="col-12 col-md-6">
                             <div class="form-group">
                                 @Html.LabelFor(m => m.Mobile, new { @class = "form-label" })
-                                @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", @placeholder = "082 686 7925", @autocomplete = "mobile" })
+                                @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", @id = "cell", @placeholder = "082 686 7925", @autocomplete = "mobile" })
                                 @Html.ValidationMessageFor(m => m.Mobile, "", new { @class = "field-error" })
                             </div>
                         </div>
@@ -188,7 +188,7 @@
                 </div>
 
                 <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
-                    <a href="/Customers/Companies" type="button" data-fsm-new-user-close class="btn btn-light btn-xs border">
+                    <a href="@(Model.ReturnUrl is not null ? Model.ReturnUrl : "/Customers/Companies")" type="button" data-fsm-new-user-close class="btn btn-light btn-xs border">
                         Cancel
                     </a>
                     <button type="submit" id="save-user-btn" class="btn btn-primary btn-xs" data-loading-text="Creating Company" data-spinner-size="spinner-xs">
@@ -260,4 +260,5 @@
             }
         });
     </script>
+
 }

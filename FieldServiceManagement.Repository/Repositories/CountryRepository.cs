@@ -27,6 +27,11 @@ namespace FieldServiceManagement.Repository.Repositories
             return [.. _dbContext.Set<Country>().FromSqlRaw(query, parameters)];
         }
 
+        public async Task<List<Country>> GetAllCountries()
+        {
+            return _repository.GetAll().ToList();
+        }
+
         #region DISPOSE
         public void Dispose()
         {

@@ -11,6 +11,7 @@ using X.PagedList.Extensions;
 namespace FieldServiceManagement.Controllers
 {
     [Route("Customers/[controller]")]
+    [Authorize]
     public class CompaniesController : Controller
     {
         [HttpGet]
@@ -37,9 +38,10 @@ namespace FieldServiceManagement.Controllers
 
         [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         [HttpGet("Create")]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(string? returnUrl)
         {
             var model = new CreateCompanyViewModel();
+            model.ReturnUrl = returnUrl;
             await PopulateOrganisationAddresses(model);
             return View(model);
         }
