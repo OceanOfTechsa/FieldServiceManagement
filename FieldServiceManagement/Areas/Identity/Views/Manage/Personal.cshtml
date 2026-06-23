@@ -3,6 +3,7 @@
 @using FieldServiceManagement.Helpers
 @using FieldServiceManagement.Models
 @model FieldServiceManagement.ViewModels.User.AppUserViewModel
+
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Personal Information";
@@ -10,51 +11,9 @@
     var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
 }
 
-<style>
-    .avatar-upload-wrapper {
-        position: relative;
-        display: inline-block;
-        cursor: default; /* not clickable by default */
-    }
-
-        .avatar-upload-wrapper.avatar-editable {
-            cursor: pointer; /* clickable in edit mode */
-        }
-
-    .avatar-upload-image {
-        transition: all .2s ease;
-    }
-
-    .avatar-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,.55);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.2rem;
-        opacity: 0;
-        transition: opacity .2s ease;
-        pointer-events: none;
-    }
-
-    /* overlay only shows on hover when in edit mode */
-    .avatar-upload-wrapper.avatar-editable:hover .avatar-overlay {
-        opacity: 1;
-    }
-
-    .avatar-loader {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,.65);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>
+@section Styles {
+    <link rel="stylesheet" href="~/css/Identity/Account/Personal.css" asp-append-version="true" />
+}
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-2 px-3">
@@ -74,7 +33,6 @@
             <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel">
                 @await Html.PartialAsync("~/Views/Components/Partials/_AccountLeftPanele.cshtml")
             </div>
-
             
             <button class="btn fsm-panel-fab d-lg-none"
                     type="button"
@@ -84,8 +42,8 @@
                 <i class="bi bi-layout-sidebar"></i>
             </button>
 
-            @using (Html.BeginForm("Edit", "Users", new { area = "" }, FormMethod.Post, null, new{ id = "edit-user-form", @class = "d-flex flex-column flex-grow-1 overflow-hidden"}))
-            {
+            <form class="d-flex flex-column flex-grow-1 overflow-hidden" method="post" id = "edit-user-form" action="/Identity/Account/Manage/Edit">
+
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(m => m.Id)
                 @Html.HiddenFor(m => m.OrganisationId)
@@ -313,10 +271,16 @@
                                 <div class="col-12 col-md-6">
                                     <div class="form-group">
                                         @Html.LabelFor(m => m.PreferredLanguageId, new { @class = "form-label" })
-                                        @Html.DropDownListFor(m => m.PreferredLanguageId,
-                                            ViewBag.Languages as SelectList ?? new SelectList(Enumerable.Empty<object>()),
-                                            "Select language",
-                                            new { @class = "form-select" })
+                                        <select id="preferredLanguageId" name="PreferredLanguageId" class="form-select">
+                                            <option value="">Select language</option>
+                                            @foreach (var language in ViewBag.Languages as SelectList ?? new SelectList(Enumerable.Empty<object>()))
+                                            {
+                                                <option value="@language.Value"
+                                                        selected="@(Model.PreferredLanguageId?.ToString() == language.Value ? "selected" : null)">
+                                                    @language.Text
+                                                </option>
+                                            }
+                                        </select>
                                         @Html.ValidationMessageFor(m => m.PreferredLanguageId, "", new { @class = "field-error" })
                                     </div>
                                 </div>
@@ -333,7 +297,7 @@
                         </div>
                     </div>
                 </div>
-            }
+            </form>
         </div>
     </div>
 </div>
@@ -391,131 +355,24 @@
 </div>
 
 @section scripts {
+    <script src="~/js/Identity/Account/Personal.js" defer></script>
     <script type="text/javascript">
-        const editToggleBtn = document.getElementById('toggleEdit');
-        const cancelEditBtn = document.getElementById('cancelEdit');
-
-        const infoDiv = document.getElementById('infoDiv');
-        const editFormDiv = document.getElementById('editForm');
-
-        const form = document.getElementById('edit-user-form');
-
-        const cancelDialog = document.getElementById('fsm-cancel-edit-dialog');
-        const cancelDialogClose = document.getElementById('fsm-cancel-edit-close');
-        const cancelDialogConfirm = document.getElementById('fsm-cancel-edit-confirm');
-
-        const avatarWrapper = document.querySelector('.avatar-upload-wrapper');
-        const avatarInput = document.getElementById('avatar-upload');
-        const avatarPreview = document.getElementById('avatar-preview');
-        const avatarLoader = document.getElementById('avatar-loader');
-
-        let originalValues = {};
-        const originalAvatarSrc = avatarPreview.src;
-
-        function captureInitialValues() {
-            originalValues = {};
-            form.querySelectorAll('input, select, textarea').forEach(field => {
-                if (field.type === 'hidden') return;
-                originalValues[field.name] = field.type === 'checkbox'
-                    ? field.checked
-                    : field.value;
-            });
+        @{
+                var languages = ViewBag.Languages as SelectList;
         }
 
-        function hasChanges() {
-            let changed = false;
-            form.querySelectorAll('input, select, textarea').forEach(field => {
-                if (field.type === 'hidden') return;
-                const currentValue = field.type === 'checkbox'
-                    ? field.checked
-                    : field.value;
-                if (originalValues[field.name] !== currentValue) {
-                    changed = true;
-                }
-            });
-            return changed;
+        @if (languages != null && languages.Any())
+        {
+                <text>
+                        const languageChoices = new Choices('#preferredLanguageId', {
+                            searchEnabled: true,
+                        searchPlaceholderValue: 'Search language...',
+                        itemSelectText: '',
+                        shouldSort: false,
+                        removeItemButton: true,
+                        noResultsText: 'No languages found',
+                                    });
+                </text>
         }
-
-        function restoreOriginalValues() {
-            Object.keys(originalValues).forEach(key => {
-                const field = form.querySelector(`[name="${key}"]`);
-                if (!field) return;
-                if (field.type === 'checkbox') {
-                    field.checked = originalValues[key];
-                } else {
-                    field.value = originalValues[key];
-                }
-            });
-        }
-
-        function enterEditMode() {
-            captureInitialValues();
-
-            infoDiv.classList.add('d-none');
-            editFormDiv.classList.remove('d-none');
-
-            editToggleBtn.classList.add('d-none');
-            cancelEditBtn.classList.remove('d-none');
-
-            avatarWrapper.classList.add('avatar-editable');
-        }
-
-        function exitEditMode(discardChanges = false) {
-            restoreOriginalValues();
-
-            if (discardChanges) {
-                avatarPreview.src = originalAvatarSrc; 
-                avatarInput.value = '';                 
-            }
-
-            infoDiv.classList.remove('d-none');
-            editFormDiv.classList.add('d-none');
-
-            editToggleBtn.classList.remove('d-none');
-            cancelEditBtn.classList.add('d-none');
-
-            avatarWrapper.classList.remove('avatar-editable');
-        }
-
-        editToggleBtn.addEventListener('click', function () {
-            enterEditMode();
-        });
-
-        cancelEditBtn.addEventListener('click', function () {
-            if (!hasChanges()) {
-                exitEditMode(true);
-                return;
-            }
-            cancelDialog.classList.add('show');
-        });
-
-        cancelDialogClose.addEventListener('click', function () {
-            cancelDialog.classList.remove('show');
-        });
-
-        cancelDialogConfirm.addEventListener('click', function () {
-            cancelDialog.classList.remove('show');
-            exitEditMode(true);
-        });
-
-        avatarWrapper.addEventListener('click', () => {
-            const isEditMode = !editFormDiv.classList.contains('d-none');
-            if (!isEditMode) return;
-            avatarInput.click();
-        });
-
-        avatarInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (!file) return;
-
-            avatarLoader.classList.remove('d-none');
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                avatarPreview.src = e.target.result;
-                avatarLoader.classList.add('d-none');
-            };
-            reader.readAsDataURL(file);
-        });
     </script>
 }

@@ -1,4 +1,5 @@
 ﻿using FieldServiceManagement.Business.LanguageBusiness;
+using FieldServiceManagement.Business.URLEncryptionBusiness;
 using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Data.DataModels.User;
 using FieldServiceManagement.ViewModels.Shared;
@@ -40,6 +41,22 @@ namespace FieldServiceManagement.Areas.Identity.Controllers
             model.TwoFactorEnabled = identityUser?.TwoFactorEnabled;
             BuildLanguagesList(model);
             return View(model);
+        }
+
+        [HttpPost("Edit")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(AppUserViewModel model)
+        {
+            if(!ModelState.IsValid)
+            {
+                BuildLanguagesList(model);
+                return View(model);
+            }
+
+            var performedBy = await new UserBusiness().GetUserDetailsByUserNameAsync(User?.Identity?.Name!);
+            new UserBusiness().UpdateUserAsync(model, performedBy);
+
+            return RedirectToAction(nameof(Personal));
         }
 
 
