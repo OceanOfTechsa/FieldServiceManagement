@@ -37,8 +37,7 @@ namespace FieldServiceManagement.Areas.Identity.Controllers
             if (model is null)
                 return View("ResourceNotFound", new ResourceNotFoundViewModel{ ResourceName = "Profile" });
 
-            var identityUser = await _userManager.GetUserAsync(User!);
-            model.TwoFactorEnabled = identityUser?.TwoFactorEnabled;
+            model.TwoFactorEnabled = _userManager.GetUserAsync(User!).Result.TwoFactorEnabled;
             BuildLanguagesList(model);
             return View(model);
         }

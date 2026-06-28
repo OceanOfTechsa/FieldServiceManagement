@@ -72,7 +72,6 @@ public class AccountController : Controller
                     rememberMe = model.RememberMe,
                     returnUrl = model.ReturnUrl
                 });
-
             var guardResult = ApplyGuards(result, model.ReturnUrl);
             if (guardResult != null)
                 return guardResult;
@@ -130,6 +129,7 @@ public class AccountController : Controller
         {
             UserName = model.Email,
             Email = model.Email,
+            OrganisationId = Guid.NewGuid()
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);

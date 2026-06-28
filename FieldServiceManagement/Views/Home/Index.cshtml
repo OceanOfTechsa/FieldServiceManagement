@@ -1,12 +1,135 @@
-﻿@using FieldServiceManagement.Enum
-
+﻿@using FieldServiceManagement.Business.Configuration
+@using FieldServiceManagement.Helpers
+@using System.Reflection
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Home";
+    var greeting = GreetingHelper.GetGreeting();
+    var browser = Context.Request.Headers["User-Agent"].ToString();
+    var fileVersion = Assembly.GetEntryAssembly()!
+        .GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version;
 }
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-center">
-        <div>
-            Welcome <strong>Name</strong>
+<style>
+    .fsm-welcome-icon-ring {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        border: 1.5px solid #dee2e6;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fsm-welcome-icon-ring i {
+        font-size: 28px;
+        color: var(--bs-primary);
+    }
+
+    .fsm-welcome-eyebrow {
+        font-size: 11px;
+        font-family: var(--fsm-font-mono);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-bottom: 10px;
+    }
+
+    .fsm-welcome-title {
+        font-size: 42px; /* was 32px */
+        font-weight: 600; /* was 500 */
+        color: #111827;
+        margin: 0 0 6px;
+        line-height: 1.1;
+    }
+
+    .fsm-welcome-sub {
+        font-size: 16px; /* was 13px */
+        color: #888;
+        font-weight: 400;
+        margin-bottom: 28px;
+    }
+
+
+    .fsm-welcome-hr {
+        width: 100%;
+        border: none;
+        border-top: 1px solid #e4e4e4;
+        margin-bottom: 28px;
+    }
+
+    .fsm-welcome-desc {
+        font-size: 15px; /* was 13px */
+        color: #666;
+        text-align: center;
+        line-height: 1.7;
+        max-width: 480px;
+        margin-bottom: 28px;
+    }
+
+    /* .fsm-welcome-build {
+        font-size: 11px;
+        color: #bbb;
+        font-family: var(--fsm-font-mono, monospace);
+        letter-spacing: 0.04em;
+    } */
+
+    .fsm-welcome-build {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-family: var(--fsm-font-mono);
+        font-size: 11px;
+        color: #9ca3af;
+        letter-spacing: 0.04em;
+    }
+</style>
+<div class="d-flex flex-column container-fluid px-0 h-full">
+
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-2 px-3 border-bottom">
+        <div class="d-flex gap-2 align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <i class="bi bi-person-circle me-1 text-black"></i>
+                        @greeting <strong>@User?.Identity?.Name</strong>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column align-items-center pt-9 px-2">
+
+                <div class="fsm-welcome-brand mb-4">
+                    <img src="@AppSettings.fsmLogo" alt="OOT FSM" class="brand-avatar-lg" />
+                </div>
+
+                <h1 class="fsm-welcome-title" style="font-size:clamp(4rem,3.5vw,2.8rem);">Welcome</h1>
+                <p class="fsm-welcome-sub fw-semibold text-accent">OOT Field Service Management</p>
+
+                @* <hr class="fsm-welcome-hr" /> *@
+
+                @if (browser.Contains("Trident/") || browser.Contains("MSIE "))
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_BrowserNotice.cshtml")
+                }
+                else
+                {
+                    <p class="fs-6 text-center">
+                        Use the navigation bar above to create, view, update, and manage your field service operations.
+                    </p>
+                   
+                }
+                <span class="fsm-welcome-build">
+                    <i class="bi bi-box-seam"></i> Build: @fileVersion
+                </span>
+            </div>
         </div>
     </div>
 </div>

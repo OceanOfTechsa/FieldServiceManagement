@@ -4,6 +4,7 @@ using FieldServiceManagement.Business.URLEncryptionBusiness;
 using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Company;
 using FieldServiceManagement.ViewModels.Interfaces;
+using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using X.PagedList.Extensions;
@@ -31,7 +32,7 @@ namespace FieldServiceManagement.Controllers
         {
             var model = await new CompanyBusiness().GetCompanyFullDetailsByIdAsync(Id);
             if (!model.Any())
-                return NotFound();
+                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Company" });
 
             return View(model.ToPagedList(page ?? 1, 10));
         }
@@ -67,6 +68,9 @@ namespace FieldServiceManagement.Controllers
         public async Task<IActionResult> Edit(Guid Id)
         {
             var model = await new CompanyBusiness().GetCompanyByIdAsync(Id);
+            if (model is null)
+                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Company" });
+
             await PopulateOrganisationAddresses(model);
             return View(model);
         }

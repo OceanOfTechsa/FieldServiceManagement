@@ -2,7 +2,9 @@
 using FieldServiceManagement.Business.URLEncryptionBusiness;
 using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Data.DataModels.User;
+using FieldServiceManagement.Helpers;
 using FieldServiceManagement.Models;
+using FieldServiceManagement.ViewModels.Shared;
 using FieldServiceManagement.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -40,10 +42,11 @@ namespace FieldServiceManagement.Controllers
         public async Task<IActionResult> Info(Guid Id)
         {
             var profile = await new UserBusiness().GetAllUserDetailsByIdAsync(Id);
-            if(profile.User.OrganisationId != new UserBusiness().GetUserDetailsByUserNameAsync(User?.Identity?.Name!).Result.OrganisationId)
+            if (profile is null)
+                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "User" });
+
+            if (profile.User.OrganisationId != User.GetOrganisationId())
                 return Forbid();
-            if (profile == null)
-                return NotFound();
 
             return View(profile);
         }
@@ -81,6 +84,9 @@ namespace FieldServiceManagement.Controllers
         public async Task<IActionResult> Edit(Guid Id)
         {
             var model = await new UserBusiness().GetAllUserDetailsByIdAsync(Id);
+            if (model is null)
+                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "User" });
+
             BuildLanguagesList(model);
             return View(model);
         }

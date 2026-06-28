@@ -13,9 +13,9 @@ namespace FieldServiceManagement.Controllers
      
         public async Task<IActionResult> Index(string? status)
         {
-            var contacts = await new AddressBusiness().GetAddressByUserEmailAsync(User?.Identity?.Name!);
+            var Addresses = await new AddressBusiness().GetAddressByUserEmailAsync(User?.Identity?.Name!);
             ViewBag.SelectedStatus = status;
-            return View(contacts);
+            return View(Addresses);
         }
 
         public async Task<IActionResult> Create(string? returnUrl)

@@ -3,6 +3,7 @@
 @using FieldServiceManagement.ViewModels.User
 @using FieldServiceManagement.Web.Navigation
 @using System.Security.Claims
+@using FieldServiceManagement.Business.Configuration
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
 @{
@@ -374,7 +375,7 @@
 
             @* Brand *@
             <a href="/" class="fsm-brand">
-                <img src="/Assets/Images/Brand/logo.svg" alt="FSM logo" class="brand-avatar" />
+                <img src="@AppSettings.fsmLogo" alt="FSM logo" class="brand-avatar" />
                 FSM
             </a>
 

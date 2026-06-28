@@ -5,6 +5,7 @@ using FieldServiceManagement.Business.URLEncryptionBusiness;
 using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Contact;
 using FieldServiceManagement.ViewModels.Interfaces;
+using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using X.PagedList.Extensions;
@@ -63,7 +64,7 @@ namespace FieldServiceManagement.Controllers
         {
             var model = await new ContactBusiness().GetContactFullDetailsByIdAsync(Id);
             if (!model.Any())
-                return NotFound();
+                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Contact" });
 
             return View(model.ToPagedList(page ?? 1, 10));
         }

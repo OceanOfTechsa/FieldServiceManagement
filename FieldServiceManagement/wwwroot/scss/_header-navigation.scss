@@ -64,6 +64,32 @@ $nav-height:      44px;
   }
 }
 
+
+.fsm-brand-lg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: black;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    margin-right: 1.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:hover {
+        color: $nav-text;
+        text-decoration: none;
+    }
+
+    .brand-avatar-lg {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+}
+
 // ─── Nav links (desktop) ─────────────────────────────────────────────────────
 .fsm-nav {
     display: flex;

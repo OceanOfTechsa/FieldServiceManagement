@@ -209,6 +209,28 @@ namespace FieldServiceManagement.Web.Navigation
                 Icon = "fa-solid fa-file-lines",
                 Roles = ["Administrator", "Dispatcher"],
                 Subs = []
+            },
+            new NavItem
+            {
+                Title = "Addresses",
+                Url = "/Addresses",
+                Icon = "fa-solid fa-file-lines",
+                Roles = ["Administrator", "Dispatcher", "CallCenterAgent"],
+                Subs = 
+                [
+                    new NavSubItem
+                    {
+                        Title = "All Addresses",
+                        Url = "/Addresses",
+                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "SuperAdmin"]
+                    },
+                    new NavSubItem
+                    {
+                        Title = "Create",
+                        Url = "/Addresses/Create",
+                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "SuperAdmin"]
+                    }
+                ]
             }
         ];
     }
