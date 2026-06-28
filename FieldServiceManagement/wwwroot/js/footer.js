@@ -13,7 +13,7 @@
     let isOnline = navigator.onLine;
     let isLoading = document.readyState !== 'complete';
     let isIssue = false;          // set to true from server via window.fsmHasIssue
-    let announcementCount = 0;             // set from server via window.fsmAnnouncementCount
+    let announcementCount = 3;             // set from server via window.fsmAnnouncementCount
     let countdown = 30;
     let countdownTimer = null;
     let isReloading = false;
@@ -204,3 +204,37 @@
     render();
 
 })();
+
+
+
+(function () {
+    const dot = document.getElementById('health-dot');
+    const label = document.getElementById('health-label');
+
+    const colors = {
+        Healthy: 'var(--bs-success)',
+        Degraded: 'var(--bs-warning)',
+        Unhealthy: 'var(--bs-danger)'
+    };
+
+    const displayLabel = {
+        Healthy: 'Operational',
+        Degraded: 'Degraded',
+        Unhealthy: 'Outage'
+    };
+
+    async function ping() {
+        try {
+            const res = await fetch('/health/status');
+            const data = await res.json();
+            dot.style.background = colors[data.status] ?? 'var(--bs-secondary)';
+            label.textContent = displayLabel[data.status] ?? data.status;
+        } catch {
+            dot.style.background = 'var(--bs-danger)';
+            label.textContent = 'Unreachable';
+        }
+    }
+
+    ping();
+    setInterval(ping, 1 * 60 * 1000);
+}());

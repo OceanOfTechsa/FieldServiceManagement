@@ -30,7 +30,8 @@ public class Startup
             .AddSwaggerModule(WebHostEnvironment)
             // .AddCacheModule(WebHostEnvironment)
             .AddElmahModule(WebHostEnvironment)
-            .AddResendModule(WebHostEnvironment);
+            .AddResendModule(WebHostEnvironment)
+            .AddHealthModule();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

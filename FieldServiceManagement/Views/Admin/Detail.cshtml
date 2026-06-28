@@ -1,0 +1,232 @@
+﻿@model string
+@{
+    ViewData["Title"] = $"Health – {Model}";
+    Layout = "_Layout";
+
+    var serviceIcon = Model switch
+    {
+        "application" => "bi-cpu",
+        "database" => "bi-database",
+        "resend" => "bi-envelope",
+        _ => "bi-gear"
+    };
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <!-- Toolbar -->
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
+        <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
+                <li class="breadcrumb-item text-blue">Admin</li>
+                <li class="breadcrumb-item text-blue">
+                    <a href="/Admin/Health">
+                        Health
+                    </a>
+                </li>
+                <li class="breadcrumb-item link-success text-capitalize" aria-current="page">@Model</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex gap-2 align-items-center">
+            <span class="text-muted" style="font-size:12px">
+                Last refreshed: <span id="last-refresh">—</span>
+            </span>
+            <button class="btn border-fsm btn-xs" id="refreshBtn" title="Refresh now">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+    </div>
+
+     <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+               <!-- Status banner -->
+                <div id="status-banner" class="bd-callout bd-callout-danger my-0 p-2 bg-opacity-10 mt-3 mx-2" style="display:none!important">
+                    <span id="status-dot" class="fsm-status-dot"></span>
+                    <span id="status-label" class="fsm-user-name"></span>
+                    <span id="status-duration" class="fsm-meta-text font-mono ms-1"></span>
+                    <span id="status-error" class="text-danger smaller ms-auto d-none"></span>
+                </div>
+
+                <!-- Detail cards -->
+                <div id="detail-body">
+                    <div class="fsm-empty-state py-5">
+                        <div class="fsm-empty-icon">
+                            <i class="bi @serviceIcon"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-1">Loading…</h6>
+                        <p class="text-muted small mb-0">Fetching service details</p>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const service = '@Model';
+
+            const statusDot = {
+                Healthy:   'bg-success',
+                Degraded:  'bg-warning',
+                Unhealthy: 'bg-danger'
+            };
+
+            const statusBannerBg = {
+                Healthy:   'bd-callout-success',
+                Degraded:  'bd-callout-warning',
+                Unhealthy: 'bd-callout-danger'
+            };
+
+           const fieldLabels = {
+                // Application
+                version:              'Version',
+                environment:          'Environment',
+                machineName:          'Machine name',
+                uptime:               'Uptime',
+                memoryMb:             'Memory usage',
+                threadCount:          'Thread count',
+                // Resend
+                latencyMs:            'Latency',
+                domainCount:          'Domains configured',
+                statusCode:           'HTTP status code',
+                // Database
+                queryRoundTripMs:     'Query round-trip',
+                provider:             'Provider',
+                appliedMigrations:    'Applied migrations',
+                pendingMigrations:    'Pending migrations',
+                database:             'Database name'
+            };
+
+            const fieldIcons = {
+                // Application
+                version:              'bi-tag',
+                environment:          'bi-layers',
+                machineName:          'bi-pc-display',
+                uptime:               'bi-clock-history',
+                memoryMb:             'bi-memory',
+                threadCount:          'bi-cpu',
+                // Resend
+                latencyMs:            'bi-stopwatch',
+                domainCount:          'bi-envelope-check',
+                statusCode:           'bi-activity',
+                // Database
+                queryRoundTripMs:     'bi-stopwatch',
+                provider:             'bi-server',
+                appliedMigrations:    'bi-check-circle',
+                pendingMigrations:    'bi-exclamation-circle',
+                database:             'bi-database'
+            };
+
+            function formatValue(key, val) {
+                if (key === 'memoryMb')          return `${val} MB`;
+                if (key === 'latencyMs')         return `${val} ms`;
+                if (key === 'statusCode')        return `HTTP ${val}`;
+                if (key === 'queryRoundTripMs')  return `${val} ms`;
+                if (key === 'pendingMigrations') return val === 0 ? 'None' : `${val} pending`;
+                if (key === 'appliedMigrations') return `${val} applied`;
+                return val;
+            }
+
+            async function load() {
+                try {
+                    const res  = await fetch('/health/detail');
+                    const data = await res.json();
+                    const svc  = data.checks.find(c => c.name === service);
+
+                    document.getElementById('last-refresh').textContent =
+                        new Date().toLocaleTimeString('en-GB');
+
+                    if (!svc) {
+                        document.getElementById('detail-body').innerHTML = `
+                            <div class="fsm-empty-state py-5">
+                                <div class="fsm-empty-icon">
+                                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                                </div>
+                                <h6 class="fw-semibold mb-1">Service not found</h6>
+                                <p class="text-muted small mb-0">Could not find data for "${service}"</p>
+                            </div>`;
+                        return;
+                    }
+
+                    // Status banner
+                    const banner = document.getElementById('status-banner');
+                    banner.className = `bd-callout my-0 p-2 bg-opacity-10 mt-3 mx-2 ${statusBannerBg[svc.status] ?? 'bg-light'}`;
+                    banner.style.display = '';
+                     const displayLabel = {
+                        Healthy:   'Operational',
+                        Degraded:  'Degraded',
+                        Unhealthy: 'Outage'
+                    };
+
+                    document.getElementById('status-dot').className  = `fsm-status-dot ${statusDot[svc.status] ?? 'bg-secondary'}`;
+                    document.getElementById('status-label').textContent = displayLabel[svc.status] ?? svc.status;
+                    document.getElementById('status-duration').textContent = `${svc.durationMs.toFixed(1)} ms`;
+
+                    const errEl = document.getElementById('status-error');
+                    if (svc.error) {
+                        errEl.textContent = svc.error;
+                        errEl.classList.remove('d-none');
+                    } else {
+                        errEl.classList.add('d-none');
+                    }
+
+                    // Description card
+                    const descCard = `
+                        <div class="border-0 rounded-2 overflow-hidden mb-2" style="background:var(--bs-white)">
+                            <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2">
+                                <i class="bi bi-info-circle text-muted" style="font-size:13px"></i>
+                                <span class="fsm-section-label">Description</span>
+                            </div>
+                            <div class="px-3 py-3">
+                                <span class="fsm-meta-text">${svc.description ?? '—'}</span>
+                            </div>
+                        </div>`;
+
+                    // Data fields as individual rows in a card
+                    const entries = Object.entries(svc.data ?? {});
+                    const fieldRows = entries.map(([k, v]) => `
+                        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi ${fieldIcons[k] ?? 'bi-dot'} text-muted" style="font-size:13px"></i>
+                                <span class="fsm-meta-text">${fieldLabels[k] ?? k}</span>
+                            </div>
+                            <span class="fsm-user-name font-mono">${formatValue(k, v)}</span>
+                        </div>`).join('');
+
+                    const dataCard = entries.length > 0 ? `
+                        <div class="border-0 rounded-2 overflow-hidden mb-2" style="background:var(--bs-white)">
+                            <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2">
+                                <i class="bi bi-list-ul text-muted" style="font-size:13px"></i>
+                                <span class="fsm-section-label">Details</span>
+                            </div>
+                            ${fieldRows}
+                        </div>` : '';
+
+                    document.getElementById('detail-body').innerHTML = descCard + dataCard;
+
+                } catch {
+                    document.getElementById('detail-body').innerHTML = `
+                        <div class="fsm-empty-state py-5">
+                            <div class="fsm-empty-icon">
+                                <i class="bi bi-exclamation-triangle text-danger"></i>
+                            </div>
+                            <h6 class="fw-semibold mb-1">Failed to load</h6>
+                            <p class="text-muted small mb-3">Could not reach the health endpoint.</p>
+                            <button class="btn btn-primary btn-xs" onclick="load()">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Retry
+                            </button>
+                        </div>`;
+                }
+            }
+
+            document.getElementById('refreshBtn').addEventListener('click', load);
+
+            load();
+            setInterval(load, 30_000);
+        }());
+    </script>
+}

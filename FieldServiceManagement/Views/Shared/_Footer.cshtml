@@ -114,9 +114,20 @@
 
         @* Hint area *@
         <div class="footer-hint-area">
-            <span class="hint-idle">
-                <span class="">Platform v1.0</span>
-            </span>
+            <a href="@(User.IsInRole("SuperAdmin") ? "/Admin/Health" : "#")"
+               class="d-flex align-items-center gap-2 text-decoration-none"
+               id="fsm-health-footer"
+               title="@(User.IsInRole("SuperAdmin") ? "View system health" : "System health status")"
+               style="@(User.IsInRole("SuperAdmin") ? "" : "pointer-events:none;cursor:default")">
+                <i class="bi bi-heart-pulse text-muted" style="font-size:11px"></i>
+                <span class="text-muted" style="font-size:11px">System</span>
+                <span id="health-dot"
+                      style="width:6px;height:6px;border-radius:50%;
+                             background:var(--bs-secondary);display:inline-block;
+                             flex-shrink:0">
+                </span>
+                <span id="health-label" class="text-muted" style="font-size:11px">Running diagnosis</span>
+            </a>
 
             <p class="hint-powered">
                 Powered by <a href="@AppSettings.CompanyUrl" target="_blank" rel="noopener">@AppSettings.CompanyName</a>

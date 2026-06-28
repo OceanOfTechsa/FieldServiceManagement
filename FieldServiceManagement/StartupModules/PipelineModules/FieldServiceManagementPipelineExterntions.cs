@@ -1,5 +1,6 @@
 ﻿using FieldServiceManagement.Data.DataModels.User;
 using FieldServiceManagement.StartupModules.Middleware;
+using FieldServiceManagement.StartupModules.ServiceModules;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.WebUtilities;
@@ -127,7 +128,7 @@ public static class PipelineExtensions
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
         });
-
+        app.UseHealthModule();
         return app;
     }
 }
