@@ -1,5 +1,5 @@
 ﻿@using FieldServiceManagement.Helpers
-@model FieldServiceManagement.ViewModels.Organisation.OrganisationViewModel
+@model FieldServiceManagement.ViewModels.Organisation.OrganisationDetailsViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Manage Organisation";
@@ -127,22 +127,22 @@
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Industry</label>
-                                <p class="fw-semibold mb-0">@(Model.IndustryId?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.IndustryName?.ToString() ?? "—")</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Country</label>
-                                <p class="fw-semibold mb-0">@(Model.CountryId?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.IndustryName?.ToString() ?? "—")</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">State / Province</label>
-                                <p class="fw-semibold mb-0">@(Model.StateId?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.StateName?.ToString() ?? "—")</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Currency</label>
-                                <p class="fw-semibold mb-0">@(Model.CurrencyId?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.CurrencyName?.ToString() ?? "—")</p>
                             </div>
 
                             <div class="col-md-6">
@@ -152,23 +152,8 @@
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Language</label>
-                                <p class="fw-semibold mb-0">@(Model.LanguageId?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.LanguageName?.ToString() ?? "—")</p>
                             </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small mb-1">Created</label>
-                                <p class="fw-semibold mb-0">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</p>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small mb-1">Last Updated</label>
-                                <p class="fw-semibold mb-0">
-                                    @(Model.UpdatedAt.HasValue
-                                        ? Model.UpdatedAt.Value.ToString("dd MMM yyyy, HH:mm")
-                                        : "—")
-                                </p>
-                            </div>
-
                         </div>
                     </div>
 

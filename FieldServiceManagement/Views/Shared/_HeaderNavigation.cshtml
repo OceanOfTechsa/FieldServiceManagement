@@ -190,10 +190,34 @@
                 }
                 else if (Model?.OrgSubscription?.IsTrial == true && Model?.OrgSubscription?.EndDate >= DateTime.UtcNow && Model.OrgSubscription.PlanId != (int)SubscriptionPlanEnum.Free)
                 {
-                    var daysLeft = (int)Math.Ceiling((Model.OrgSubscription.EndDate - DateTime.UtcNow).TotalDays);
+                    var endDateUtc = Model.OrgSubscription.EndDate.Kind == DateTimeKind.Utc
+                        ? Model.OrgSubscription.EndDate
+                        : Model.OrgSubscription.EndDate.ToUniversalTime();
+
+                    var daysLeft = (int)Math.Ceiling((endDateUtc - DateTime.UtcNow).TotalDays);
                     <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
                         <i class="bi bi-exclamation-circle-fill text-warning"></i>
                         @Model?.SubscriptionPlan?.Name edition trial expires in <strong>@daysLeft</strong> day(s)
+                    </div>
+                }
+                else if (Model?.OrgSubscription?.IsTrial == true
+                      && Model.OrgSubscription.EndDate < DateTime.UtcNow) 
+                {
+                    var endDateUtc = Model.OrgSubscription.EndDate.Kind == DateTimeKind.Utc
+                        ? Model.OrgSubscription.EndDate
+                        : Model.OrgSubscription.EndDate.ToUniversalTime();
+
+                    <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                        Your subscription expired on
+                        <strong>@endDateUtc.ToString("MMM dd, yyyy hh:mm") @endDateUtc.ToString("tt").ToLower()</strong>.
+                    </div>
+                }
+                else if (Model?.OrgSubscription?.PlanId == (int)SubscriptionPlanEnum.Professional)
+                {
+                    <div class="bg-info-subtle text-black small p-1 px-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-briefcase-fill text-info"></i>
+                        You are on the Professional edition.
                     </div>
                 }
                 else

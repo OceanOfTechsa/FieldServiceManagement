@@ -17,12 +17,17 @@ namespace FieldServiceManagement.Business
 
         public async Task<BusinessResult> ApplySubscriptionPlanRules(AppUserProfileViewModel Model,SubscriptionRuleContext Context)
         {
+
+            if (Model?.OrgSubscription?.EndDate < DateTime.UtcNow)
+                return BusinessResult.Fail($"Your subscription expired on {Model?.OrgSubscription?.EndDate:MMM dd, yyyy}. Access to this feature has been restricted. Please renew your subscription or contact support to restore full access.");
+
             var plan = Model.SubscriptionPlan;
             if (plan == null)
                 return BusinessResult.Fail("No subscription plan found for the current organisation.");
 
             if (!plan.IsActive)
                 return BusinessResult.Fail("Your current subscription plan is inactive. Please contact support or upgrade your plan.");
+
 
             var orgId = Model.User.OrganisationId;
 

@@ -12,5 +12,11 @@ namespace FieldServiceManagement.Business
             var Org = repo.GetById(OrgId);
             return ObjectMapper.Mapper.Map<OrganisationViewModel>(Org);
         }
+
+        public async Task<OrganisationDetailsViewModel> GetOrganisationDeatailsByIdAsync(Guid OrgId)
+        {
+            var result = await new OrganisationRepository().GetOrganisationDetailsByIdAsync(OrgId);
+            return ObjectMapper.Mapper.Map<OrganisationDetailsViewModel>(result);
+        }
     }
 }

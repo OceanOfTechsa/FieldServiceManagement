@@ -32,7 +32,7 @@ namespace FieldServiceManagement.Areas.Identity.Controllers
         [HttpGet("Organisation")]
         public async Task<IActionResult> Organisation()
         {
-            var model = await new OrganisationBusiness().GetOrganisationById(User.GetOrganisationIdOrThrow());
+            var model = await new OrganisationBusiness().GetOrganisationDeatailsByIdAsync(User.GetOrganisationIdOrThrow());
             if(model is null)
                 return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Organisation", ReturnUrl = "/Identity/Account/Manage/Settings/Organisation" });
 

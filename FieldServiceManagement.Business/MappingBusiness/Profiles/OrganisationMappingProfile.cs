@@ -9,6 +9,7 @@ namespace FieldServiceManagement.Business.MappingBusiness.Profiles
         public OrganisationMappingProfile()
         {
             CreateMap<Organisation, OrganisationViewModel>().ReverseMap();
+            CreateMap<OrganisationDetails, OrganisationDetailsViewModel>().ReverseMap();
         }
     }
 }

@@ -2,6 +2,8 @@
 using FieldServiceManagement.Data.DataModels.Organisation;
 using FieldServiceManagement.Data.RepositoryServices;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace FieldServiceManagement.Repository.Repositories
 {
@@ -27,6 +29,13 @@ namespace FieldServiceManagement.Repository.Repositories
             return _repository.Find(o => o.Id == OrgId)?.FirstOrDefault();
         }
 
+
+        public async Task<OrganisationDetails?> GetOrganisationDetailsByIdAsync(Guid organisationId)
+        {
+            var param = new SqlParameter("@OrganisationId", organisationId);
+            var query = "EXEC [dbo].[GetOrganisationById] @OrganisationId";
+            return _dbContext.Database.SqlQueryRaw<OrganisationDetails>(query, param).AsEnumerable().FirstOrDefault();
+        }
 
         #region DISPOSE
         public void Dispose()
