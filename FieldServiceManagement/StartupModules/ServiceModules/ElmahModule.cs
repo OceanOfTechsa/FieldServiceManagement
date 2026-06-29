@@ -16,7 +16,7 @@ namespace FieldServiceManagement.StartupModules.ServiceModules
                 options.Path = "elmah";
 
                 // Preserve your existing production trimming logic
-                var connStr = AppSettings.GetFormsConnectionString();
+                var connStr = AppSettings.GetFSMConnectionString();
                 options.ConnectionString = env.IsDevelopment() ? connStr : connStr[..^34];
 
                 options.ApplicationName = "FieldServiceManagement";

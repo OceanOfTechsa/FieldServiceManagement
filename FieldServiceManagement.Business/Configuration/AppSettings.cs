@@ -30,16 +30,18 @@ namespace FieldServiceManagement.Business.Configuration
         }
 
         //The connection string must include the Column Encryption Setting=enabled; at the end as it needs to be removed for Elmah
-        public static string GetFormsConnectionString()
+        public static string GetFSMConnectionString()
         {
-            var connectionString = EnvironmentName != Enum.Environment.Development.ToString() ? ConfigHelper.Settings("AppSettings", "FieldServiceManagement") : Environment.GetEnvironmentVariable("FieldServiceManagement");
+            var connectionString = EnvironmentName != Enum.Environment.Development.ToString()
+                ? ConfigHelper.Settings("AppSettings", "FieldServiceManagement")
+                : Environment.GetEnvironmentVariable("FieldServiceManagement");
 
             if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new Exception("Cannot read the Forms Connection String !");
-            }
+                throw new Exception("Cannot read the FSM Connection String!");
+
             return connectionString;
         }
+
         public static string GetRedisConnectionString()
         {
             var redisConnection = EnvironmentName != Enum.Environment.Development.ToString() ? ConfigHelper.Settings("AppSettings", "FieldServiceManagementREDIS") : Environment.GetEnvironmentVariable("FieldServiceManagementREDIS");

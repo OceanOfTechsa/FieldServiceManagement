@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using System.Globalization;
+using ElmahCore.Mvc;
 
 namespace FieldServiceManagement.Web.StartupModules.PipelineModules;
 
@@ -79,6 +80,8 @@ public static class PipelineExtensions
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseElmah();
 
         app.UseEndpoints(endpoints =>
         {
