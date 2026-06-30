@@ -33,7 +33,7 @@ namespace FieldServiceManagement.Web.Navigation
                 Title = "Workflow",
                 Url = "/Workflow",
                 Icon = "fa-solid fa-chart-diagram",
-                Roles = ["Administrator", "SuperAdmin"],
+                Roles = ["SuperAdmin"],
                 Subs =
                 [
                     new NavSubItem
@@ -215,20 +215,20 @@ namespace FieldServiceManagement.Web.Navigation
                 Title = "Addresses",
                 Url = "/Addresses",
                 Icon = "fa-solid fa-file-lines",
-                Roles = ["Administrator", "Dispatcher", "CallCenterAgent"],
+                Roles = ["Administrator", "Dispatcher", "CallCenterAgent", "FieldAgent"],
                 Subs = 
                 [
                     new NavSubItem
                     {
                         Title = "All Addresses",
                         Url = "/Addresses",
-                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "SuperAdmin"]
+                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "CallCenterAgent"]
                     },
                     new NavSubItem
                     {
                         Title = "Create",
                         Url = "/Addresses/Create",
-                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "SuperAdmin"]
+                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "CallCenterAgent"]
                     }
                 ]
             }

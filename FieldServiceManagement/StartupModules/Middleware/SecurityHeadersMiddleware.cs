@@ -93,11 +93,11 @@ namespace FieldServiceManagement.StartupModules.Middleware
                 csp.Append("connect-src 'self' ");
 
                 // FSM backend APIs
-                if (!string.IsNullOrWhiteSpace(AppSettings.BaseUrl))
-                    csp.Append(AppSettings.BaseUrl + " ");
+                if (!string.IsNullOrWhiteSpace(AppSettings.baseUrl))
+                    csp.Append(AppSettings.baseUrl + " ");
 
-                if (!string.IsNullOrWhiteSpace(AppSettings.AzureBlobUri))
-                    csp.Append(AppSettings.AzureBlobUri + " ");
+                if (!string.IsNullOrWhiteSpace(AppSettings.azureBaseUrl))
+                    csp.Append(AppSettings.azureBaseUrl + " ");
 
                 // ----------------------------
                 // Dev support

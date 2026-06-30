@@ -172,7 +172,7 @@ $nav-height:      44px;
         }
 
         &.align-center {
-            left: 50%;
+            left: 0%;
             transform: translateX(-50%) translateY(-4px);
 
             &.show {
@@ -189,6 +189,7 @@ $nav-height:      44px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.07);
             transition: background 0.12s ease;
             cursor: pointer;
+            border-radius: 0;
 
             &:hover,
             &.active {
@@ -402,8 +403,8 @@ $nav-height:      44px;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         background: $accent-green;
         border: none;
         border-radius: 6px;

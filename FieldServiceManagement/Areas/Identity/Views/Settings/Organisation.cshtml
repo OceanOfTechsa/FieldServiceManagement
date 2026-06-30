@@ -1,8 +1,11 @@
 ﻿@using FieldServiceManagement.Helpers
+@using FieldServiceManagement.Models
 @model FieldServiceManagement.ViewModels.Organisation.OrganisationDetailsViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Manage Organisation";
+
+    var emptyFieldReplacer = new EmptyFieldReplacer().Field;
 }
 
 @section Styles {
@@ -127,32 +130,32 @@
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Industry</label>
-                                <p class="fw-semibold mb-0">@(Model.IndustryName?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.IndustryName?.ToString() ?? @emptyFieldReplacer)</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Country</label>
-                                <p class="fw-semibold mb-0">@(Model.IndustryName?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.IndustryName?.ToString() ?? @emptyFieldReplacer)</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">State / Province</label>
-                                <p class="fw-semibold mb-0">@(Model.StateName?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.StateName?.ToString() ?? @emptyFieldReplacer)</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Currency</label>
-                                <p class="fw-semibold mb-0">@(Model.CurrencyName?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.CurrencyName?.ToString() ?? @emptyFieldReplacer)</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Timezone</label>
-                                <p class="fw-semibold mb-0">@(Model.TimezoneName?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.TimezoneName?.ToString() ?? @emptyFieldReplacer)</p>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted small mb-1">Language</label>
-                                <p class="fw-semibold mb-0">@(Model.LanguageName?.ToString() ?? "—")</p>
+                                <p class="fw-semibold mb-0">@(Model.LanguageName?.ToString() ?? @emptyFieldReplacer)</p>
                             </div>
                         </div>
                     </div>

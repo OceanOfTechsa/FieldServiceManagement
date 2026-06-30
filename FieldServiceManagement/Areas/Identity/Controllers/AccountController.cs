@@ -138,7 +138,7 @@ public class AccountController : Controller
         {
             if (result.Errors.Any(e => e.Code == "DuplicateUserName" || e.Code == "DuplicateEmail"))
             {
-                _ = Task.Run(() => new DuplicateRegistrationNotification(model.Email).SendNotification());
+                _ = Task.Run(() => new DuplicateRegistrationNotification(model.Email).SendNotificationWithoutQueue());
                 string message = "If this email isn't already registered, your account has been created. Please check your inbox to continue..";
 
                 if (model.CalledFromBusiness)

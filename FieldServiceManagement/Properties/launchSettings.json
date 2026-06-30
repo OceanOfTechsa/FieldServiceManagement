@@ -4,8 +4,6 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        //"ASPNETCORE_ENVIRONMENT": "Development",
-        //"mvcDecryptFilterSecret": "f7K#mP2$vQx9Yw&NzR4eLdA8cTjBsH6G"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5051"
@@ -15,10 +13,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "mvcDecryptFilterSecret": "f7K#mP2$vQx9Yw&NzR4eLdA8cTjBsH6G",
-        "RESEND_APITOKEN": "re_hzpfhdSU_KGnJT5N5Ujo33zbxxBqLLXCn",
-        "FSMFromEmail": "OOT FSM <noreply.notifications@oceanoftechsa.com>",
-        "FieldServiceManagement": "Server=localhost\\SQLEXPRESS;Database=FieldServiceManagement;Trusted_Connection=True;Encrypt=False;"
+        "FSMFromEmail": "OOT FSM <noreply.notifications@oceanoftechsa.com>"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7053;http://localhost:5051"
@@ -28,10 +23,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "mvcDecryptFilterSecret": "f7K#mP2$vQx9Yw&NzR4eLdA8cTjBsH6G",
-        "RESEND_APITOKEN": "re_hzpfhdSU_KGnJT5N5Ujo33zbxxBqLLXCn",
-        "FSMFromEmail": "OOT FSM<noreply.notifications@oceanoftechsa.com>",
-        "FieldServiceManagement": "Server=localhost\\SQLEXPRESS;Database=FieldServiceManagement;Trusted_Connection=True;Encrypt=False;"
+        "FSMFromEmail": "OOT FSM<noreply.notifications@oceanoftechsa.com>"
       }
     }
   },

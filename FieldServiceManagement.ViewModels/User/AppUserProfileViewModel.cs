@@ -1,5 +1,6 @@
 ﻿using FieldServiceManagement.ViewModels.Address;
 using FieldServiceManagement.ViewModels.Audit;
+using FieldServiceManagement.ViewModels.Language;
 using FieldServiceManagement.ViewModels.Organisation;
 using FieldServiceManagement.ViewModels.OrganisationSubscription;
 using FieldServiceManagement.ViewModels.SubscriptionPlan;
@@ -80,5 +81,7 @@ namespace FieldServiceManagement.ViewModels.User
 
 
         public UserInvitationViewModel? Invitation { get; set; }
+
+        public List<LanguageViewModel>? Languages { get; set; } = new();
     }
 }

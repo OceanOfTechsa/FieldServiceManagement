@@ -103,13 +103,13 @@
 
         @* Tool buttons *@
         <button class="center-tool-btn" data-fsm-notes-trigger title="Notes">
-            <img src="~/Assets/Images//Application/notebook.svg" width="18" height="18" alt="Notes" />
+            <img src="~/Assets/Images/Application/notebook.svg" width="18" height="18" alt="Notes" />
         </button>
         <button class="center-tool-btn border-x" data-fsm-notes-trigger title="Files">
-            <img src="~/Assets/Images//Application/filesProject.svg" width="20" height="20" alt="Files" />
+            <img src="~/Assets/Images/Application/filesProject.svg" width="20" height="20" alt="Files" />
         </button>
         <button class="center-tool-btn border-e" data-fsm-notes-trigger title="Signs">
-            <img src="~/Assets/Images//Application/sign.png" width="18" height="18" alt="Signs" />
+            <img src="~/Assets/Images/Application/sign.png" width="18" height="18" alt="Signs" />
         </button>
 
         @* Hint area *@
@@ -126,7 +126,7 @@
                              background:var(--bs-secondary);display:inline-block;
                              flex-shrink:0">
                 </span>
-                <span id="health-label" class="text-muted" style="font-size:11px">Running diagnosis</span>
+                <span id="health-label" class="text-muted" style="font-size:11px">@AppSettings.SystemDiagnosisText</span>
             </a>
 
             <p class="hint-powered">

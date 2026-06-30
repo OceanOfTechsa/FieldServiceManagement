@@ -9,6 +9,12 @@ public class Startup
     {
         Configuration = configuration;
         WebHostEnvironment = env;
+
+        // If you rely on env-specific appsettings, the host already loads these by default.
+        // Keep this only if you have custom loading logic elsewhere.
+        _ = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+            .AddEnvironmentVariables();
     }
 
     public IConfiguration Configuration { get; }
@@ -28,7 +34,7 @@ public class Startup
             //.AddReportingModule(WebHostEnvironment)
             .AddSecurityModule()
             .AddSwaggerModule(WebHostEnvironment)
-            // .AddCacheModule(WebHostEnvironment)
+            .AddCacheModule(WebHostEnvironment)
             .AddElmahModule(WebHostEnvironment)
             .AddResendModule(WebHostEnvironment)
             .AddHealthModule();

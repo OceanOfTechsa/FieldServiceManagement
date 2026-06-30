@@ -19,8 +19,14 @@ public static class MvcModule
         var mvc = services.AddControllersWithViews();
 
         if (env.IsDevelopment())
-            mvc.AddRazorRuntimeCompilation()
-                .AddNewtonsoftJson();
+            mvc.AddRazorRuntimeCompilation(options =>
+            {
+                options.FileProviders.Clear();
+                options.FileProviders.Add(
+                    new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                        env.ContentRootPath));
+            })
+            .AddNewtonsoftJson();
 
         services.AddHttpContextAccessor();
         return services;

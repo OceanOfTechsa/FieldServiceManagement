@@ -1,15 +1,19 @@
-﻿using System.Net.Mail;
+﻿using FieldServiceManagement.Business.SettingsBusiness;
+using System.Net.Mail;
 
 namespace FieldServiceManagement.Business.Configuration
 {
     public class AppSettings
     {
         public static readonly string CompanyName = "Ocean of Tech";
+        public static readonly string SystemDiagnosisText = "Running System Diagnosis";
         public static readonly string CompanyUrl = "https://oceanoftech.co.za";
-        public static SettingsBusiness.SettingsBusiness settingBusiness = new SettingsBusiness.SettingsBusiness();
+        public static SettingsBusiness.SettingsBusiness settingBusiness = new();
         public static readonly string EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty;
         public static string baseUrl => GetConfigValue("siteUrl");
-        public static readonly string AzureBlobUri = string.Empty;
+        public static string azureBaseUrl => EnvironmentName == nameof(Enum.Environment.Development)
+         ? baseUrl
+         : GetConfigValue("azureUrl");
 
         public static readonly string BaseUrl = ConfigHelper.Settings("AppSettings", "siteUrl");
         public static string InstrumentationKey => ConfigHelper.Settings("AppSettings", "InstrumentationKey") ?? string.Empty;
@@ -19,8 +23,9 @@ namespace FieldServiceManagement.Business.Configuration
         public static int staffPageSize => Convert.ToInt16(ConfigHelper.Settings("AppSettings", "staffPageSize"));
         public static string GetUrLEncryptionKey()
         {
-            if (EnvironmentName != Enum.Environment.Development.ToString())
-                return ConfigHelper.Settings("AppSettings", "mvcDecryptFilterSecret");
+            if (EnvironmentName != nameof(Enum.Environment.Development))
+                return GetConfigValue("mvcDecryptFilterSecret");
+
             var secret = Environment.GetEnvironmentVariable("mvcDecryptFilterSecret");
             if (string.IsNullOrEmpty(secret))
             {
@@ -29,12 +34,11 @@ namespace FieldServiceManagement.Business.Configuration
             return secret;
         }
 
-        //The connection string must include the Column Encryption Setting=enabled; at the end as it needs to be removed for Elmah
         public static string GetFSMConnectionString()
         {
-            var connectionString = EnvironmentName != Enum.Environment.Development.ToString()
-                ? ConfigHelper.Settings("AppSettings", "FieldServiceManagement")
-                : Environment.GetEnvironmentVariable("FieldServiceManagement");
+            var connectionString = EnvironmentName != nameof(Enum.Environment.Development)
+                ? GetConfigValue("FSMConnectionString")
+                : Environment.GetEnvironmentVariable("FSMConnectionString");
 
             if (string.IsNullOrEmpty(connectionString))
                 throw new Exception("Cannot read the FSM Connection String!");
@@ -44,7 +48,9 @@ namespace FieldServiceManagement.Business.Configuration
 
         public static string GetRedisConnectionString()
         {
-            var redisConnection = EnvironmentName != Enum.Environment.Development.ToString() ? ConfigHelper.Settings("AppSettings", "FieldServiceManagementREDIS") : Environment.GetEnvironmentVariable("FieldServiceManagementREDIS");
+            var redisConnection = EnvironmentName != nameof(Enum.Environment.Development) 
+                ? GetConfigValue("FSMREDIS") 
+                : Environment.GetEnvironmentVariable("FSMREDIS");
 
             if (string.IsNullOrEmpty(redisConnection))
             {
@@ -60,9 +66,9 @@ namespace FieldServiceManagement.Business.Configuration
 
         public static string GetFSMFromEmail()
         {
-            var from = EnvironmentName == Enum.Environment.Development.ToString()
-                ? Environment.GetEnvironmentVariable("FSMFromEmail")
-                : ConfigHelper.Settings("AppSettings", "FSMFromEmail");
+            var from = EnvironmentName != nameof(Enum.Environment.Development)
+                ? GetConfigValue("FSMFromEmail")
+                : Environment.GetEnvironmentVariable("FSMFromEmail");
 
             if (string.IsNullOrWhiteSpace(from))
                 throw new InvalidOperationException("FSMFromEmail configuration is missing or empty. Set FSMFromEmail in config or environment.");
@@ -78,13 +84,52 @@ namespace FieldServiceManagement.Business.Configuration
             }
         }
 
-
-
+        #region Helpers
+        private static string GetSettingValue(string key, string defaultValue = "")
+        {
+            return settingBusiness.GetSettingsByKey(key)?.value ?? defaultValue;
+        }
 
         private static string GetConfigValue(string key, string defaultValue = "")
         {
             return ConfigHelper.Settings("AppSettings", key) ?? defaultValue;
         }
 
+        private static bool GetBooleanSetting(string key, bool defaultValue = false)
+        {
+            var value = GetSettingValue(key);
+
+            return bool.TryParse(value, out var result)
+                ? result
+                : defaultValue;
+        }
+
+        private static int GetIntSetting(string key, int defaultValue = 0)
+        {
+            var value = GetSettingValue(key);
+
+            return int.TryParse(value, out var result)
+                ? result
+                : defaultValue;
+        }
+
+        private static int GetIntConfig(string key, int defaultValue = 0)
+        {
+            var value = GetConfigValue(key);
+
+            return int.TryParse(value, out var result)
+                ? result
+                : defaultValue;
+        }
+
+        private static DateTime GetDateSetting(string key)
+        {
+            var value = GetSettingValue(key);
+
+            return DateTime.TryParse(value, out var result)
+                ? result
+                : DateTime.MinValue;
+        }
+        #endregion
     }
 }

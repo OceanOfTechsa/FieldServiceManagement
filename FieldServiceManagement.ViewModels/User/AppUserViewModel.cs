@@ -1,4 +1,5 @@
 ﻿using FieldServiceManagement.Data.DataModels.BaseClass;
+using System.ComponentModel;
 
 namespace FieldServiceManagement.ViewModels.User
 {
@@ -10,9 +11,13 @@ namespace FieldServiceManagement.ViewModels.User
         public string Email { get; set; }
         public string Phone { get; set; }
         public string? AvatarUrl { get; set; }
+        [DisplayName("User Role")]
         public int? UserRoleId { get; set; }
+        [DisplayName("Language")]
         public int? PreferredLanguageId { get; set; }
+        [DisplayName("IsActice?")]
         public bool IsActive { get; set; }
+        [DisplayName("Status")]
         public int? StatusId { get; set; }
         public bool IsOwner { get; set; }
         public Guid UserId { get; set; }
@@ -22,6 +27,7 @@ namespace FieldServiceManagement.ViewModels.User
         public Guid CreatedById { get; set; }
         public Guid? UpdatedById { get; set; }
 
+        [DisplayName("Employee Number")]
         public string? EmployeeNumber { get; set; }
         public bool? TwoFactorEnabled { get; set; }
     }

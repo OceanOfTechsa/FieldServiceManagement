@@ -92,7 +92,7 @@
                                 <td>
                                     <a href="/Addresses/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())"
                                        class="d-flex align-items-center gap-2 full-name-wrapper">
-                                        <img src="@($"https://ui-avatars.com/api/?name={item.City}&background=random")" class="fsm-avatar" alt="@item.City" />
+                                        <img src="@($"https://ui-avatars.com/api/?name={item.Street}&background=random")" class="fsm-avatar" alt="@item.City" />
                                         <span class="fsm-user-name">
                                             @item.Street
                                         </span>
@@ -142,15 +142,24 @@
 
                                 <!-- Created By -->
                                 <td>
-                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.CreatedById?.ToString() ?? string.Empty) })"
-                                       class="d-flex align-items-center gap-2 full-name-wrapper">
-                                        @if (item.CreatedByAvatar is not null)
-                                        {
-                                            <img src="@($"https://ui-avatars.com/api/?name={item.CreatedByName}&background=random")"
-                                                 class="fsm-avatar-sm" alt="@item.CreatedByName" />
-                                        }
-                                        <span class="fsm-user-name">@(string.IsNullOrWhiteSpace(item.CreatedByName) ? "-" : item.CreatedByName)</span>
-                                    </a>
+                                    @if (item.CreatedById.HasValue)
+                                    {
+                                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.CreatedById.Value.ToString()) })"
+                                           class="d-flex align-items-center gap-2 full-name-wrapper">
+                                            @if (item.CreatedByAvatar is not null)
+                                            {
+                                                <img src="@($"https://ui-avatars.com/api/?name={item.CreatedByName}&background=random")"
+                                                     class="fsm-avatar-sm" alt="@item.CreatedByName" />
+                                            }
+                                            <span class="fsm-user-name">@(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)</span>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="d-flex align-items-center gap-2">
+                                            <span class="fsm-user-name">@(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)</span>
+                                        </span>
+                                    }
                                 </td>
 
                                 <!-- Created At -->

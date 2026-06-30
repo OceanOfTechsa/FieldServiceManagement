@@ -1,5 +1,6 @@
 ﻿@model FieldServiceManagement.ViewModels.User.UserInvitationViewModel
 @using FieldServiceManagement.Enum
+@using System.Text.RegularExpressions
 
 @{
     ViewData["Title"] = "Invite User";
@@ -89,19 +90,14 @@
                                 <div class="form-group">
                                     @Html.LabelFor(m => m.UserType, new { @class = "form-label" })
                                     <span class="text-danger mt-2">*</span>
-                                    @Html.DropDownListFor(m => m.UserType,
-                                        new SelectList(
-                                            System.Enum.GetValues(typeof(UserRole))
-                                                .Cast<UserRole>()
-                                                .Select(r => new
-                                                {
-                                                    Value = (int)r,
-                                                    Text = System.Text.RegularExpressions.Regex.Replace(r.ToString(), "([A-Z])", " $1").Trim()
-                                                }),
-                                            "Value", "Text"
-                                        ),
-                                        "Select user type",
-                                        new { @class = "form-select" })
+                                    <select id="UserType" name="UserType" class="form-select">
+                                        <option value="">Select User Type</option>
+                                        @foreach (UserRole role in Enum.GetValues(typeof(UserRole)))
+                                        {
+                                            var label = Regex.Replace(role.ToString(), "([A-Z])", " $1").Trim();
+                                            <option value="@((int)role)" selected="@(Model.UserType == (int)role ? "selected" : null)">@label</option>
+                                        }
+                                    </select>
                                     @Html.ValidationMessageFor(m => m.UserType, "", new { @class = "field-error" })
                                 </div>
                             </div>
@@ -109,7 +105,6 @@
                             <div class="col-12">
                                 <div class="form-group">
                                     @Html.LabelFor(m => m.EmployeeNumber, new { @class = "form-label" })
-                                    <span class="text-danger mt-2">*</span>
                                     @Html.TextBoxFor(m => m.EmployeeNumber, new { @class = "form-control", @placeholder = "E.g., EMP001", @autocomplete = "employee-number" })
                                     @Html.ValidationMessageFor(m => m.EmployeeNumber, "", new { @class = "field-error" })
                                 </div>
@@ -192,5 +187,13 @@
             $(this).siblings('.field-error').text('').hide();
         });
 
+
+        new Choices('#UserType', {
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search User Types...',
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true,
+        });
     </script>
 }

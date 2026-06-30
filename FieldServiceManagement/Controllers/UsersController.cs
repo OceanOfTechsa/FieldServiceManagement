@@ -100,8 +100,6 @@ namespace FieldServiceManagement.Controllers
             foreach (var key in keysToRemove)
                 ModelState.Remove(key);
 
-            //ModelState.Remove($"{nameof(AppUserProfileViewModel.User)}.{nameof(AppUserViewModel.AvatarUrl)}");
-
             if (!ModelState.IsValid)
             {
                 BuildLanguagesList(model);
@@ -115,8 +113,7 @@ namespace FieldServiceManagement.Controllers
 
         private void BuildLanguagesList(AppUserProfileViewModel model)
         {
-            var langs = new LanguageBusiness().GetLanguages();
-            ViewBag.Languages = new SelectList(langs, "Id", "Name", model.User.PreferredLanguageId);
+            model.Languages = new LanguageBusiness().GetLanguages();
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator")]

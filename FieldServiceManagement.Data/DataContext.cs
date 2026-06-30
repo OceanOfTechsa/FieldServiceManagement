@@ -136,9 +136,7 @@ namespace FieldServiceManagement.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(
-                new SqlConnection(ServicesExtensions.FieldServiceManagementConnectionString)
-            );
+            optionsBuilder.UseSqlServer(new SqlConnection(ServicesExtensions.FSMConnectionString));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

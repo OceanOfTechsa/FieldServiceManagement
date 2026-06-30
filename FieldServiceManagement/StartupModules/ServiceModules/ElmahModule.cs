@@ -9,21 +9,18 @@ namespace FieldServiceManagement.StartupModules.ServiceModules
     {
         public static IServiceCollection AddElmahModule(this IServiceCollection services, IWebHostEnvironment env)
         {
-            // SQL-backed Elmah
+            var connStr = AppSettings.GetFSMConnectionString();
+            var elmahConnStr = env.IsDevelopment() ? connStr : connStr[..^34];
+
             services.AddElmah<SqlErrorLog>(options =>
             {
                 options.OnPermissionCheck = context => context.User.IsInRole("SuperAdmin");
                 options.Path = "elmah";
-
-                // Preserve your existing production trimming logic
-                var connStr = AppSettings.GetFSMConnectionString();
-                options.ConnectionString = env.IsDevelopment() ? connStr : connStr[..^34];
-
+                options.ConnectionString = elmahConnStr;
                 options.ApplicationName = "FieldServiceManagement";
             });
 
             services.AddSingleton<IErrorFilter, IgnoreNoiseFilter>();
-
             return services;
         }
     }
