@@ -14,7 +14,11 @@
             <span class="text-muted" style="font-size:12px">
                 Last refreshed: <span id="last-refresh">—</span>
             </span>
-            <button class="btn border-fsm btn-xs" id="refreshBtn" title="Refresh now">
+            <button class="btn border-fsm btn-xs" id="refreshBtn"
+                data-bs-toggle="tooltip" data-bs-title="Refresh now"
+                data-bs-placement="bottom"
+                data-bs-custom-class="fsm-tooltip"
+            >
                 <i class="bi bi-arrow-clockwise"></i>
             </button>
         </div>

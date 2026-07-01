@@ -1,15 +1,8 @@
 ﻿@using FieldServiceManagement.Business.Configuration
 @{
     var currentYear       = DateTime.Now.Year;
-    var hasIssue          = ViewData["FooterHasIssue"]          is bool b   && b;
-    var announcementCount = ViewData["FooterAnnouncementCount"] is int  cnt ? cnt : 0;
-}
 
-@* ── Inject server state for JS ──────────────────────────────────────────── *@
-<script>
-    window.fsmHasIssue          = @(hasIssue.ToString().ToLower());
-    window.fsmAnnouncementCount = @announcementCount;
-</script>
+}
 
 @* ── Announcements offcanvas ─────────────────────────────────────────────── *@
 <aside id="fsm-announce-sheet" class="fsm-offcanvas fsm-offcanvas-light" aria-label="Announcements">
@@ -44,17 +37,17 @@
         </div>
 
         @* Announcement *@
-        <div id="fsm-fp-announcement" style="display:none">
+        <div id="fsm-fp-announcement" class="w-100" style="display:none">
             <button id="fsm-footer-announce-trigger" class="announcement-trigger">
                 <div class="status-content" style="color:#0B9944;font-weight:500;">
                     <i class="bi bi-megaphone-fill"></i>
                     <span id="fsm-footer-announce-label">You have a new announcement</span>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                @* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                      stroke="#0B9944" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
-                </svg>
+                </svg> *@
             </button>
         </div>
         @* Online *@
@@ -94,7 +87,9 @@
             <a href="@(User.IsInRole("SuperAdmin") ? "/Admin/Health" : "#")"
                class="d-flex align-items-center gap-2 text-decoration-none"
                id="fsm-health-footer"
-               title="@(User.IsInRole("SuperAdmin") ? "View system health" : "System health status")"
+               data-bs-toggle="tooltip" data-bs-title="@(User.IsInRole("SuperAdmin") ? "View system health" : "System health status")"
+               data-bs-placement="right"
+               data-bs-custom-class="fsm-tooltip"
                style="@(User.IsInRole("SuperAdmin") ? "" : "pointer-events:none;cursor:default")">
                 <i class="bi bi-heart-pulse text-muted" style="font-size:11px"></i>
                 <span class="text-muted" style="font-size:11px">System</span>

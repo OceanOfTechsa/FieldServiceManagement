@@ -2133,3 +2133,8 @@ hr {
 .copy-btn:hover {
     transform: scale(1.1);
 }
+
+.fsm-tooltip {
+    --bs-tooltip-bg: var(--accent-dim);
+    --bs-tooltip-color: var(--bs-white);
+}

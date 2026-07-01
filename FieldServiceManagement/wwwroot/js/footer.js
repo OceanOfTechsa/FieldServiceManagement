@@ -5,7 +5,7 @@
     let isOnline = navigator.onLine;
     let isIssue = false;
     let isDegraded = false;
-    let announcementCount = 0;
+    let announcementCount = 2;
     let countdown = 30;
     let countdownTimer = null;
     let isReloading = false;
