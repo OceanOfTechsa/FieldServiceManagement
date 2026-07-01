@@ -1,6 +1,157 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "Privacy Policy";
+    Layout = "_Layout";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+@section styles{
+    <link rel="stylesheet" href="~/css/FSM/privacy.css" asp-append-version="true" />
+}
+
+<div class="d-flex flex-column w-100 bg-white">
+    <div class="pp-hero">
+        <div class="pp-hero-inner">
+            <div class="pp-eyebrow">Legal Document</div>
+            <h1>Privacy Policy</h1>
+            <div class="pp-hero-meta">
+                <span><i class="bi bi-calendar3"></i> Effective: 1 June 2026</span>
+                <span><i class="bi bi-arrow-clockwise"></i> Last updated: 26 June 2026</span>
+                <span><i class="bi bi-geo-alt"></i> South Africa</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pp-body w-100">
+
+        <div class="pp-toc">
+            <div class="pp-toc-label">Contents</div>
+            <ol>
+                <li><a href="#s1">Information We Collect</a></li>
+                <li><a href="#s2">How We Use Your Information</a></li>
+                <li><a href="#s3">Data Storage & Security</a></li>
+                <li><a href="#s4">Sharing Your Information</a></li>
+                <li><a href="#s5">Your Rights (POPIA)</a></li>
+                <li><a href="#s6">Cookies</a></li>
+                <li><a href="#s7">Data Retention</a></li>
+                <li><a href="#s8">Contact Us</a></li>
+            </ol>
+        </div>
+
+        <div class="pp-highlight">
+            This policy applies to OOT FSM (Field Service Management), a product of Ocean of Tech. It describes how we collect, use, and protect personal information in compliance with the <strong style="color:#664d03;">Protection of Personal Information Act (POPIA), Act 4 of 2013</strong>.
+        </div>
+
+        <div class="pp-section" id="s1">
+            <span class="pp-section-num">01 /</span>
+            <h2>Information We Collect</h2>
+            <p>We collect information you provide directly when you register, create an organisation, or use the platform, as well as data generated automatically through your use of our services.</p>
+            <ul class="pp-list">
+                <li><strong>Account information</strong> — full name, email address, phone number, job title, and password (stored hashed)</li>
+                <li><strong>Organisation details</strong> — company name, industry, country, address, and subscription plan</li>
+                <li><strong>Usage data</strong> — pages visited, features used, timestamps, and session duration</li>
+                <li><strong>Device & technical data</strong> — IP address, browser type, operating system, and referring URLs</li>
+                <li><strong>Communications</strong> — support requests, feedback submissions, and bug reports you send us</li>
+                <li><strong>Location data</strong> — latitude and longitude where you choose to associate addresses with field service records</li>
+            </ul>
+        </div>
+
+        <div class="pp-section" id="s2">
+            <span class="pp-section-num">02 /</span>
+            <h2>How We Use Your Information</h2>
+            <p>We use your personal information only for the purposes for which it was collected, or for compatible purposes permitted by law.</p>
+            <ul class="pp-list">
+                <li>Providing, maintaining, and improving the OOT FSM platform</li>
+                <li>Creating and managing your user account and organisation</li>
+                <li>Processing subscription payments and sending billing communications</li>
+                <li>Sending transactional emails — invitations, password resets, and system notifications — via Resend</li>
+                <li>Monitoring system health, diagnosing technical issues, and preventing abuse</li>
+                <li>Responding to support requests and communicating service updates</li>
+                <li>Complying with legal obligations applicable in South Africa and other relevant jurisdictions</li>
+            </ul>
+            <p>We do not sell, rent, or trade your personal information to third parties for their marketing purposes.</p>
+        </div>
+
+        <div class="pp-section" id="s3">
+            <span class="pp-section-num">03 /</span>
+            <h2>Data Storage &amp; Security</h2>
+            <p>Your data is stored on Microsoft Azure infrastructure. We implement industry-standard technical and organisational measures to protect your information against unauthorised access, loss, or disclosure.</p>
+            <ul class="pp-list">
+                <li>All data in transit is encrypted using TLS 1.2 or higher</li>
+                <li>Passwords are hashed using ASP.NET Core Identity with PBKDF2 and a unique salt per user</li>
+                <li>Access to production data is restricted to authorised personnel only</li>
+                <li>Application errors are logged via Elmah with access restricted to SuperAdmin roles</li>
+                <li>Session tokens are stored in HttpOnly, Secure, SameSite cookies</li>
+            </ul>
+            <div class="pp-highlight">
+                While we take reasonable steps to protect your information, no system is completely secure. <strong style="color:#664d03;">We encourage you to use a strong, unique password and to log out of the platform on shared devices.</strong>
+            </div>
+        </div>
+
+        <div class="pp-section" id="s4">
+            <span class="pp-section-num">04 /</span>
+            <h2>Sharing Your Information</h2>
+            <p>We share your information only in the following limited circumstances:</p>
+            <ul class="pp-list">
+                <li><strong>Service providers</strong> — third-party vendors who assist us in operating the platform, including Microsoft Azure (hosting), Resend (email delivery), and Redis (caching). These providers are bound by data processing agreements.</li>
+                <li><strong>Within your organisation</strong> — users you invite to your organisation account will have access to shared records within the platform according to their assigned role</li>
+                <li><strong>Legal requirements</strong> — we may disclose information where required by South African law, court order, or regulatory authority</li>
+                <li><strong>Business transfers</strong> — in the event of a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction</li>
+            </ul>
+        </div>
+
+        <div class="pp-section" id="s5">
+            <span class="pp-section-num">05 /</span>
+            <h2>Your Rights under POPIA</h2>
+            <p>As a data subject under the Protection of Personal Information Act (POPIA), you have the following rights regarding your personal information:</p>
+            <ul class="pp-list">
+                <li><strong>Right to access</strong> — request a copy of the personal information we hold about you</li>
+                <li><strong>Right to correction</strong> — request that inaccurate or incomplete information be corrected</li>
+                <li><strong>Right to deletion</strong> — request that your personal information be deleted, subject to our legal retention obligations</li>
+                <li><strong>Right to object</strong> — object to the processing of your information in certain circumstances</li>
+                <li><strong>Right to data portability</strong> — request your data in a structured, machine-readable format</li>
+                <li><strong>Right to lodge a complaint</strong> — submit a complaint to the Information Regulator of South Africa at <a href="https://www.inforegulator.org.za" target="_blank" rel="noopener">inforegulator.org.za</a></li>
+            </ul>
+            <p>To exercise any of these rights, contact our Information Officer using the details in Section 8.</p>
+        </div>
+
+        <div class="pp-section" id="s6">
+            <span class="pp-section-num">06 /</span>
+            <h2>Cookies</h2>
+            <p>OOT FSM uses cookies that are strictly necessary for the platform to function. We do not use advertising or tracking cookies.</p>
+            <ul class="pp-list">
+                <li><strong>fsm.app</strong> — authentication session cookie, expires after 5 hours of inactivity</li>
+                <li><strong>fsm.af</strong> — antiforgery token to protect form submissions against CSRF attacks</li>
+                <li><strong>fsm.tmp</strong> — temporary data used for page transitions and notifications</li>
+            </ul>
+            <p>All cookies are HttpOnly and Secure. They are not accessible to JavaScript and are transmitted only over HTTPS.</p>
+        </div>
+
+        <div class="pp-section" id="s7">
+            <span class="pp-section-num">07 /</span>
+            <h2>Data Retention</h2>
+            <p>We retain your personal information for as long as your account is active or as needed to provide our services. When you request deletion of your account:</p>
+            <ul class="pp-list">
+                <li>Your profile and organisation data will be marked as deleted within 30 days</li>
+                <li>Audit logs are retained for a minimum of 12 months for legal and compliance purposes</li>
+                <li>Email logs are retained for 90 days for delivery troubleshooting</li>
+                <li>Anonymised usage statistics may be retained indefinitely</li>
+            </ul>
+        </div>
+
+        <div class="pp-section" id="s8">
+            <span class="pp-section-num">08 /</span>
+            <h2>Contact Us</h2>
+            <p>If you have questions about this privacy policy or wish to exercise your rights, please contact our Information Officer:</p>
+            <div class="pp-contact-block">
+                <h3 class="text-white">Ocean of Tech - Information Officer</h3>
+                <p><i class="bi bi-building me-2"></i>Ocean of Tech (Pty) Ltd</p>
+                <p><i class="bi bi-geo-alt me-2"></i>KwaZulu-Natal, South Africa</p>
+                <p><i class="bi bi-envelope me-2"></i><a href="mailto:privacy@@oceanoftech.co.za">privacy@@oceanoftech.co.za</a></p>
+                <p style="margin-top:16px;font-size:12px;color:rgba(255,255,255,0.3)">
+                    We will respond to all privacy requests within 30 days as required by POPIA.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>

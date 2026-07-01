@@ -1,7 +1,6 @@
 using CacheManager.Core;
 using FieldServiceManagement.Business.Configuration;
 
-
 namespace FieldServiceManagement.StartupModules.ServiceModules
 {
     public static class CacheModule

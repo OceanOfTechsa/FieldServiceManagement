@@ -1,6 +1,7 @@
-﻿@using FieldServiceManagement.Business.Configuration
+﻿@using System.Reflection
+@using FieldServiceManagement.Business.Configuration
+@using FieldServiceManagement.Enum
 @using FieldServiceManagement.Helpers
-@using System.Reflection
 @{
     ViewData["Title"] = "Home";
     var greeting = GreetingHelper.GetGreeting();
@@ -8,85 +9,12 @@
     var fileVersion = Assembly.GetEntryAssembly()!
         .GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version;
 }
-<style>
-    .fsm-welcome-icon-ring {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        border: 1.5px solid #dee2e6;
-        background: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 
-    .fsm-welcome-icon-ring i {
-        font-size: 28px;
-        color: var(--bs-primary);
-    }
-
-    .fsm-welcome-eyebrow {
-        font-size: 11px;
-        font-family: var(--fsm-font-mono);
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: #9ca3af;
-        margin-bottom: 10px;
-    }
-
-    .fsm-welcome-title {
-        font-size: 42px; /* was 32px */
-        font-weight: 600; /* was 500 */
-        color: #111827;
-        margin: 0 0 6px;
-        line-height: 1.1;
-    }
-
-    .fsm-welcome-sub {
-        font-size: 16px; /* was 13px */
-        color: #888;
-        font-weight: 400;
-        margin-bottom: 28px;
-    }
+@section styles {
+    <link rel="stylesheet" href="~/css/FSM/home.css" asp-append-version="true" />
+}
 
 
-    .fsm-welcome-hr {
-        width: 100%;
-        border: none;
-        border-top: 1px solid #e4e4e4;
-        margin-bottom: 28px;
-    }
-
-    .fsm-welcome-desc {
-        font-size: 15px; /* was 13px */
-        color: #666;
-        text-align: center;
-        line-height: 1.7;
-        max-width: 480px;
-        margin-bottom: 28px;
-    }
-
-    /* .fsm-welcome-build {
-        font-size: 11px;
-        color: #bbb;
-        font-family: var(--fsm-font-mono, monospace);
-        letter-spacing: 0.04em;
-    } */
-
-    .fsm-welcome-build {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        background: #f8f9fa;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        padding: 4px 10px;
-        font-family: var(--fsm-font-mono);
-        font-size: 11px;
-        color: #9ca3af;
-        letter-spacing: 0.04em;
-    }
-</style>
 <div class="d-flex flex-column container-fluid px-0 h-full">
 
     <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-2 px-3">
@@ -95,7 +23,36 @@
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item">
                         <i class="bi bi-person-circle me-1 text-black"></i>
-                        @greeting <strong>@User?.Identity?.Name</strong>
+                        @greeting <strong>
+                        @if (User.IsInRole(UserRole.Administrator.ToString()))
+                        {
+                            <text>Administrator</text>
+                        }
+                        else if (User.IsInRole(UserRole.CallCenterAgent.ToString()))
+                        {
+                            <text>Call Center Agent</text>
+                        }
+                        else if (User.IsInRole(UserRole.FieldAgent.ToString()))
+                        {
+                            <text>Field Agent</text>
+                        }
+                        else if (User.IsInRole(UserRole.LimitedFieldAgent.ToString()))
+                        {
+                            <text>Limited Field Agent</text>
+                        }
+                        else if (User.IsInRole(UserRole.Dispatcher.ToString()))
+                        {
+                            <text>Dispatcher</text>
+                        }
+                        else if (User.IsInRole(UserRole.SuperAdmin.ToString()))
+                        {
+                            <text>Super Admin</text>
+                        }
+                        else if (User.IsInRole(UserRole.CustomerPortalUser.ToString()))
+                        {
+                            <text>Customer Portal User</text>
+                        }
+                    </strong>
                     </li>
                 </ol>
             </nav>

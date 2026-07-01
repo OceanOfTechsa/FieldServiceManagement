@@ -5,13 +5,51 @@ using Microsoft.AspNetCore.Mvc;
 namespace FieldServiceManagement.Controllers
 {
     [Authorize(Roles = "SuperAdmin")]
-    [Route("Admin/Health")]
+    [Route("Admin")]
     public class AdminController : Controller
     {
-        [HttpGet("")]
-        public IActionResult Dashboard() => View();
+        // GET: /Admin/Health
+        [HttpGet("Health")]
+        public IActionResult Index()
+        {
+            return View();
+        }
 
-        [HttpGet("Info/{service}")]
-        public IActionResult Detail(string service) => View("Detail", service);
+        // GET: /Admin/Health/Info/Database
+        [HttpGet("Health/Info/{service}")]
+        public IActionResult Info(string service)
+        {
+            return View("Info", service);
+        }
+
+        [HttpGet("PendingAlerts")]
+        public IActionResult PendingAlerts()
+        {
+            return View();
+        }
+
+        [HttpGet("ViewAllAlerts")]
+        public IActionResult ViewAllAlerts()
+        {
+            return View();
+        }
+
+        [HttpGet("ResendEmail")]
+        public IActionResult ResendEmail()
+        {
+            return View();
+        }
+
+        [HttpGet("SQLFirewall")]
+        public IActionResult SQLFirewall()
+        {
+            return View();
+        }
+
+        [HttpGet("FlushCache")]
+        public IActionResult FlushCache()
+        {
+            return View();
+        }
     }
 }

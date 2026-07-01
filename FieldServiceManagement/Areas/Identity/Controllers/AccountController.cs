@@ -423,6 +423,7 @@ public class AccountController : Controller
             "CallCenterAgent" => "cca@fsm.oceanoftech.co.za",
             "LimitedFieldAgent" => "lfa@fsm.oceanoftech.co.za",
             "SuperAdmin" => "system@fsm.com",
+            "CustomerPortalUser" => "customer@fsm.oceanoftech.co.za",
             _ => role + "@fsm.oceanoftech.co.za"
         };
         return email;

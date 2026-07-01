@@ -10,9 +10,10 @@ namespace FieldServiceManagement.StartupModules.ServiceModules
         public static IServiceCollection AddHealthModule(this IServiceCollection services)
         {
             services.AddHealthChecks()
-                .AddCheck<ApplicationHealthCheck>(name: "application",tags: ["app"])
-                .AddCheck<DatabaseHealthCheck>("database", tags: ["db"])
-                .AddCheck<ResendHealthCheck>(name: "resend",tags: ["email"]);
+                .AddCheck<ApplicationHealthCheck>(name: "Application",tags: ["app"])
+                .AddCheck<DatabaseHealthCheck>("Database", tags: ["db"])
+                .AddCheck<ResendHealthCheck>(name: "Resend",tags: ["email"])
+                .AddCheck<RedisHealthCheck>(name: "Redis", tags: ["chache"]);
             return services;
         }
 

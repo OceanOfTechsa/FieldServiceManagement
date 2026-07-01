@@ -8,19 +8,17 @@ namespace FieldServiceManagement.Controllers;
 [Authorize]
 public class HomeController : Controller
 {
-    public ActionResult Index()
-    {
-        return View();
-    }
+    public ActionResult Index() => View();
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+    public IActionResult Privacy() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    
+    public IActionResult About() => View();
+
+    public IActionResult Offline(string? ReturnUrl)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View((object)ReturnUrl!);
     }
 }

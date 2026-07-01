@@ -20,6 +20,9 @@ namespace FieldServiceManagement.Enum
         LimitedFieldAgent = 5,
 
         [Display(Name = "SuperAdmin")]
-        SuperAdmin = 6
+        SuperAdmin = 6,
+
+        [Display(Name = "CustomerPortalUser")]
+        CustomerPortalUser = 7
     }
 }

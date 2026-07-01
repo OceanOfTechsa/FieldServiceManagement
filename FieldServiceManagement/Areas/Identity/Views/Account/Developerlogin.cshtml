@@ -24,35 +24,121 @@
             Quick login
         </span>
     </div>
+    <div class="accordion accordion-flush mt-1 p-0 mt-0" id="devloginAccordion">
 
-    <div class="d-flex flex-column gap-2">
-
-        @foreach (var user in new[]
-                {
-                ("Administrator", "Administrator"),
-                ("Dispatcher", "Dispatcher"),
-                ("FieldAgent", "FieldAgent"),
-                ("CallCenterAgent", "Call Center Agent"),
-                ("LimitedFieldAgent", "Limited Field Agent"),
-                ("SuperAdmin", "Super Admin"),
-            })
-        {
-            <form asp-area="Identity"
-                  asp-controller="Account"
-                  asp-action="DeveloperLogin"
-                  method="post">
-
-                @Html.AntiForgeryToken()
-
-                <input type="hidden" name="role" value="@user.Item1" />
-
-                <button type="submit" class="btn-dev color-accent" data-loading-text="Logging In">
-                    Login as:
-                    <span style="font-size:0.9rem;opacity:0.6;">
-                        @user.Item2
-                    </span>
+        <!-- Internal Users -->
+        <div class="accordion-item border-0 rounded-2 text-accent">
+            <h4 class="accordion-header" id="headingInternal">
+                <button class="btn btn-sm w-100 rounded-2 shadow-none text-accent bg-primary-subtle d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#internalUsersCollapse"
+                        aria-expanded="true"
+                        aria-controls="internalUsersCollapse">
+                    Internal Users
+                    <i class="bi bi-chevron-expand"></i>
                 </button>
-            </form>
-        }
+            </h4>
+
+            <div id="internalUsersCollapse"
+                 class="accordion-collapse collapse show mb-3"
+                 aria-labelledby="headingInternal"
+                 data-bs-parent="#devloginAccordion">
+
+                <div class="accordion-body p-0">
+
+                    <div class="d-flex flex-column gap-2">
+
+                        @foreach (var user in new[]
+                        {
+                        ("Administrator", "Administrator"),
+                        ("Dispatcher", "Dispatcher"),
+                        ("FieldAgent", "Field Agent"),
+                        ("CallCenterAgent", "Call Center Agent"),
+                        ("LimitedFieldAgent", "Limited Field Agent"),
+                        ("SuperAdmin", "Super Admin")
+                    })
+                        {
+                            <form asp-area="Identity"
+                                  asp-controller="Account"
+                                  asp-action="DeveloperLogin"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden" name="role" value="@user.Item1" />
+
+                                <button type="submit"
+                                        class="btn-dev color-accent"
+                                        data-loading-text="Logging In">
+                                    Login as:
+                                    <span style="font-size:0.9rem;opacity:0.6;">
+                                        @user.Item2
+                                    </span>
+                                </button>
+
+                            </form>
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- External Users -->
+        <div class="accordion-item border-0 rounded-2">
+
+            <h4 class="accordion-header" id="headingExternal">
+                <button class="btn btn-sm w-100 rounded-2 shadow-none text-accent bg-primary-subtle d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#externalUsersCollapse"
+                        aria-expanded="false"
+                        aria-controls="externalUsersCollapse">
+                    External Users
+                    <i class="bi bi-chevron-expand"></i>
+                </button>
+            </h4>
+
+            <div id="externalUsersCollapse"
+                 class="accordion-collapse collapse"
+                 aria-labelledby="headingExternal"
+                 data-bs-parent="#devloginAccordion">
+
+                <div class="accordion-body p-0">
+
+                    <div class="d-flex flex-column gap-2">
+
+                        @foreach (var user in new[]
+                        {
+                        ("CustomerPortalUser", "Customer Portal User"),
+                    })
+                        {
+                            <form asp-area="Identity"
+                                  asp-controller="Account"
+                                  asp-action="DeveloperLogin"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden" name="role" value="@user.Item1" />
+
+                                <button type="submit"
+                                        class="btn-dev color-accent"
+                                        data-loading-text="Logging In">
+                                    Login as:
+                                    <span style="font-size:0.9rem;opacity:0.6;">
+                                        @user.Item2
+                                    </span>
+                                </button>
+
+                            </form>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

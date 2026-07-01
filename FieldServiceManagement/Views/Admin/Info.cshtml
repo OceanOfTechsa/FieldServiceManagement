@@ -1,13 +1,14 @@
 ﻿@model string
 @{
-    ViewData["Title"] = $"Health – {Model}";
+    ViewData["Title"] = $"{Model} Health Status";
     Layout = "_Layout";
 
     var serviceIcon = Model switch
     {
-        "application" => "bi-cpu",
-        "database" => "bi-database",
-        "resend" => "bi-envelope",
+        "Application" => "bi-cpu",
+        "Database" => "bi-database",
+        "Resend" => "bi-envelope",
+        "Redis" => "bi-clock-history",
         _ => "bi-gear"
     };
 }

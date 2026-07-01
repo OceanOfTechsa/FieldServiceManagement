@@ -1,0 +1,77 @@
+﻿.fsm-welcome-icon-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 1.5px solid #dee2e6;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fsm-welcome-icon-ring i {
+    font-size: 28px;
+    color: var(--bs-primary);
+}
+
+.fsm-welcome-eyebrow {
+    font-size: 11px;
+    font-family: var(--fsm-font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 10px;
+}
+
+.fsm-welcome-title {
+    font-size: 42px; /* was 32px */
+    font-weight: 600; /* was 500 */
+    color: #111827;
+    margin: 0 0 6px;
+    line-height: 1.1;
+}
+
+.fsm-welcome-sub {
+    font-size: 16px; /* was 13px */
+    color: #888;
+    font-weight: 400;
+    margin-bottom: 28px;
+}
+
+
+.fsm-welcome-hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #e4e4e4;
+    margin-bottom: 28px;
+}
+
+.fsm-welcome-desc {
+    font-size: 15px; /* was 13px */
+    color: #666;
+    text-align: center;
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 28px;
+}
+
+/* .fsm-welcome-build {
+        font-size: 11px;
+        color: #bbb;
+        font-family: var(--fsm-font-mono, monospace);
+        letter-spacing: 0.04em;
+    } */
+
+.fsm-welcome-build {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-family: var(--fsm-font-mono);
+    font-size: 11px;
+    color: #9ca3af;
+    letter-spacing: 0.04em;
+}

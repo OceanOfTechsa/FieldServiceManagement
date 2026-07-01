@@ -1,0 +1,175 @@
+﻿@using System.Reflection
+
+@{
+    ViewData["Title"] = "About OOT FSM";
+    Layout = "_Layout";
+    var fileVersion = Assembly.GetEntryAssembly()!
+        .GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version;
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/FSM/about.css" asp-append-version="true" />
+}
+
+<div class="d-flex flex-column w-100 bg-white">
+    <!-- Hero -->
+    <div class="about-hero">
+        <div class="about-hero-inner">
+            <div>
+                <div class="about-eyebrow">Ocean of Tech</div>
+                <h1>Field Service<br><em>Management.</em></h1>
+                <p class="about-hero-desc">
+                    OOT FSM is a cloud-based field service management platform built for South African businesses — managing workforces, jobs, contacts, and operations from a single, integrated system.
+                </p>
+            </div>
+            <div class="about-hero-stats">
+                <div class="about-stat">
+                    <div class="about-stat-num">2026</div>
+                    <div class="about-stat-label">Founded</div>
+                </div>
+                <div class="about-stat">
+                    <div class="about-stat-num">ZA</div>
+                    <div class="about-stat-label">Based in South Africa</div>
+                </div>
+                <div class="about-stat">
+                    <div class="about-stat-num">Build</div>
+                    <div class="about-stat-label">@fileVersion</div>
+                </div>
+                <div class="about-stat">
+                    <div class="about-stat-num">POPIA</div>
+                    <div class="about-stat-label">Compliant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="about-body">
+
+        <!-- Feature cards -->
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-card-icon"><i class="bi bi-people-fill"></i></div>
+                <h3>Workforce Management</h3>
+                <p>Manage your field technicians, assign roles, track availability, and keep your entire workforce organised in one place.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon"><i class="bi bi-briefcase-fill"></i></div>
+                <h3>Job Scheduling</h3>
+                <p>Create, assign, and track field service jobs from dispatch through to completion with full audit history.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon"><i class="bi bi-person-lines-fill"></i></div>
+                <h3>Contact &amp; Company CRM</h3>
+                <p>Maintain a complete record of your customers, contacts, and companies with linked addresses and job history.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon"><i class="bi bi-shield-check"></i></div>
+                <h3>Role-Based Access</h3>
+                <p>Fine-grained permission control from SuperAdmin down to field technician, with organisation-scoped data isolation.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon"><i class="bi bi-envelope-check"></i></div>
+                <h3>Automated Notifications</h3>
+                <p>Transactional emails for invitations, job updates, and system events delivered via Resend with full delivery logging.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon"><i class="bi bi-heart-pulse"></i></div>
+                <h3>System Health Monitoring</h3>
+                <p>Live health checks across application, database, email, and cache services — visible in real time to administrators.</p>
+            </div>
+        </div>
+
+        <!-- Mission -->
+        <div class="about-mission">
+            <div class="about-mission-left">
+                <div class="about-mission-label">Our Mission</div>
+                <h2>Built for the field.<br>Designed for scale.</h2>
+            </div>
+            <div class="about-mission-body">
+                <p>Most field service tools are either too complex for small teams or too limited to grow with a business. OOT FSM is different — it's built from the ground up for South African field service companies who need a professional, reliable platform without enterprise pricing.</p>
+                <p>We believe operations software should be fast, clear, and trustworthy. Every feature in OOT FSM is designed to reduce administrative overhead and give managers and technicians the information they need, when they need it.</p>
+            </div>
+        </div>
+
+        <!-- Tech stack -->
+        <div class="about-stack">
+            <div class="about-section-header">
+                <h2>Built on a solid foundation</h2>
+                <span>Technology Stack</span>
+            </div>
+            <div class="about-stack-grid">
+                <div class="about-stack-item">
+                    <div class="about-stack-category">Backend</div>
+                    <div class="about-stack-name">ASP.NET Core MVC</div>
+                    <div class="about-stack-desc">Layered architecture across UI, Controller, Business, Data, and Repository projects</div>
+                </div>
+                <div class="about-stack-item">
+                    <div class="about-stack-category">Database</div>
+                    <div class="about-stack-name">SQL Server + EF Core</div>
+                    <div class="about-stack-desc">Stored procedures with complex joins, output parameters, and full audit logging</div>
+                </div>
+                <div class="about-stack-item">
+                    <div class="about-stack-category">Cache</div>
+                    <div class="about-stack-name">Redis</div>
+                    <div class="about-stack-desc">CacheManager-backed Redis on a dedicated database index for fast data retrieval</div>
+                </div>
+                <div class="about-stack-item">
+                    <div class="about-stack-category">Email</div>
+                    <div class="about-stack-name">Resend</div>
+                    <div class="about-stack-desc">Transactional email with full delivery logging, queue management, and error tracking</div>
+                </div>
+                <div class="about-stack-item">
+                    <div class="about-stack-category">Hosting</div>
+                    <div class="about-stack-name">Microsoft Azure</div>
+                    <div class="about-stack-desc">Cloud-hosted with Application Insights telemetry and snapshot error collection</div>
+                </div>
+                <div class="about-stack-item">
+                    <div class="about-stack-category">Frontend</div>
+                    <div class="about-stack-name">Bootstrap 5 + Vue 2</div>
+                    <div class="about-stack-desc">Razor views with x-template Vue components, Choices.js, and a custom SCSS design system</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company -->
+        <div class="about-company">
+            <div>
+                <h2 class="text-white">About Ocean of Tech</h2>
+                <p>Ocean of Tech is a South African software development company focused on building practical, production-grade business applications. We work at the intersection of enterprise reliability and startup agility.</p>
+                <p>OOT FSM is our flagship SaaS product, developed in partnership with real field service businesses to ensure every feature solves a genuine operational problem.</p>
+                <p>We are affiliated with DUT AppFactory, enabling us to bring academic rigour and real-world industry experience into every product we build.</p>
+            </div>
+            <div class="about-company-details">
+                <div class="about-company-detail">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <div class="about-company-detail-text">
+                        <strong>Location</strong>
+                        <span>KwaZulu-Natal, South Africa</span>
+                    </div>
+                </div>
+                <div class="about-company-detail">
+                    <i class="bi bi-building"></i>
+                    <div class="about-company-detail-text">
+                        <strong>Affiliation</strong>
+                        <span>DUT AppFactory · Motherland Omni</span>
+                    </div>
+                </div>
+                <div class="about-company-detail">
+                    <i class="bi bi-shield-check"></i>
+                    <div class="about-company-detail-text">
+                        <strong>Compliance</strong>
+                        <span>POPIA (Protection of Personal Information Act)</span>
+                    </div>
+                </div>
+                <div class="about-company-detail">
+                    <i class="bi bi-envelope"></i>
+                    <div class="about-company-detail-text">
+                        <strong>Contact</strong>
+                        <span><a href="mailto:hello@@oceanoftech.co.za" style="color:#009966;text-decoration:none">hello@@oceanoftech.co.za</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

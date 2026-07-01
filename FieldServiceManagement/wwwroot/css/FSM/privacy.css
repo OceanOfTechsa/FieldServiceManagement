@@ -1,0 +1,243 @@
+﻿.pp-hero {
+    background: #0a0a0a;
+    color: #fff;
+    padding: 80px 0 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.pp-hero::before {
+    content: "PRIVACY";
+    position: absolute;
+    top: -10px;
+    right: -20px;
+    font-size: 140px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    letter-spacing: -4px;
+    pointer-events: none;
+    font-family: 'Courier New', monospace;
+    line-height: 1;
+}
+
+.pp-hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.pp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #009966;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 24px;
+}
+
+.pp-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: #009966;
+}
+
+.pp-hero h1 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.05;
+    margin: 0 0 20px;
+    letter-spacing: -1.5px;
+    font-family: 'Georgia', serif;
+}
+
+.pp-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    font-family: 'Courier New', monospace;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin-top: 32px;
+    padding-top: 24px;
+}
+
+.pp-hero-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pp-body {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+}
+
+.pp-toc {
+    background: #f8f7f5;
+    border-left: 3px solid #0a0a0a;
+    padding: 24px 28px;
+    margin-bottom: 56px;
+    border-radius: 0 4px 4px 0;
+}
+
+.pp-toc-label {
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #888;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 14px;
+}
+
+.pp-toc ol {
+    margin: 0;
+    padding-left: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 32px;
+}
+
+.pp-toc ol li {
+    font-size: 13px;
+}
+
+.pp-toc ol li a {
+    color: #0a0a0a;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.pp-toc ol li a:hover {
+    color: #009966;
+}
+
+.pp-section {
+    margin-bottom: 36px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid #eee;
+}
+
+.pp-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.pp-section-num {
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: #009966;
+    letter-spacing: .1em;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.pp-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0a0a0a;
+    margin: 0 0 20px;
+    letter-spacing: -.3px;
+    /* font-family: 'Georgia', serif; */
+}
+
+.pp-section p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #444;
+    margin-bottom: 16px;
+}
+
+.pp-section p:last-child {
+    margin-bottom: 0;
+}
+
+.pp-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.pp-list li {
+    font-size: 15px;
+    line-height: 1.65;
+    color: #444;
+    padding: 8px 0 8px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.pp-list li:last-child {
+    border-bottom: none;
+}
+
+.pp-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #009966;
+    font-size: 13px;
+}
+
+.pp-highlight {
+    background: #fffbf0;
+    /* border: 1px solid #f0e0a0; */
+    border-left: 3px solid #f0a500;
+    padding: 16px 20px;
+    border-radius: 0 4px 4px 0;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #555;
+}
+
+.pp-contact-block {
+    background: #0a0a0a;
+    color: #fff;
+    padding: 40px;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+.pp-contact-block h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    font-family: 'Georgia', serif;
+}
+
+.pp-contact-block p {
+    color: rgba(255,255,255,0.6) !important;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.pp-contact-block a {
+    color: #009966;
+    text-decoration: none;
+}
+
+.pp-contact-block a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+    .pp-toc ol {
+        grid-template-columns: 1fr;
+    }
+
+    .pp-hero-inner, .pp-body {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .pp-hero {
+        padding: 48px 0 40px;
+    }
+}
