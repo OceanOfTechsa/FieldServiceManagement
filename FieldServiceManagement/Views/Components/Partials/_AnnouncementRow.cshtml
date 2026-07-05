@@ -1,0 +1,58 @@
+﻿@model FieldServiceManagement.ViewModels.Announcement.UserAnnouncementViewModel
+
+<link rel="stylesheet" href="~/css/FSM/announcements.css" asp-append-version="true" />
+
+<div class="fsm-announcement-row @(!Model.IsSeen ? "unseen" : "")" data-id="@Model.Id">
+    @Html.AntiForgeryToken()
+    <label class="fsm-announcement-check @(Model.IsSeen == true ? "pe-none" : "")">
+        <input type="checkbox" disabled="@(Model.IsSeen == true)" class="@(Model.IsSeen == true ? "pe-none" : "")" />
+        <span></span>
+    </label>
+
+    <div class="fsm-announcement-body">
+        <div class="fsm-announcement-top">
+            <span class="fsm-announcement-title">
+                @Model.Title
+                @if (!Model.IsSeen)
+                {
+                    <span class="fsm-unseen-dot" title="Unseen"></span>
+                }
+            </span>
+            <span class="fsm-announcement-time">@Model.TimeAgoDisplay</span>
+        </div>
+
+        <div class="fsm-collapsible">
+            <div class="fsm-announcement-text fsm-clamp">
+                @Model.Description
+            </div>
+            <button class="fsm-collapsible-toggle" type="button" style="display:none;">Show more</button>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <div class="fsm-collapsible">
+                <div class="fsm-announcement-notes fsm-clamp">
+                    <strong>Notes:</strong> @Model.Notes
+                </div>
+                <button class="fsm-collapsible-toggle" type="button" style="display:none;">Show more</button>
+            </div>
+        }
+
+        <div class="fsm-announcement-actions">
+            @if (Model.IsSeen)
+            {
+                <button class="fsm-mark-seen-btn seen" data-announcement-id="@Model.Id" disabled>
+                    Seen <i class="bi bi-hand-thumbs-up-fill"></i>
+                </button>
+            }
+            else
+            {
+                <button class="fsm-mark-seen-btn" data-announcement-id="@Model.Id">
+                    <span class="fsm-btn-content">
+                        Mark as seen <i class="bi bi-hand-thumbs-up"></i>
+                    </span>
+                </button>
+            }
+        </div>
+    </div>
+</div>

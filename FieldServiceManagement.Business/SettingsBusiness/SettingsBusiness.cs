@@ -51,7 +51,7 @@ namespace FieldServiceManagement.Business.SettingsBusiness
             }
         }
 
-        public SettingsViewModel GetSettingsByKey(string key)
+        public SettingsViewModel? GetSettingsByKey(string key)
         {
             using (var repo = new SettingsRepository())
             {

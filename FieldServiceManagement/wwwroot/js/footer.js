@@ -5,13 +5,13 @@
     let isOnline = navigator.onLine;
     let isIssue = false;
     let isDegraded = false;
-    let announcementCount = 2;
+    let announcementCount = 0;
     let countdown = 30;
     let countdownTimer = null;
     let isReloading = false;
-    let offlineAttempts = 0;
     let currentDotColor = 'var(--bs-secondary)';
     let currentHealthStatus = 'Healthy';
+    let offlineAttempts = parseInt(sessionStorage.getItem('fsm_offline_attempts') ?? '0');
 
     const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
 
@@ -20,15 +20,12 @@
     const panelIssue = document.getElementById('fsm-fp-issue');
     const panelAnnouncement = document.getElementById('fsm-fp-announcement');
     const panelOnline = document.getElementById('fsm-fp-online');
+    const fsmFooterOfflinePageNote = document.getElementById('fsm-footer-offline-page-note');
 
     const countdownEl = document.getElementById('fsm-footer-countdown');
     const reloadBtns = document.querySelectorAll('[data-fsm-footer-reload]');
     const announceLbl = document.getElementById('fsm-footer-announce-label');
     const issueMsg = document.getElementById('fsm-issue-message');
-
-    const announceSheet = document.getElementById('fsm-announce-sheet');
-    const announceTrig = document.getElementById('fsm-footer-announce-trigger');
-    const announceClose = document.querySelectorAll('[data-fsm-announce-close]');
 
     const dot = document.getElementById('health-dot');
     const label = document.getElementById('health-label');
@@ -173,7 +170,7 @@
     // ─── Announcement polling ─────────────────────────────────────────────────────
     async function pingAnnouncements() {
         try {
-            const res = await fetch('/api/announcements/count');
+            const res = await fetch('/Announcements/GetUnseenCount');
             const data = await res.json();
 
             const prev = announcementCount;
@@ -191,18 +188,50 @@
     setInterval(pingAnnouncements, 2 * 60 * 1000);
 
     // ─── Online / offline ────────────────────────────────────────────────────────
+    const isOfflinePage = window.location.pathname.toLowerCase().includes('/home/offline');
+
+    function handleOfflineCountdownEnd() {
+        offlineAttempts++;
+        sessionStorage.setItem('fsm_offline_attempts', offlineAttempts);
+
+        if (offlineAttempts === 1) {
+            isReloading = true;
+            render();
+            window.location.reload();
+        } else {
+            window.location.href = `/Home/Offline?ReturnUrl=${returnUrl}`;
+        }
+    }
+
+    // Only start countdown if not already on the offline page
+    if (!isOnline && !isOfflinePage) {
+        startCountdown();
+    }
+
+
     window.addEventListener('online', () => {
         isOnline = true;
         offlineAttempts = 0;
         countdown = 30;
-        stopCountdown();
-        render();
+
+        if (isOfflinePage) {
+            const params = new URLSearchParams(window.location.search);
+            const returnUrl = params.get('ReturnUrl');
+            sessionStorage.removeItem('fsm_offline_attempts');
+            fsmFooterOfflinePageNote.innerText = "Connection lost. Connect to use FSM.";
+
+            if (returnUrl && returnUrl.startsWith('/')) {
+                window.location.replace(returnUrl);
+            } else {
+                window.location.replace('/');
+            }
+        }
     });
 
     window.addEventListener('offline', () => {
         isOnline = false;
         countdown = 30;
-        startCountdown();
+        if (!isOfflinePage) startCountdown();
         render();
     });
 
@@ -218,6 +247,10 @@
             }
         }, 1000);
     }
+
+    document.addEventListener('fsm:announcements:loaded', () => {
+        pingAnnouncements();
+    });
 
     function stopCountdown() {
         if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
@@ -242,21 +275,12 @@
         });
     });
 
-    // ─── Announcements sheet ─────────────────────────────────────────────────────
-    function openAnnouncements() {
-        announceSheet?.classList.add('show');
-        backdrop?.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-
     function closeAnnouncements() {
         announceSheet?.classList.remove('show');
         backdrop?.classList.remove('show');
         document.body.style.overflow = '';
     }
 
-    announceTrig?.addEventListener('click', openAnnouncements);
-    announceClose.forEach(el => el.addEventListener('click', closeAnnouncements));
     backdrop?.addEventListener('click', () => {
         closeAnnouncements();
         document.querySelectorAll('.fsm-offcanvas.show, .fsm-mobile-offcanvas.show')
@@ -279,3 +303,28 @@
     render();
 
 }());
+
+
+const announcementsDialog = document.getElementById('fsm-announcements-dialog');
+const announcementsTriggers = document.querySelectorAll('[data-fsm-announcements-trigger]');
+const announcementsClose = document.querySelectorAll('[data-fsm-announcements-close]');
+
+announcementsTriggers.forEach(t => {
+    t.addEventListener('click', (e) => {
+        e.stopPropagation();
+        announcementsDialog?.classList.add('show');
+    });
+});
+
+announcementsClose.forEach(btn => {
+    btn.addEventListener('click', () => announcementsDialog?.classList.remove('show'));
+});
+
+// ─── Keyboard: close sheets on Escape ────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeAllSheets();
+        announcementsDialog?.classList.remove('show');
+        dropdowns.forEach(dd => dd.querySelector('.fsm-dropdown-menu')?.classList.remove('show'));
+    }
+});

@@ -1,0 +1,25 @@
+﻿@model string
+
+<div class="fsm-empty-state">
+    <div class="fsm-empty-icon">
+        <i class="bi bi-megaphone-fill"></i>
+    </div>
+
+    <p class="text-danger small mb-3">
+        @if(Model is not null)
+        {
+            @if (Model == "seen")
+            {
+                <text>No seen announcements yet.</text>
+            }
+            else if (Model == "new")
+            {
+                <text>No new announcements yet.</text>
+            }
+        }
+        else
+        {
+            <text>No announcements yet.</text>
+        }
+    </p>
+</div>

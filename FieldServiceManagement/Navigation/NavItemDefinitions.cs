@@ -162,7 +162,7 @@ namespace FieldServiceManagement.Web.Navigation
             },
             new NavItem
             {
-                Title = "Notifications",
+                Title = "Announcements",
                 Url = "",
                 Icon = "bi bi-megaphone-fill",
                 Roles = ["SuperAdmin"],
@@ -170,34 +170,16 @@ namespace FieldServiceManagement.Web.Navigation
                 [
                     new NavSubItem
                     {
-                        Title = "Send Broadcast",
-                        Url = "/Admin/Notifications/SendBroadcast",
+                        Title = "All Announcements",
+                        Url = "/Admin/Announcements/",
                         Roles = ["SuperAdmin"]
-                    },
+                    }, 
                     new NavSubItem
                     {
-                        Title = "Send Maintenance Notice",
-                        Url = "/Admin/Notifications/SendMaintenanceNotice",
+                        Title = "Create Announcement",
+                        Url = "/Admin/Announcements/Create",
                         Roles = ["SuperAdmin"]
-                    },
-                    new NavSubItem
-                    {
-                        Title = "Schedule Maintenance",
-                        Url = "/Admin/Notification/ScheduleMaintenance",
-                        Roles = ["SuperAdmin"]
-                    },
-                    new NavSubItem
-                    {
-                        Title = "View Notification History",
-                        Url = "/Admin/Notifications/Histroty",
-                        Roles = ["SuperAdmin"]
-                    },
-                    new NavSubItem
-                    {
-                        Title = "Timezones",
-                        Url = "/Admin/Timezones",
-                        Roles = ["SuperAdmin"]
-                    },
+                    }
                 ]
             },
             new NavItem

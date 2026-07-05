@@ -1,0 +1,78 @@
+﻿@model FieldServiceManagement.ViewModels.Announcement.AnnouncementListViewModel
+<link rel="stylesheet" href="~/css/FSM/announcements.css" asp-append-version="true" />
+
+<div class="w-100 overflow-hidden p-0" style="height: calc(100vh - 230px);">
+    <div class="bd-callout bd-callout-info my-0 p-2 bg-opacity-10">
+        <span class="small">
+            These announcements are issued by the platform development team to keep all organisations informed about <strong>Updates</strong>, <strong>maintenance</strong>, and <strong>new features</strong>.
+        </span>
+    </div>
+
+    <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+        <div class="fsm-announcement-tab-bar" id="fsm-announcement-tab-bar">
+            <div class="fsm-announcement-tab-track" id="fsm-announcement-tab-track">
+                <button class="fsm-announcement-tab active" data-tab="all" data-index="0">All <span class="fsm-tab-count">(@Model.TotalCount)</span></button>
+                <button class="fsm-announcement-tab" data-tab="seen" data-index="1">Seen <span class="fsm-tab-count">(@Model.SeenCount)</span></button>
+                <button class="fsm-announcement-tab" data-tab="new" data-index="2">New <span class="fsm-tab-count">(@Model.NewCount)</span></button>
+            </div>
+        </div>
+
+        <div class="fsm-announcement-tab-content flex-grow-1 overflow-auto p-0">
+
+            <div class="fsm-announcement-tab-panel active pb-5 p-0" data-panel="all">
+                <div class="fsm-announcement-list">
+                    @foreach (var announcement in Model.Announcements.OrderBy(a => a.IsSeen).ThenByDescending(a => a.AnnouncementDate))
+                    {
+                        @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementRow.cshtml", announcement)
+                    }
+                </div>
+            </div>
+
+            <div class="fsm-announcement-tab-panel p-0 pb-5" data-panel="seen">
+                <div class="fsm-announcement-list">
+                    @{
+                        var seenAnnouncements = Model.Announcements
+                            .Where(a => a.IsSeen)
+                            .OrderByDescending(a => a.SeenDate)
+                            .ToList();
+                    }
+
+                    @if (seenAnnouncements.Any())
+                    {
+                        @foreach (var announcement in seenAnnouncements)
+                        {
+                            @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementRow.cshtml", announcement)
+                        }
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementsEmptyState.cshtml", "seen")
+                    }
+                </div>
+            </div>
+
+            <div class="fsm-announcement-tab-panel p-0 pb-5" data-panel="new">
+                <div class="fsm-announcement-list">
+                    @{
+                        var newAnnouncements = Model.Announcements
+                            .Where(a => !a.IsSeen)
+                            .OrderByDescending(a => a.AnnouncementDate)
+                            .ToList();
+                    }
+
+                    @if (newAnnouncements.Any())
+                    {
+                        @foreach (var announcement in newAnnouncements)
+                        {
+                            @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementRow.cshtml", announcement)
+                        }
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementsEmptyState.cshtml", "new")
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

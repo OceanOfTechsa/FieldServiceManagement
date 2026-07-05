@@ -9,11 +9,10 @@
     </h2>
     <p>
         Setup these accounts and ensure that you have logged in at least once with each account.
-        This process does not create the user account. Or <a asp-area="Identity" asp-controller="Account"
-                                                         asp-action="Login"
-                                                         class="text-dim text-decoration-none border-bottom border-fsm pb-1">
-        Go To Login
-    </a>
+        This process does not create the user account. Or 
+        <a asp-area="Identity" asp-controller="Account" asp-action="Login" class="text-dim text-decoration-none border-bottom border-fsm pb-1">
+            o To Login
+        </a>
     </p>
 </div>
 
@@ -43,12 +42,10 @@
             <div id="internalUsersCollapse"
                  class="accordion-collapse collapse show mb-3"
                  aria-labelledby="headingInternal"
-                 data-bs-parent="#devloginAccordion">
-
+                 data-bs-parent="#devloginAccordion"
+            >
                 <div class="accordion-body p-0">
-
                     <div class="d-flex flex-column gap-2">
-
                         @foreach (var user in new[]
                         {
                         ("Administrator", "Administrator"),
@@ -62,7 +59,8 @@
                             <form asp-area="Identity"
                                   asp-controller="Account"
                                   asp-action="DeveloperLogin"
-                                  method="post">
+                                  method="post"
+                            >
 
                                 @Html.AntiForgeryToken()
 
@@ -70,25 +68,22 @@
 
                                 <button type="submit"
                                         class="btn-dev color-accent"
-                                        data-loading-text="Logging In">
+                                        data-loading-text="Loading..."
+                                >
                                     Login as:
                                     <span style="font-size:0.9rem;opacity:0.6;">
                                         @user.Item2
                                     </span>
                                 </button>
-
                             </form>
                         }
-
                     </div>
-
                 </div>
             </div>
         </div>
 
         <!-- External Users -->
         <div class="accordion-item border-0 rounded-2">
-
             <h4 class="accordion-header" id="headingExternal">
                 <button class="btn btn-sm w-100 rounded-2 shadow-none text-accent bg-primary-subtle d-flex justify-content-between align-items-center"
                         type="button"
@@ -104,22 +99,20 @@
             <div id="externalUsersCollapse"
                  class="accordion-collapse collapse"
                  aria-labelledby="headingExternal"
-                 data-bs-parent="#devloginAccordion">
-
+                 data-bs-parent="#devloginAccordion"
+            >
                 <div class="accordion-body p-0">
-
                     <div class="d-flex flex-column gap-2">
-
                         @foreach (var user in new[]
                         {
-                        ("CustomerPortalUser", "Customer Portal User"),
-                    })
+                            ("CustomerPortalUser", "Customer Portal User"),
+                        })
                         {
                             <form asp-area="Identity"
                                   asp-controller="Account"
                                   asp-action="DeveloperLogin"
-                                  method="post">
-
+                                  method="post"
+                            >
                                 @Html.AntiForgeryToken()
 
                                 <input type="hidden" name="role" value="@user.Item1" />
@@ -132,10 +125,8 @@
                                         @user.Item2
                                     </span>
                                 </button>
-
                             </form>
                         }
-
                     </div>
                 </div>
             </div>

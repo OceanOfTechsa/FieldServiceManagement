@@ -1,0 +1,409 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@model FieldServiceManagement.ViewModels.Announcement.AnnouncementDetailViewModel
+
+@{
+    ViewData["Title"] = Model?.Title ?? "Announcement";
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        <div class="d-flex gap-2 align-items-center">
+          
+                <div class="d-flex align-items-start gap-1">
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item">Admin</li>
+                            <li class="breadcrumb-item"><a href="/Admin/Announcements">Announcements</a></li>
+                            <li class="breadcrumb-item text-primary" aria-current="page">
+                            @Model?.Title
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+            
+        </div>
+
+        @if (User.IsInRole("SuperAdmin") && Model?.IsDeleted == false)
+        {
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn-sm bg-danger text-white" data-fsm-delete-trigger>
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+                @if (Model.StatusId != (int)AnnouncementStatus.AnnouncementArchived)
+                {
+                        <button class="btn-sm bg-warning text-white" data-fsm-archive-trigger>
+                        <i class="bi bi-archive"></i> Archive
+                    </button>
+                }
+                <a href="/Admin/Announcements/Edit?Id=@UrlEncryptionBusiness.EncryptParam(Model.Id.ToString())"
+                   class="btn-sm btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+
+            <!-- Left panel -->
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel">
+                @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementLeftPanel.cshtml", Model)
+            </div>
+            <!-- Mobile left panel toggle -->
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
+            <!-- Main content -->
+            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+
+                <!-- Tab bar -->
+                <div class="fsm-tab-bar" id="fsm-tab-bar">
+                    <div class="fsm-tab-track" id="fsm-tab-track">
+                        <button class="fsm-tab active" data-tab="details" data-index="0">Details</button>
+                        <button class="fsm-tab" data-tab="notes" data-index="1">Notes</button>
+                        <button class="fsm-tab" data-tab="recipients" data-index="2">Recipients</button>
+                    </div>
+                    <div class="fsm-tab-more fsm-dropdown" id="fsm-tab-more" style="display:none;">
+                        <button class="fsm-tab-more-btn nav-dropdown-toggle"
+                                id="fsm-tab-more-btn"
+                                type="button"
+                                aria-expanded="false"
+                                aria-label="More tabs">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="fsm-dropdown-menu fsm-tab-more-menu"
+                             id="fsm-tab-more-menu"
+                             role="menu">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab panels -->
+                <div class="fsm-tab-content flex-grow-1 overflow-auto">
+
+                    <!-- Details -->
+                    <div class="fsm-tab-panel active p-3" data-panel="details">
+                        <div class="fsm-section-label mb-2">Description</div>
+                        <div class="fsm-meta-text" style="white-space:pre-line;line-height:1.75">
+                            @(Model?.Description ?? @EmptyFieldReplacer)
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="fsm-tab-panel p-3" data-panel="notes">
+                        @if (!string.IsNullOrWhiteSpace(Model?.Notes))
+                        {
+                            <div class="fsm-section-label mb-2">Internal Notes</div>
+                            <div class="fsm-meta-text" style="white-space:pre-line;line-height:1.75">
+                                @Model.Notes
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="fsm-empty-state py-5">
+                                <div class="fsm-empty-icon"><i class="bi bi-sticky"></i></div>
+                                <h6 class="fw-semibold mb-1">No notes</h6>
+                                <p class="text-muted small mb-0">No internal notes have been added to this announcement.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Recipients -->
+                    <div class="fsm-tab-panel p-3" data-panel="recipients">
+                        <div class="fsm-section-label mb-2">Visible To</div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            @if (Model != null)
+                            {
+                                foreach (var role in Model.VisibleToRoleList)
+                                {
+                                    <span class="fsm-pill bg-secondary-subtle text-secondary px-3 py-1">
+                                        <i class="bi bi-person-fill me-1"></i>@role
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile offcanvas -->
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">Announcement Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-2 overflow-y-auto d-flex flex-column gap-2">
+        @await Html.PartialAsync("~/Views/Components/Partials/_AnnouncementLeftPanel.cshtml", Model)
+    </div>
+</div>
+
+<!-- Delete dialog -->
+<div id="fsm-delete-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="delete-title" class="dialog-title">Delete Announcement</p>
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <i class="bi bi-trash"></i>
+            </div>
+            <div class="warn-text">
+                <p>Delete Confirmation Required</p>
+                <p class="warn-sub">
+                    Are you sure you want to delete <strong>@Model?.Title</strong>?
+                    This will remove the announcement from all users immediately.
+                </p>
+            </div>
+        </div>
+        <div class="dialog-body">
+            Select <strong>Delete Announcement</strong> to proceed, or <strong>Cancel</strong> to go back.
+        </div>
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="delete-error">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            Failed to delete this announcement. Please try again.
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+            <button class="btn-confirm" id="fsm-delete-confirm">Delete Announcement</button>
+        </div>
+    </div>
+</div>
+
+<!-- Archive dialog -->
+<div id="fsm-archive-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="archive-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="archive-title" class="dialog-title">Archive Announcement</p>
+
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <i class="bi bi-archive"></i>
+            </div>
+
+            <div class="warn-text">
+                <p>Archive Confirmation Required</p>
+                <p class="warn-sub">
+                    Are you sure you want to archive <strong>@Model?.Title</strong>?
+                    This announcement will no longer be visible to users but will remain securely stored in the system. You can restore it later if needed.
+                </p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            Select <strong>Archive Announcement</strong> to remove this announcement from all users while keeping it available for future restoration. Select <strong>Cancel</strong> if you do not wish to continue.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="archive-error">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            Failed to archive this announcement. Please try again.
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-archive-cancel>Cancel</button>
+            <button class="btn-confirm" id="fsm-archive-confirm">Archive Announcement</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            // ── Delete dialog ────────────────────────────────────────────────────────
+            const deleteDialog   = document.getElementById('fsm-delete-dialog');
+            const deleteTriggers = document.querySelectorAll('[data-fsm-delete-trigger]');
+            const deleteCancels  = document.querySelectorAll('[data-fsm-delete-cancel]');
+
+            const archiveDialog   = document.getElementById('fsm-archive-dialog');
+            const archiveTriggers = document.querySelectorAll('[data-fsm-archive-trigger]');
+            const archiveCancels  = document.querySelectorAll('[data-fsm-archive-cancel]');
+
+            deleteTriggers.forEach(btn => btn.addEventListener('click', e => {
+                e.stopPropagation();
+                deleteDialog?.classList.add('show');
+            }));
+
+            deleteCancels.forEach(btn => btn.addEventListener('click', () => {
+                deleteDialog?.classList.remove('show');
+            }));
+
+            archiveTriggers.forEach(btn => btn.addEventListener('click', e => {
+                e.stopPropagation();
+                archiveDialog?.classList.add('show');
+            }));
+
+            archiveCancels.forEach(btn => btn.addEventListener('click', () => {
+                archiveDialog?.classList.remove('show');
+            }));
+
+            // ── Tab bar ──────────────────────────────────────────────────────────────
+            const track    = document.getElementById('fsm-tab-track');
+            const moreWrap = document.getElementById('fsm-tab-more');
+            const moreBtn  = document.getElementById('fsm-tab-more-btn');
+            const moreMenu = document.getElementById('fsm-tab-more-menu');
+            const tabs     = Array.from(track?.querySelectorAll('.fsm-tab') ?? []);
+            const panels   = Array.from(document.querySelectorAll('.fsm-tab-panel'));
+
+            if (!track || !tabs.length) return;
+
+            function activate(tabName) {
+                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
+                moreMenu?.querySelectorAll('button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tab === tabName);
+                });
+            }
+
+            tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.tab)));
+
+            function recalc() {
+                if (!moreWrap) return;
+                tabs.forEach(t => { t.style.display = ''; });
+                moreWrap.style.display    = 'none';
+                moreWrap.style.visibility = 'hidden';
+                moreMenu.innerHTML        = '';
+
+                requestAnimationFrame(() => {
+                    const barWidth   = track.parentElement.offsetWidth;
+                    const moreBtnW   = 44;
+                    let   used       = 0;
+                    const overflowed = [];
+
+                    tabs.forEach(tab => {
+                        used += tab.getBoundingClientRect().width;
+                        if (used > barWidth - moreBtnW) {
+                            tab.style.display = 'none';
+                            overflowed.push(tab);
+                        }
+                    });
+
+                    if (overflowed.length === 0) {
+                        moreWrap.style.display    = 'none';
+                        moreWrap.style.visibility = '';
+                        return;
+                    }
+
+                    moreWrap.style.display    = '';
+                    moreWrap.style.visibility = '';
+
+                    overflowed.forEach(tab => {
+                        const btn       = document.createElement('button');
+                        btn.type        = 'button';
+                        btn.role        = 'menuitem';
+                        btn.dataset.tab = tab.dataset.tab;
+                        btn.textContent = tab.textContent.trim();
+                        btn.className   = 'dropdown-item' + (tab.classList.contains('active') ? ' active' : '');
+                        btn.addEventListener('click', () => {
+                            activate(tab.dataset.tab);
+                            moreMenu.classList.remove('show');
+                            moreBtn.setAttribute('aria-expanded', 'false');
+                        });
+                        moreMenu.appendChild(btn);
+                    });
+                });
+            }
+
+            moreBtn?.addEventListener('click', e => {
+                e.stopPropagation();
+                const isOpen = moreMenu.classList.contains('show');
+                document.querySelectorAll('.fsm-dropdown-menu.show').forEach(m => {
+                    m.classList.remove('show');
+                    m.closest('.fsm-dropdown')
+                     ?.querySelector('[aria-expanded]')
+                     ?.setAttribute('aria-expanded', 'false');
+                });
+                if (!isOpen) {
+                    moreMenu.classList.add('show');
+                    moreBtn.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            moreMenu?.addEventListener('click', e => e.stopPropagation());
+            document.addEventListener('click', () => {
+                moreMenu?.classList.remove('show');
+                moreBtn?.setAttribute('aria-expanded', 'false');
+            });
+
+            requestAnimationFrame(() => requestAnimationFrame(recalc));
+            window.addEventListener('resize', recalc);
+
+
+            document.getElementById('fsm-archive-confirm').addEventListener('click', async () => {
+                const button = document.getElementById('fsm-archive-confirm');
+                const error = document.getElementById('archive-error');
+
+                error.classList.add('d-none');
+
+                // Show loading state
+                button.disabled = true;
+                const originalText = button.innerHTML;
+                button.innerHTML = `
+                    <span class="spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Archiving...
+                `;
+
+                try {
+                    const response = await fetch('/Admin/Announcements/Archive', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: '@Model.Id' })
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/Admin/Announcements';
+                    } else {
+                        error.classList.remove('d-none');
+                    }
+                } catch {
+                    error.classList.remove('d-none');
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            });
+
+            document.getElementById('fsm-delete-confirm').addEventListener('click', async () => {
+                const button = document.getElementById('fsm-delete-confirm');
+                const error  = document.getElementById('delete-error');
+
+                error.classList.add('d-none');
+                button.disabled = true;
+                const originalText = button.innerHTML;
+                button.innerHTML = `
+                    <span class="spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Deleting...
+                `;
+
+                try {
+                    const response = await fetch('/Admin/Announcements/Delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: '@Model.Id' })
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/Admin/Announcements';
+                    } else {
+                        error.classList.remove('d-none');
+                    }
+                } catch {
+                    error.classList.remove('d-none');
+                } finally {
+                    button.disabled  = false;
+                    button.innerHTML = originalText;
+                }
+            });
+        }());
+    </script>
+}

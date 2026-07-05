@@ -990,6 +990,11 @@ $nav-height:      44px;
         width: min(920px, 95vw);
     }
 
+    &.fsm-dialog-2xfull {
+        width: min(1090px, 95vw);
+    }
+
+
     .fsm-dialog-backdrop.show & {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -1172,7 +1177,6 @@ $nav-height:      44px;
             background-color: #2563eb;
         }
     /* ====================== BD-CALLOUT AUTO THEMING ====================== */
-
     //.bd-callout {
     //    border-left: 4px solid;
     //    padding: 12px 16px;

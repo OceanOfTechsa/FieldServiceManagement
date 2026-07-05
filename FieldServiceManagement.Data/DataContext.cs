@@ -1,4 +1,5 @@
 ﻿using FieldServiceManagement.Data.DataModels.Address;
+using FieldServiceManagement.Data.DataModels.Announcement;
 using FieldServiceManagement.Data.DataModels.Asset;
 using FieldServiceManagement.Data.DataModels.Audits;
 using FieldServiceManagement.Data.DataModels.Company;
@@ -117,6 +118,10 @@ namespace FieldServiceManagement.Data
         public DbSet<UserInvitation> UserInvitations { get; set; }
         #endregion
 
+        #region System
+        public DbSet<Announcement> Announcements { get; set; }
+        #endregion
+
         public DataContext() { }
 
         public new DbSet<TEntity> Set<TEntity>() where TEntity : class
@@ -159,6 +164,8 @@ namespace FieldServiceManagement.Data
                 .IsRequired(false);
 
             modelBuilder.Entity<AppUserProfile>().HasNoKey().ToView(null);
+            modelBuilder.Entity<UserAnnouncement>().HasNoKey();
+            modelBuilder.Entity<AnnouncementAdminListItem>().HasNoKey();
         }
     }
 }

@@ -1,21 +1,21 @@
 ﻿@using System.Text.RegularExpressions
 @using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
-@using FieldServiceManagement.ViewModels.Contact
+@using FieldServiceManagement.ViewModels.Announcement
 
-@model IEnumerable<ContactListItemViewModel>
+@model IEnumerable<AnnouncementAdminListItemViewModel>
 
 @{
-    ViewData["Title"] = "All Contacts";
-    var contacts = Model?.ToList() ?? new List<ContactListItemViewModel>();
+    ViewData["Title"] = "All Announcements";
+    var announcements = Model?.ToList() ?? new List<AnnouncementAdminListItemViewModel>();
     var selectedStatus = ViewBag.SelectedStatus?.ToString() ?? "All";
 
-    var filteredContacts = selectedStatus switch
+    var filteredAnnouncements = selectedStatus switch
     {
-        "Active" => contacts.Where(x => x.IsActive && !x.IsDeleted).ToList(),
-        "InActive" => contacts.Where(x => !x.IsActive && !x.IsDeleted).ToList(),
-        "Deleted" => contacts.Where(x => x.IsDeleted).ToList(),
-        _ => contacts
+        "Draft"     => announcements.Where(x => x.StatusName == "AnnouncementInDraft").ToList(),
+        "APublished"   => announcements.Where(x => x.StatusName == "AnnouncementPublished").ToList(),
+        "Archived"  => announcements.Where(x => x.StatusName == "AnnouncementArchived").ToList(),
+        _           => announcements
     };
 
     var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
@@ -31,7 +31,7 @@
                                v-model="selectedStatus"
                                placeholder="All"
                                param-name="status"
-                               suffix="Contacts">
+                               suffix="Announcements">
                 </enum-dropdown>
             </div>
         </div>
@@ -43,22 +43,16 @@
                 </button>
                 <div id="searchWrapper" class="search-wrapper">
                     <input class="border-fsm form-control search-input"
-                           placeholder="Search by name or email..."
+                           placeholder="Search by title..."
                            id="searchInput" />
                     <button id="cancelSearch" class="cancel-btn">✕</button>
                 </div>
             </div>
-            <a href="/Customers/Contacts/Import" class="btn border-fsm btn-xs">
-                <i class="bi bi-file-earmark-arrow-up"></i>
-            </a>
-            <button class="btn btn-info-soft btn-xs">
-                <i class="bi bi-question-circle-fill"></i>
-            </button>
-            <a href="/Customers/Contacts/Create" class="btn btn-primary btn-xs"
-               title="New Contact"
-               aria-label="New Contact">
+            <a href="/Admin/Announcements/Create" class="btn btn-primary btn-xs"
+               title="New Announcement"
+               aria-label="New Announcement">
                 <i class="fa-solid fa-plus"></i>
-                New Contact
+                New Announcement
             </a>
         </div>
     </div>
@@ -69,91 +63,105 @@
             <table class="table align-middle mb-0 fsm-table">
                 <thead>
                     <tr>
-                        <th class="fsm-sortable" data-sort="name">
-                            Contact Name
+                        <th class="fsm-sortable" data-sort="title">
+                            Title
                             <span class="fsm-sort-icon">
                                 <i class="bi bi-chevron-expand"></i>
                             </span>
                         </th>
-                        <th>Company</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Mobile</th>
                         <th>Status</th>
+                        <th>Visible To</th>
+                        <th>Active</th>
                         <th>Created By</th>
                         <th>Created At</th>
+                        <th>Updated By</th>
+                        <th>Updated At</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (filteredContacts.Any())
+                    @if (filteredAnnouncements.Any())
                     {
-                        foreach (var item in filteredContacts)
+                        foreach (var item in filteredAnnouncements)
                         {
-                            var fullName = $"{item.Name} {item.Surname}".Trim();
-
-                            <tr data-sort-value="@item.Name">
-                                <!-- Contact Name -->
+                            <tr data-sort-value="@item.Title">
+                                <!-- Title -->
                                 <td>
-                                    <a href="/Customers/Contacts/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())" class="d-flex align-items-center gap-2 full-name-wrapper">
-                                        <img src="@($"https://ui-avatars.com/api/?name={fullName}&background=random")" class="fsm-avatar" alt="@fullName" />
-                                        <span class="fsm-user-name">
-                                            @{
-                                                var salutationDisplay = ((UserSalutation?)@item.Salutation)?.GetDisplayName() ?? "Unknown";
-                                                var salutationLabel = Regex.Replace(salutationDisplay, "(?<=[a-z])(?=[A-Z])", " ");
-                                            }
-                                            @salutationLabel. @fullName
-                                        </span>
+                                    <a href="/Admin/Announcements/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())" class="d-flex align-items-center gap-2 full-name-wrapper">
+                                        <span class="fsm-user-name">@item.Title</span>
                                     </a>
-                                </td>
+                                </td>   
 
-                                <!-- Company -->
-                                <td>
-                                    @if (!string.IsNullOrWhiteSpace(item.CompanyName))
-                                    {
-                                        <a href="/Customers/Companies/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.CompanyId.ToString())"
-                                           class="fsm-meta-text text-decoration-none">
-                                            @item.CompanyName <i class="bi bi-box-arrow-up-right"></i>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <span class="fsm-meta-text">-</span>
-                                    }
-                                </td>
-
-                                <!-- Email -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Email) ? @EmptyFieldReplacer : item.Email)</span></td>
-
-                                <!-- Phone -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? @EmptyFieldReplacer : item.Phone)</span></td>
-
-                                <!-- Mobile -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Mobile) ? @EmptyFieldReplacer : item.Mobile)</span></td>
-                               
                                 <!-- Status -->
                                 <td>
                                     @{
-                                        var (statusLabel, statusCss) = item.IsDeleted
-                                            ? ("Deleted", "bg-danger")
-                                            : item.IsActive
-                                                ? ("Active", "bg-success")
-                                                : ("Inactive", "bg-secondary");
+                                        var statusCss = item.StatusId switch
+                                        {
+                                            (int)AnnouncementStatus.AnnouncementPublished => "bg-success",
+                                            (int)AnnouncementStatus.AnnouncementInDraft => "bg-secondary",
+                                            (int)AnnouncementStatus.AnnouncementArchived => "bg-warning",
+                                            _           => "bg-secondary"
+                                        };
                                     }
                                     <span class="d-inline-flex align-items-center gap-2">
                                         <span class="fsm-status-dot @statusCss"></span>
-                                        <span>@statusLabel</span>
+                                        @if (item.StatusId == (int)AnnouncementStatus.AnnouncementInDraft)
+                                        {
+                                            <span>Draft</span>
+                                        }
+                                        else if (item.StatusId == (int)AnnouncementStatus.AnnouncementPublished)
+                                        {
+                                            <span>Published</span>
+                                        }
+                                        else if (item.StatusId == (int)AnnouncementStatus.AnnouncementArchived)
+                                        {
+                                            <span>Archived</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Unknown</span>
+                                        }
+                                    </span>
+                                </td>
+
+                                <!-- Visible To -->
+                                @{
+                                    var roleNames = string.IsNullOrWhiteSpace(item.VisibleToRoleIds)
+                                        ? "Everyone"
+                                        : string.Join(", ",
+                                            item.VisibleToRoleIds
+                                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                .Select(id =>
+                                                {
+                                                    if (int.TryParse(id.Trim(), out var roleId) &&
+                                                        Enum.IsDefined(typeof(UserRole), roleId))
+                                                    {
+                                                        return Regex.Replace(
+                                                        ((UserRole)roleId).GetDisplayName(),
+                                                        "(?<=[a-z])(?=[A-Z])",
+                                                        " ");
+                                                    }
+
+                                                    return $"Unknown ({id})";
+                                                }));
+                                }
+
+                                <td>
+                                    <span class="fsm-meta-text">@roleNames</span>
+                                </td>
+
+                                <!-- Active -->
+                                <td>
+                                    <span class="d-inline-flex align-items-center gap-2">
+                                        <span class="fsm-status-dot @(item.IsActive ? "bg-success" : "bg-secondary")"></span>
+                                        <span>@(item.IsActive ? "Yes" : "No")</span>
                                     </span>
                                 </td>
 
                                 <!-- Created By -->
                                 <td>
-                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.CreatedById?.ToString() ?? string.Empty) })" class="d-flex align-items-center gap-2 full-name-wrapper">
-                                        @if(item.CreatedByAvatar is not null)
-                                        {
-                                            <img src="@($"https://ui-avatars.com/api/?name={item.CreatedByName}&background=random")" class="fsm-avatar-sm" alt="@item.CreatedByName" />
-                                        }
-                                        <span class="fsm-user-name">@(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)</span>
-                                    </a>
+                                    <span class="fsm-meta-text">
+                                        @(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)
+                                    </span>
                                 </td>
 
                                 <!-- Created At -->
@@ -162,36 +170,67 @@
                                         @item.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item.CreatedAt.ToString("tt").ToUpper()
                                     </span>
                                 </td>
+
+                                <!-- Updated By -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(string.IsNullOrWhiteSpace(item.UpdatedByName) ? @EmptyFieldReplacer : item.UpdatedByName)
+                                    </span>
+                                </td>
+
+                                <!-- Updated At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(item.UpdatedAt.HasValue
+                                            ? $"{item.UpdatedAt.Value:MMM dd, yyyy hh:mm} {item.UpdatedAt.Value:tt}".ToUpper()
+                                            : @EmptyFieldReplacer)
+                                    </span>
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="8">
+                            <td colspan="9">
                                 <div class="fsm-empty-state">
                                     <div class="fsm-empty-icon">
-                                        <i class="bi bi-person-lines-fill"></i>
+                                        <i class="bi bi-megaphone"></i>
                                     </div>
-                                    <h6 class="fw-semibold mb-1">No contacts found</h6>
-                                    <p class="text-muted small mb-3">No contacts match the selected filter.</p>
-                                    <a href="/Customers/Contacts/Create" class="btn btn-primary btn-xs">
+                                    <h6 class="fw-semibold mb-1">No announcements found</h6>
+                                    <p class="text-muted small mb-3">No announcements match the selected filter.</p>
+                                    <a href="/Admin/Announcements/Create" class="btn btn-primary btn-xs">
                                         <i class="fa-solid fa-plus"></i>
-                                        New Contact
+                                        New Announcement
                                     </a>
                                 </div>
                             </td>
                         </tr>
                     }
 
-                    @if (selectedStatus == "Deleted" && filteredContacts.Any())
+                    @if (selectedStatus == "Draft" && filteredAnnouncements.Any())
                     {
-                        <tr>
-                            <td colspan="8">
+                        <tr data-static="true">
+                            <td colspan="9">
                                 <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
                                     <i class="bi bi-exclamation-circle-fill text-warning"></i>
-                                    @(filteredContacts.Count > 1 ? "These contacts have" : "This contact has")
-                                    been permanently deleted. All associated data has been archived.
+                                    @(filteredAnnouncements.Count > 1
+                                        ? "These announcements are currently in draft and are not visible to any users."
+                                        : "This announcement is currently in draft and is not visible to any users.")
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (selectedStatus == "Archived" && filteredAnnouncements.Any())
+                    {
+                        <tr data-static="true">
+                            <td colspan="9">
+                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                                    <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    @(filteredAnnouncements.Count > 1
+                                        ? "These announcements have been archived and are no longer visible to users."
+                                        : "This announcement has been archived and is no longer visible to users.")
                                 </div>
                             </td>
                         </tr>
@@ -202,7 +241,7 @@
 
         <div class="fsm-table-footer">
             <span>
-                Total Contacts: <strong>@filteredContacts.Count</strong>
+                Total Announcements: <strong>@filteredAnnouncements.Count</strong>
                 @if (selectedStatus != "All")
                 {
                     <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
@@ -225,7 +264,6 @@
 
 @section Scripts {
     <script>
-        // ── Shared enum-dropdown component ───────────────────────────────
         Vue.component('enum-dropdown', {
             props: {
                 options:     Array,
@@ -297,13 +335,12 @@
             el: '#app',
             data() {
                 return {
-                    statusOptions: ['All', 'Active', 'InActive', 'Deleted'],
+                    statusOptions: ['All', 'Draft', 'Published', 'Archived'],
                     selectedStatus: '@(ViewBag.SelectedStatus ?? "All")'
                 };
             }
         });
 
-        // ── DOM refs ──────────────────────────────────────────────────────
         const searchBtn     = document.getElementById('searchBtn');
         const searchWrapper = document.getElementById('searchWrapper');
         const cancelSearch  = document.getElementById('cancelSearch');
@@ -311,25 +348,22 @@
         const table         = document.querySelector('.fsm-table');
         const tbody         = table.querySelector('tbody');
 
-        // ── Empty state row (search) ──────────────────────────────────────
         const emptyStateRow = document.createElement('tr');
         emptyStateRow.id = 'emptyStateRow';
         emptyStateRow.style.display = 'none';
         emptyStateRow.dataset.static = 'true';
         emptyStateRow.innerHTML = `
-            <td colspan="8">
+            <td colspan="9">
                 <div class="fsm-empty-state">
-                    <div class="fsm-empty-icon"><i class="bi bi-person-lines-fill"></i></div>
-                    <h6 class="fw-semibold mb-1">No contacts found</h6>
-                    <p class="text-muted small mb-3">No contacts match your search.</p>
+                    <div class="fsm-empty-icon"><i class="bi bi-megaphone"></i></div>
+                    <h6 class="fw-semibold mb-1">No announcements found</h6>
+                    <p class="text-muted small mb-3">No announcements match your search.</p>
                 </div>
             </td>`;
         tbody.appendChild(emptyStateRow);
 
-        // ── Data rows only (excludes static rows) ─────────────────────────
         const dataRows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.dataset.static);
 
-        // ── Search ────────────────────────────────────────────────────────
         searchBtn.addEventListener('click', () => {
             searchWrapper.classList.add('active');
             searchBtn.classList.add('d-none');
@@ -351,8 +385,7 @@
             let visible = 0;
 
             dataRows.forEach(row => {
-                // search across: name, email, phone, mobile (cols 0–3)
-                const match = [0, 1, 2, 3].some(i => row.cells[i]?.textContent.toLowerCase().includes(value));
+                const match = [0, 1].some(i => row.cells[i]?.textContent.toLowerCase().includes(value));
                 row.style.display = match ? '' : 'none';
                 if (match) visible++;
             });
@@ -360,7 +393,6 @@
             emptyStateRow.style.display = visible === 0 ? '' : 'none';
         });
 
-        // ── Sort + Pagination ─────────────────────────────────────────────
         const headers    = table.querySelectorAll('th.fsm-sortable');
         const prevBtn    = document.querySelector('.fsm-page-btn:first-of-type');
         const nextBtn    = document.querySelector('.fsm-page-btn:last-of-type');

@@ -1,0 +1,234 @@
+﻿@model FieldServiceManagement.ViewModels.Announcement.CreateAnnouncementViewModel
+@using FieldServiceManagement.Enum
+@using System.Text.RegularExpressions
+
+@{
+    ViewData["Title"] = "Create Announcement";
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item text-blue">Admin</li>
+                    <li class="breadcrumb-item text-blue"><a href="/Admin/Announcements">Announcements</a></li>
+                    <li class="breadcrumb-item link-success" aria-current="page">Create</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="fsm-fixed-view-wrapper-forms" id="fsm-new-announcement">
+        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+
+           <form id="create-announcement-form" method="post" action="/Admin/Announcements/Create" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                @Html.AntiForgeryToken()
+
+                <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="mt-3">
+                    <div class="bd-callout bd-callout-info my-0 p-2 mb-3 bg-opacity-10">
+                        <span class="smaller">
+                            • Announcements are issued to organisations across the platform to communicate <strong>updates</strong>, <strong>maintenance</strong>, and <strong>new features</strong>.
+                            <br />
+                            • Leave <strong>Visible To</strong> empty to make the announcement visible to all roles.
+                            <br />
+                            • Announcements will only appear to users once their status is set to <strong>Published</strong>.
+                        </span>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    
+
+                    <div>
+                        <div class="row g-3">
+                            <!-- Title -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Title, new { @class = "form-label" })
+                                    <span class="text-danger mt-2">*</span>
+                                    @Html.TextBoxFor(m => m.Title, new { @class = "form-control", @placeholder = "E.g., Scheduled Maintenance" })
+                                    @Html.ValidationMessageFor(m => m.Title, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Description, new { @class = "form-label" })
+                                    <span class="text-danger mt-2">*</span>
+                                    @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @rows = 4, @placeholder = "Describe the announcement..." })
+                                    @Html.ValidationMessageFor(m => m.Description, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Notes, new { @class = "form-label" })
+                                    @Html.TextAreaFor(m => m.Notes, new { @class = "form-control", @rows = 2, @placeholder = "Optional additional notes..." })
+                                    @Html.ValidationMessageFor(m => m.Notes, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <!-- Announcement Date -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.AnnouncementDate, new { @class = "form-label" })
+                                    <span class="text-danger mt-2">*</span>
+                                    @Html.TextBoxFor(m => m.AnnouncementDate, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", @type = "datetime-local", name = "AnnouncementDate" })
+                                    @Html.ValidationMessageFor(m => m.AnnouncementDate, "", new { @class = "field-error" })
+
+                                    @if (Model.AnnouncementDate != default)
+                                    {
+                                        <span class="smaller text-muted">
+                                            <strong>@Model.AnnouncementDate.ToString("MMM dd, yyyy hh:mm") @Model.AnnouncementDate.ToString("tt").ToLower()</strong>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.StatusId, new { @class = "form-label" })
+                                    <span class="text-danger mt-2">*</span>
+                                    <select id="StatusId" name="StatusId" class="form-select">
+                                        <option value="">Select Status</option>
+                                        @foreach (AnnouncementStatus announcement in Enum.GetValues(typeof(AnnouncementStatus)))
+                                        {
+                                            var label = Regex.Replace(announcement.ToString(), "([A-Z])", " $1").Trim();
+                                            <option value="@((int)announcement)" selected="@(Model.StatusId == (int)announcement ? "selected" : null)">@label</option>
+                                        }
+                                    </select>
+                                    @Html.ValidationMessageFor(m => m.StatusId, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <!-- Visible To Roles -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Visible To</label>
+                                    <select id="SelectedRoleIds" name="SelectedRoleIds" class="form-select" multiple>
+                                        @foreach (UserRole role in Enum.GetValues(typeof(UserRole)))
+                                        {
+                                            var label = Regex.Replace(role.ToString(), "([A-Z])", " $1").Trim();
+                                            var isPreselected = role == UserRole.Administrator;
+
+                                            if (isPreselected)
+                                            {
+                                                <option value="@((int)role)" selected="selected">@label</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@((int)role)">@label</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span class="smaller text-muted">Leave empty to make visible to everyone.</span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <div class="mt-2 d-flex gap-1 align-items-center">
+                                        <label class="form-check-label" for="IsActive">Announcement is active?</label>
+                                        @Html.CheckBoxFor(m => m.IsActive, new 
+                                            { 
+                                                id = "IsActive",
+                                                @class ="",
+                                                data_toggle = "switch",
+                                                data_size = "mini",
+                                                data_handle_width = "2",
+                                                data_on_text = "Yes",
+                                                data_off_text = "No"
+                                            })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
+                    <a href="/Admin/Announcements" type="button" class="btn btn-light btn-xs border">
+                        Cancel
+                    </a>
+                    <button type="submit" id="save-announcement-btn" class="btn btn-primary btn-xs" data-loading-text="Creating" data-spinner-size="spinner-xs">
+                        Create Announcement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const newAnnouncementApp = new Vue({
+            el: '#fsm-new-announcement',
+            methods: {
+                validate() {
+                    let valid = true;
+                    const title       = $('input[name="Title"]').val().trim();
+                    const description = $('textarea[name="Description"]').val().trim();
+                    const date        = $('input[name="AnnouncementDate"]').val();
+                    const status      = $('select[name="StatusId"]').val();
+
+                    if (!title)       { this.showFieldError('Title', 'Title is required.'); valid = false; }
+                    if (!description) { this.showFieldError('Description', 'Description is required.'); valid = false; }
+                    if (!date)        { this.showFieldError('AnnouncementDate', 'Announcement date is required.'); valid = false; }
+                    if (!status)      { this.showSelectError('StatusId', 'Status is required.'); valid = false; }
+
+                    return valid;
+                },
+                showFieldError(name, message) {
+                    $('[name="' + name + '"]').addClass('is-invalid').siblings('.field-error').text(message).show();
+                },
+                showSelectError(name, message) {
+                    $('select[name="' + name + '"]').addClass('is-invalid').siblings('.field-error').text(message).show();
+                }
+            }
+        });
+
+        $('#save-announcement-btn').on('click', function () {
+            if (newAnnouncementApp.validate()) $('#create-announcement-form').submit();
+        });
+
+        $(document).on('input change', '#create-announcement-form .form-control, #create-announcement-form .form-select', function () {
+            $(this).removeClass('is-invalid');
+            $(this).siblings('.field-error').text('').hide();
+        });
+
+        new Choices('#StatusId', {
+            searchEnabled: true,
+            itemSelectText: '',
+            shouldSort: false,
+            searchPlaceholderValue: 'Search Statuses...',
+        });
+
+        new Choices('#SelectedRoleIds', {
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search roles...',
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true,
+        });
+
+         $(document).ready(function() {
+            $("[data-toggle='switch']").bootstrapSwitch();
+        });
+
+        document.getElementById('AnnouncementDate')?.addEventListener('change', function () {
+            const preview = document.getElementById('announcement-date-preview');
+            if (!preview || !this.value) return;
+
+            const date = new Date(this.value);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+
+            preview.textContent = `${dateStr}, ${timeStr}`;
+        });
+    </script>
+}

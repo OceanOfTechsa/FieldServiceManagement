@@ -17,6 +17,8 @@
         "Deleted" => companies.Where(x => x.IsDeleted).ToList(),
         _ => companies
     };
+
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
@@ -107,7 +109,7 @@
                                 <td><span class="fsm-meta-text">@item.Email</span></td>
 
                                 <!-- Phone -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? "-" : item.Phone)</span></td>
+                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? @EmptyFieldReplacer : item.Phone)</span></td>
 
                                 <!-- Type -->
                                 <td>
@@ -121,14 +123,14 @@
                                 <!-- Service Address -->
                                 <td>
                                     <span class="fsm-meta-text">
-                                        @(string.IsNullOrWhiteSpace(item.ServiceAddressName) ? "-" : item.ServiceAddressName)
+                                        @(string.IsNullOrWhiteSpace(item.ServiceAddressName) ? @EmptyFieldReplacer : item.ServiceAddressName)
                                     </span>
                                 </td>
 
                                 <!-- Billing Address -->
                                 <td>
                                     <span class="fsm-meta-text">
-                                        @(string.IsNullOrWhiteSpace(item.BillingAddressName) ? "-" : item.BillingAddressName)
+                                        @(string.IsNullOrWhiteSpace(item.BillingAddressName) ? @EmptyFieldReplacer : item.BillingAddressName)
                                     </span>
                                 </td>
 
@@ -151,7 +153,7 @@
                                 <td>
                                     <span class="fsm-meta-text">
                                         @* <img src="@($"https://ui-avatars.com/api/?name={item.}&background=random")" class="fsm-avatar-lg" alt="@item.Name" /> *@
-                                        @(string.IsNullOrWhiteSpace(item.CreatedByName) ? "-" : item.CreatedByName)
+                                        @(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)
                                     </span>
                                 </td>
 

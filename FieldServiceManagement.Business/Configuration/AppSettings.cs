@@ -15,12 +15,12 @@ namespace FieldServiceManagement.Business.Configuration
          ? baseUrl
          : GetConfigValue("azureUrl");
 
-        public static readonly string BaseUrl = ConfigHelper.Settings("AppSettings", "siteUrl");
-        public static string InstrumentationKey => ConfigHelper.Settings("AppSettings", "InstrumentationKey") ?? string.Empty;
+        public static readonly string BaseUrl = GetConfigValue("siteUrl");
+        public static string InstrumentationKey => GetConfigValue("InstrumentationKey") ?? string.Empty;
         public static string EmailTemplatePathFSM => Path.Combine(Environment.CurrentDirectory, @"Views/Shared/_EmailTamplateFSM.cshtml");
-        public static int DailyEmailSendingLimit => Convert.ToInt32(settingBusiness.GetSettingsByKey("DailyEmailSendingLimit")?.value);
+        public static int DailyEmailSendingLimit => Convert.ToInt32(GetSettingValue("DailyEmailSendingLimit"));
         public static string fsmLogo => "/Assets/Images/Brand/logo.svg";
-        public static int staffPageSize => Convert.ToInt16(ConfigHelper.Settings("AppSettings", "staffPageSize"));
+        public static int staffPageSize => Convert.ToInt16(GetConfigValue("staffPageSize"));
         public static string GetUrLEncryptionKey()
         {
             if (EnvironmentName != nameof(Enum.Environment.Development))
