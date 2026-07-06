@@ -10,7 +10,7 @@ namespace FieldServiceManagement.ViewModels.Settings
         [Required]
         public string value { get; set; }
         [Required]
-        public string description { get; set; }
+        public string? description { get; set; }
 
         public bool isActive { get; set; }
     }

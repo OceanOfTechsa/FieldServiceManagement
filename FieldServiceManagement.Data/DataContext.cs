@@ -27,6 +27,7 @@ using FieldServiceManagement.Data.DataModels.OrganisationSubscription;
 using FieldServiceManagement.Data.DataModels.Payment;
 using FieldServiceManagement.Data.DataModels.ServiceAppointment;
 using FieldServiceManagement.Data.DataModels.ServiceReport;
+using FieldServiceManagement.Data.DataModels.Settings;
 using FieldServiceManagement.Data.DataModels.State;
 using FieldServiceManagement.Data.DataModels.Status;
 using FieldServiceManagement.Data.DataModels.SubmissionDocument;
@@ -41,6 +42,7 @@ using FieldServiceManagement.Data.DataModels.WorkflowEscalationRule;
 using FieldServiceManagement.Data.DataModels.WorkflowStageDefinition;
 using FieldServiceManagement.Data.DataModels.WorkOrder;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
+using FieldServiceManagement.ViewModels.Settings;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +122,7 @@ namespace FieldServiceManagement.Data
 
         #region System
         public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<Settings> Settings { get; set; }
         #endregion
 
         public DataContext() { }
@@ -166,6 +169,7 @@ namespace FieldServiceManagement.Data
             modelBuilder.Entity<AppUserProfile>().HasNoKey().ToView(null);
             modelBuilder.Entity<UserAnnouncement>().HasNoKey();
             modelBuilder.Entity<AnnouncementAdminListItem>().HasNoKey();
+            modelBuilder.Entity<SettingsDetailsForDisplay>().HasNoKey();
         }
     }
 }

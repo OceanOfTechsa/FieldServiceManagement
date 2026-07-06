@@ -10,7 +10,7 @@ namespace FieldServiceManagement.Data.DataModels.Settings
 
         public string value { get; set; }
 
-        public string description { get; set; }
+        public string? description { get; set; }
 
         public bool isActive { get; set; }
     }

@@ -1,0 +1,143 @@
+﻿@model FieldServiceManagement.ViewModels.Settings.SettingsViewModel
+
+@{
+    ViewData["Title"] = "Edit Setting";
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item text-blue">Admin</li>
+                    <li class="breadcrumb-item text-blue"><a href="/Admin/Settings">Settings</a></li>
+                    <li class="breadcrumb-item link-success" aria-current="page">Edit</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="fsm-fixed-view-wrapper-forms" id="fsm-edit-setting">
+        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+
+            <form id="edit-setting-form" method="post" action="/Admin/Settings/Edit" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+
+                <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="mt-3">
+                    <div class="bd-callout bd-callout-info my-0 p-2 mb-3 bg-opacity-10">
+                        <span class="smaller">
+                            • Settings are used to configure system-wide behaviour, such as <strong>feature toggles</strong>, <strong>defaults</strong>, and <strong>integration values</strong>.
+                            <br />
+                            • The <strong>Key</strong> is used internally to reference this setting and should be unique.
+                            <br />
+                            • Inactive settings are ignored by the system even if a value is present.
+                        </span>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    
+
+                    
+                    <div>
+                        <div class="row g-3">
+                            <!-- Key -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.key, new { @class = "form-label" })
+                                    <span class="text-danger mt-2">*</span>
+                                    @Html.TextBoxFor(m => m.key, new { @class = "form-control", @placeholder = "E.g., DefaultPageSize" })
+                                    @Html.ValidationMessageFor(m => m.key, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <!-- Value -->
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.value, new { @class = "form-label" })
+                                    <span class="text-danger mt-2">*</span>
+                                    @Html.TextBoxFor(m => m.value, new { @class = "form-control", @placeholder = "E.g., 25" })
+                                    @Html.ValidationMessageFor(m => m.value, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.description, new { @class = "form-label" })
+                                    @Html.TextAreaFor(m => m.description, new { @class = "form-control", @rows = 4, @placeholder = "Describe what this setting controls..." })
+                                    @Html.ValidationMessageFor(m => m.description, "", new { @class = "field-error" })
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <div class="mt-2 d-flex gap-1 align-items-center">
+                                        <label class="form-check-label" for="isActive">Setting is active?</label>
+                                        @Html.CheckBoxFor(m => m.isActive, new
+                                        {
+                                            id = "isActive",
+                                            @class = "",
+                                            data_toggle = "switch",
+                                            data_size = "mini",
+                                            data_handle_width = "2",
+                                            data_on_text = "Yes",
+                                            data_off_text = "No"
+                                        })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
+                    <a href="/Admin/Settings" type="button" class="btn btn-light btn-xs border">
+                        Cancel
+                    </a>
+                    <button type="submit" id="save-setting-btn" class="btn btn-primary btn-xs" data-loading-text="Saving" data-spinner-size="spinner-xs">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const editSettingApp = new Vue({
+            el: '#fsm-edit-setting',
+            methods: {
+                validate() {
+                    let valid = true;
+                    const key         = $('input[name="key"]').val().trim();
+                    const value       = $('input[name="value"]').val().trim();
+
+                    if (!key)         { this.showFieldError('key', 'Key is required.'); valid = false; }
+                    if (!value)       { this.showFieldError('value', 'Value is required.'); valid = false; }
+
+                    return valid;
+                },
+                showFieldError(name, message) {
+                    $('[name="' + name + '"]').addClass('is-invalid').siblings('.field-error').text(message).show();
+                }
+            }
+        });
+
+        $('#save-setting-btn').on('click', function () {
+            if (editSettingApp.validate()) $('#edit-setting-form').submit();
+        });
+
+        $(document).on('input change', '#edit-setting-form .form-control, #edit-setting-form .form-select', function () {
+            $(this).removeClass('is-invalid');
+            $(this).siblings('.field-error').text('').hide();
+        });
+
+        $(document).ready(function() {
+            $("[data-toggle='switch']").bootstrapSwitch();
+        });
+    </script>
+}

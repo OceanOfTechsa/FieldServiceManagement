@@ -136,9 +136,9 @@ namespace FieldServiceManagement.Controllers
         public async Task<IActionResult> Info(Guid Id)
         {
             var announcement = await new AnnouncementBusiness().GetAnnouncementDetailsByIdAsync(Id);
-            if(announcement is null)
-                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Announcement", Title = "Announcement Not Found" });
-            return View("~/Views/Admin/Announcements/Info.cshtml", announcement);
+            return announcement == null ? 
+                View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Announcement", Title = "Announcement Not Found" })
+                : View("~/Views/Admin/Announcements/Info.cshtml", announcement);
         }
 
         [HttpPost("/Admin/Announcements/Archive")]

@@ -37,8 +37,8 @@ namespace FieldServiceManagement.Business.SettingsBusiness
         {
             using (var repo = new SettingsRepository())
             {
-                var form = ObjectMapper.Mapper.Map<Settings>(model);
-                repo.Update(form);
+                var dbModel = ObjectMapper.Mapper.Map<Settings>(model);
+                repo.Update(dbModel);
             }
         }
 
@@ -98,15 +98,5 @@ namespace FieldServiceManagement.Business.SettingsBusiness
                 return ObjectMapper.Mapper.Map<List<SettingsViewModel>>(entity);
             }
         }
-
-        public List<SettingsViewModel> GetGrantsAssistantEmailOnSettings()
-        {
-            using (var repo = new SettingsRepository())
-            {
-                var entity = repo.GetGrantsAssistantEmailOnSettings();
-                return ObjectMapper.Mapper.Map<List<SettingsViewModel>>(entity);
-            }
-        }
-
     }
 }

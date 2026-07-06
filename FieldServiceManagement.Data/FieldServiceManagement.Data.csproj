@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FieldServiceManagement.Enum\FieldServiceManagement.Enum.csproj" />
+    <ProjectReference Include="..\FieldServiceManagement.ViewModels\FieldServiceManagement.ViewModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>
