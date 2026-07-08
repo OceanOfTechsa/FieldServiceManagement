@@ -1,78 +1,68 @@
 ﻿using FieldServiceManagement.Business.MappingBusiness;
-using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Data.DataModels.Announcement;
 using FieldServiceManagement.Enum;
 using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Announcement;
+using FieldServiceManagement.ViewModels.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace FieldServiceManagement.Business.AnnouncementBusiness
 {
     public class AnnouncementBusiness
     {
-        public async Task<AnnouncementViewModel> GetAnnouncementById(Guid Announcement)
+        public async Task<AnnouncementViewModel> GetAnnouncementById(Guid AnnouncementId)
         {
-            var dbModel = await new AnnouncementRepository().GetAnnouncementById(Announcement);
+            var dbModel = await new AnnouncementRepository().GetAnnouncementById(AnnouncementId);
             return ObjectMapper.Mapper.Map<AnnouncementViewModel>(dbModel);
         }
-        public async Task<AnnouncementListViewModel> GetAnnouncementsForUserAsync(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return new AnnouncementListViewModel();
-            }
 
-            var dbModel = await new AnnouncementRepository().GetAnnouncementsForUserAsync(email);
+        public async Task<AnnouncementListViewModel> GetAnnouncementsForUserAsync(string Email)
+        {
+            if (!IsEmailValid(Email))
+                return new AnnouncementListViewModel();
+            
+            var dbModel = await new AnnouncementRepository().GetAnnouncementsForUserAsync(Email);
             var announcements = ObjectMapper.Mapper.Map<List<UserAnnouncementViewModel>>(dbModel);
             var viewModel = new AnnouncementListViewModel
             {
                 Announcements = announcements
             };
-
             return viewModel;
         }
 
-
-        public async Task<bool> MarkAnnouncementAsSeenAsync(Guid announcementId, string email)
+        public async Task<bool> MarkAnnouncementAsSeenAsync(Guid AnnouncementId, string Email)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (!IsEmailValid(Email))
                 return false;
-
-            await new AnnouncementRepository().MarkAnnouncementAsSeenAsync(announcementId, email);
+            await new AnnouncementRepository().MarkAnnouncementAsSeenAsync(AnnouncementId, Email);
             return true;
         }
 
-        public async Task<bool> MarkBulkAnnouncementsAsSeenAsync(List<Guid> ids, string email)
+        public async Task<bool> MarkBulkAnnouncementsAsSeenAsync(List<Guid> AnnouncementIds, string Email)
         {
+            if (!AnnouncementIds.Any())
+                return false;
+
             var repo = new AnnouncementRepository();
-            var currentUser = await new UserBusiness.UserBusiness().GetUserDetailsByUserNameAsync(email);
-
-            if (currentUser == null || !ids.Any())
-                return false;
-
-            foreach (var id in ids)
-                await repo.MarkAnnouncementAsSeenAsync(id, currentUser.Email);
-
+            foreach (var id in AnnouncementIds)
+                await repo.MarkAnnouncementAsSeenAsync(id, Email);
             return true;
         }
 
-        public async Task<int> GetUnseenAnnouncementCountAsync(string email)
+        public async Task<int> GetUnseenAnnouncementCountAsync(string Email)
         {
-            if (string.IsNullOrWhiteSpace(email))
-            {
+            if (!IsEmailValid(Email))
                 return 0;
-            }
-
-            return await new AnnouncementRepository().GetUnseenAnnouncementCountAsync(email);
+            return await new AnnouncementRepository().GetUnseenAnnouncementCountAsync(Email);
         }
 
-        public async Task<Guid> CreateAnnouncementAsync(CreateAnnouncementViewModel model, string createdByEmail)
+        public async Task<Guid> CreateAnnouncementAsync(CreateAnnouncementViewModel Model, string CreatedByEmail)
         {
-            if (model == null || string.IsNullOrWhiteSpace(model.Title))
+            if (Model == null || string.IsNullOrWhiteSpace(Model.Title))
                 return Guid.Empty;
          
-            var dataModel = ObjectMapper.Mapper.Map<CreateAnnouncementModel>(model);
-            dataModel.CreatedByEmail = createdByEmail;
-
+            var dataModel = ObjectMapper.Mapper.Map<CreateAnnouncementModel>(Model);
+            dataModel.CreatedByEmail = CreatedByEmail;
             return await new AnnouncementRepository().CreateAnnouncementAsync(dataModel);
         }
 
@@ -87,27 +77,27 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
             var dbModel = await new AnnouncementRepository().GetAnnouncementDetailByIdAsync(AnnouncementId);
             return ObjectMapper.Mapper.Map<AnnouncementDetailViewModel>(dbModel);
         }
-        public async Task<bool> UpdateAnnouncementAsync(EditAnnouncementViewModel model, string email)
+        public async Task<bool> UpdateAnnouncementAsync(EditAnnouncementViewModel Model, string Email)
         {
             var repo = new AnnouncementRepository();
-            var existing = await repo.GetAnnouncementById(model.Id);
+            var existing = await repo.GetAnnouncementById(Model.Id);
 
             if (existing == null)
                 return false;
 
-            var visibleToRoleIds = model.SelectedRoleIds != null && model.SelectedRoleIds.Any()
-                ? string.Join(",", model.SelectedRoleIds)
+            var visibleToRoleIds = Model.SelectedRoleIds != null && Model.SelectedRoleIds.Any()
+                ? string.Join(",", Model.SelectedRoleIds)
                 : null;
 
-            existing.Title = model.Title;
-            existing.Description = model.Description;
-            existing.Notes = model.Notes;
-            existing.AnnouncementDate = model.AnnouncementDate;
-            existing.StatusId = model.StatusId;
+            existing.Title = Model.Title;
+            existing.Description = Model.Description;
+            existing.Notes = Model.Notes;
+            existing.AnnouncementDate = Model.AnnouncementDate;
+            existing.StatusId = Model.StatusId;
             existing.VisibleToRoleIds = visibleToRoleIds;
-            existing.IsActive = model.IsActive;
+            existing.IsActive = Model.IsActive;
 
-            return await repo.UpdateAnnouncementAsync(existing, email);
+            return await repo.UpdateAnnouncementAsync(existing, Email);
         }
 
         public async Task<bool> ArchiveAnnouncementByIdAsync(Guid AnnouncementId, string Email)
@@ -119,24 +109,24 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
                 return false;
 
             announcement.StatusId = (int)AnnouncementStatus.AnnouncementArchived;
-            announcement.UpdatedAt = DateTime.UtcNow;
+            announcement.UpdatedAt = DateTime.Now.SaDateTime();
             announcement.UpdatedBy = currentUser.Id;
 
             await repo.ArchiveAnnouncementByIdAsync(announcement);
             return true;
         }
 
-        public async Task<bool> DeleteAnnouncementByIdAsync(Guid announcementId, string email)
+        public async Task<bool> DeleteAnnouncementByIdAsync(Guid AnnouncementId, string Email)
         {
             var repo = new AnnouncementRepository();
-            var currentUser = await new UserBusiness.UserBusiness().GetUserDetailsByUserNameAsync(email);
-            var announcement = await repo.GetAnnouncementById(announcementId);
+            var currentUser = await new UserBusiness.UserBusiness().GetUserDetailsByUserNameAsync(Email);
+            var announcement = await repo.GetAnnouncementById(AnnouncementId);
 
             if (announcement == null || currentUser == null)
                 return false;
 
             announcement.IsDeleted = true;
-            announcement.UpdatedAt = DateTime.UtcNow;
+            announcement.UpdatedAt = DateTime.Now.SaDateTime();
             announcement.UpdatedBy = currentUser.Id;
             announcement.IsActive = false;
 
@@ -166,5 +156,14 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
                 SelectedRoleIds = selectedRoleIds
             };
         }
+
+
+        #region  PRIVATE METHODS
+        private static bool IsEmailValid(string? email)
+        {
+            return !string.IsNullOrWhiteSpace(email)
+                   && new EmailAddressAttribute().IsValid(email);
+        }
+        #endregion
     }
 }

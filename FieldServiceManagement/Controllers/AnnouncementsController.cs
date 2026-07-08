@@ -53,12 +53,11 @@ namespace FieldServiceManagement.Controllers
         {
             if (request.Ids == null || !request.Ids.Any())
                 return BadRequest("No announcement IDs provided.");
+
             var business = new AnnouncementBusiness();
             var result = await business.MarkBulkAnnouncementsAsSeenAsync(request.Ids, User.Identity?.Name!);
-
             if (!result)
                 return BadRequest("Failed to mark announcements as seen.");
-
             return Ok();
         }
 
@@ -146,7 +145,7 @@ namespace FieldServiceManagement.Controllers
             if (request.Id == Guid.Empty)
                 return BadRequest();
 
-            var success = await new AnnouncementBusiness().ArchiveAnnouncementByIdAsync(request.Id, User.Identity.Name!);
+            var success = await new AnnouncementBusiness().ArchiveAnnouncementByIdAsync(request.Id, User?.Identity?.Name!);
             return success ? Ok() : StatusCode(500);
         }
 
@@ -157,7 +156,7 @@ namespace FieldServiceManagement.Controllers
             if (request.Id == Guid.Empty)
                 return BadRequest();
 
-            var success = await new AnnouncementBusiness().DeleteAnnouncementByIdAsync(request.Id, User.Identity.Name!);
+            var success = await new AnnouncementBusiness().DeleteAnnouncementByIdAsync(request.Id, User?.Identity?.Name!);
             return success ? Ok() : StatusCode(500);
         }
 

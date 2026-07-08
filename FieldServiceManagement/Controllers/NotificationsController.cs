@@ -1,5 +1,4 @@
 ﻿using FieldServiceManagement.Business.NotificationBusiness;
-using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Notification;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,28 +9,10 @@ namespace FieldServiceManagement.Controllers
     public class NotificationsController : Controller
     {
         [HttpGet]
-        public async Task<IActionResult> GetUserNotifications(
-            bool? isRead,
-            byte? severity,
-            string type,
-            DateTime? dateFrom,
-            DateTime? dateTo,
-            string searchTerm)
+        public async Task<IActionResult> GetUserNotifications(bool? isRead, byte? severity, string type, DateTime? dateFrom, DateTime? dateTo, string searchTerm)
         {
-            var email = User.Identity?.Name;
-
-            var filter = new NotificationFilterViewModel
-            {
-                IsRead = isRead,
-                Severity = severity,
-                Type = type,
-                DateFrom = dateFrom,
-                DateTo = dateTo,
-                SearchTerm = searchTerm
-            };
-
-            var result = await new UserNotificationBusiness().GetNotificationsForUserAsync(email, filter);
-
+            var filter = PopulateNotificationFilterViewModel(isRead, severity, type, dateFrom, dateTo, searchTerm);
+            var result = await new UserNotificationBusiness().GetNotificationsForUserAsync(User.Identity?.Name!, filter);
             return Json(result);
         }
 
@@ -48,27 +29,31 @@ namespace FieldServiceManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> MarkAllNotificationsAsRead()
         {
-            var email = User.Identity?.Name;
-
-            var success = await new UserNotificationBusiness().MarkAllNotificationsAsReadAsync(email);
-
+            var success = await new UserNotificationBusiness().MarkAllNotificationsAsReadAsync(User.Identity?.Name!);
             return Json(new { success });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUnreadNotificationCount()
         {
-            var email = User.Identity?.Name;
-
             var count = await new UserNotificationBusiness().GetUnreadNotificationCountAsync(User.Identity?.Name!);
-
             return Json(new { count });
         }
 
-
-        public class MarkNotificationAsReadRequest
+        #region PRIVATE METHODS
+        private NotificationFilterViewModel PopulateNotificationFilterViewModel(bool? isRead, byte? severity, string type, DateTime? dateFrom, DateTime? dateTo, string searchTerm)
         {
-            public string Id { get; set; }
+            var filter = new NotificationFilterViewModel
+            {
+                IsRead = isRead,
+                Severity = severity,
+                Type = type,
+                DateFrom = dateFrom,
+                DateTo = dateTo,
+                SearchTerm = searchTerm
+            };
+            return filter;
         }
+        #endregion
     }
 }

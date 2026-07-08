@@ -1,9 +1,8 @@
 ﻿using FieldServiceManagement.Business.MappingBusiness;
-using FieldServiceManagement.Business.URLEncryptionBusiness;
-using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Data.DataModels.Notification;
 using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Notification;
+using System.ComponentModel.DataAnnotations;
 
 namespace FieldServiceManagement.Business.NotificationBusiness
 {
@@ -11,7 +10,7 @@ namespace FieldServiceManagement.Business.NotificationBusiness
     {
         public async Task<NotificationListViewModel> GetNotificationsForUserAsync(string email, NotificationFilterViewModel filter)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (!IsEmailValid(email))
                 return new NotificationListViewModel();
 
             var repo = new NotificationRepository();
@@ -19,7 +18,6 @@ namespace FieldServiceManagement.Business.NotificationBusiness
             var dataFilter = ObjectMapper.Mapper.Map<NotificationFilter>(filter);
             var dbModel = await repo.GetNotificationsForUserAsync(email, dataFilter);
             var notifications = ObjectMapper.Mapper.Map<List<UserNotificationViewModel>>(dbModel);
-
             var unreadCount = notifications.Count(n => !n.IsRead);
 
             var viewModel = new NotificationListViewModel
@@ -27,32 +25,37 @@ namespace FieldServiceManagement.Business.NotificationBusiness
                 Notifications = notifications,
                 UnreadCount = unreadCount
             };
-
             return viewModel;
         }
 
         public async Task<bool> MarkNotificationAsReadAsync(Guid Id, string email)
         {
-            if (string.IsNullOrWhiteSpace(email) || Id == Guid.Empty)
+            if (!IsEmailValid(email) || Id == Guid.Empty)
                 return false;
-
             return await new NotificationRepository().MarkNotificationAsReadAsync(Id, email);
         }
 
         public async Task<bool> MarkAllNotificationsAsReadAsync(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (!IsEmailValid(email))
                 return false;
-
             return await new NotificationRepository().MarkAllNotificationsAsReadAsync(email);
         }
 
         public async Task<int> GetUnreadNotificationCountAsync(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (!IsEmailValid(email))
                 return 0;
-
             return await new NotificationRepository().GetUnreadNotificationCountAsync(email);
         }
+
+
+        #region  PRIVATE METHODS
+        private static bool IsEmailValid(string? email)
+        {
+            return !string.IsNullOrWhiteSpace(email)
+                   && new EmailAddressAttribute().IsValid(email);
+        }
+        #endregion
     }
 }
