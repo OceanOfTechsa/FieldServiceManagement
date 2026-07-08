@@ -160,10 +160,19 @@
             </div>
         </div>
 
-        <div class="dialog-footer mb-0" id="fsm-announcements-footer" style="display:none;">
-            <button type="button" class="btn btn-primary btn-xs mb-0" id="fsm-mark-seen-bulk-btn" data-fsm-signout-cancel>
-                Mark as seen
-            </button>
-        </div>
+       <div class="dialog-footer mb-0" id="fsm-announcements-footer" style="display:none;">
+    <div class="d-flex align-items-center gap-2 w-100 justify-content-between">
+        <label class="d-flex align-items-center gap-2 fsm-meta-text mb-0 cursor-pointer">
+            <input type="checkbox" id="fsm-select-all-checkbox" class="form-check-input mb-0" />
+            <span>Select all</span>
+        </label>
+        <button type="button"
+                class="btn btn-primary btn-xs mb-0"
+                id="fsm-mark-seen-bulk-btn"
+                disabled>
+            Mark as seen
+        </button>
+    </div>
+</div>
     </div>
 </div>

@@ -45,11 +45,9 @@ namespace FieldServiceManagement.Repository.Repositories
                 new SqlParameter("@AnnouncementId", announcementId),
                 new SqlParameter("@Email",           email)
             ];
-
             const string query = "EXEC [dbo].[MarkAnnouncementAsSeen] @AnnouncementId, @Email";
 
             var rowsAffected = await _dbContext.Database.ExecuteSqlRawAsync(query, parameters);
-
             return rowsAffected >= 0;
         }
 

@@ -54,4 +54,5 @@
     window.FsmAnnouncements = {
         refresh: () => loadAnnouncements(true)
     };
+    window.FsmAnnouncementsBulk?.sync()
 })();

@@ -1,4 +1,207 @@
 ﻿@{
-    ViewData["Title"] = "Flush Cache";
+    ViewData["Title"] = "Flush Application Cache";
     Layout = "_Layout";
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+
+    <!-- Toolbar -->
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span class="ms-1 fw-500" style="font-size:13px"><strong>Flush Application Cache</strong></span>
+        </div>
+        @* <div class="d-flex align-items-center">
+            <a href="/Admin/Health" class="btn border-fsm btn-xs"
+               data-bs-toggle="tooltip" data-bs-title="Back to System Health"
+               data-bs-placement="bottom"
+               data-bs-custom-class="fsm-tooltip">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div> *@
+    </div>
+
+    <div class="rounded-2 overflow-hidden mx-2 ">
+        <!-- Body -->
+        <div class="fsm-table-wrapper p-0">
+            <div class="d-flex flex-column gap-2 w-100">
+                <div class="flex-grow-1 w-100  bg-white rounded-2 overflow-hidden">
+                    <div class="d-flex bd-callout bd-callout-warning mt-0 gap-2 align-items-start">
+                        <div>
+                            @* <p class="fw-semibold mb-1">Two-Factor Authentication Enabled</p> *@
+                            <p class="small mb-0">
+                                Flushing the cache removes all cached application data stored in <strong>Redis</strong>.
+                                The application will automatically rebuild cached data as users continue
+                                using the system.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- What will be cleared -->
+                    <div class="px-4 py-3">
+                        <div class="fsm-section-label mb-3">What will be cleared</div>
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var item in new[]
+                            {
+                                ("bi-gear-fill",        "Cached settings",          "Application configuration and feature flag cache"),
+                                ("bi-megaphone-fill",   "Cached announcements",     "Announcement visibility and seen-by cache"),
+                                ("bi-shield-fill",      "Cached permissions",       "Role and permission lookup cache"),
+                                ("bi-speedometer2",     "Dashboard cache",          "Aggregated dashboard metric cache"),
+                                ("bi-table",            "Temporary lookup cache",   "Countries, states, currencies and other lookup data")
+                            })
+                            {
+                                <div class="d-flex align-items-start gap-3">
+                                    <div style="width:28px;height:28px;background:#f8f9fa;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                                        <i class="bi @item.Item1 text-muted" style="font-size:13px"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fsm-user-name" style="font-size:13px">@item.Item2</div>
+                                        <div class="fsm-meta-text">@item.Item3</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fsm-table-footer py-2">
+            <div class="d-flex justify-content-end align-items-center w-100 gap-2">
+                <a href="/Admin/Health" class="btn btn-light btn-xs border">Cancel</a>
+                <button data-fsm-flus-trigger class="btn btn-warning btn-xs text-white">
+                     Flush Cache
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="fsm-flush-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="flush-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+
+        <p id="flush-title" class="dialog-title">Flush Application Cache</p>
+
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+
+            <div class="warn-text">
+                <p>Cache Flush Confirmation Required</p>
+
+                <p class="warn-sub">
+                    Are you sure you want to flush the application cache? This will remove all cached data stored in Redis. The application will automatically rebuild the cache as users continue using the system.
+                </p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            Cached settings, permissions, announcements, and other temporary application data will be refreshed. No database records or user data will be deleted. The first few requests after the flush may take slightly longer while the cache is rebuilt.
+        </div>
+
+       
+        <div class="bd-callout bd-callout-info my-0 p-2 bg-opacity-10 mx-1 mb-1">
+            <span class="smaller">
+                
+                <strong>No data will be lost.</strong> No database records will be deleted and no user accounts will be affected.
+                The first requests after flushing may be slightly slower while the cache rebuilds automatically.
+            </span>
+        </div>
+        
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="flush-error">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            Failed to flush the application cache. Please try again.
+        </div>
+
+        <div id="flush-success" class="bg-success-subtle text-black small p-2 px-3 d-flex align-items-center gap-2 rounded-2 d-none">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span>Application cache flushed successfully. Redirecting…</span>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-flush-cancel>
+                Cancel
+            </button>
+
+            <button class="btn-confirm" id="flush-btn">
+                Flush Cache
+            </button>
+        </div>
+
+    </div>
+</div>
+    
+
+@section Scripts {
+    <script>
+        (function () {
+            const btn        = document.getElementById('flush-btn');
+            const resultWrap = document.getElementById('flush-result');
+            const successEl  = document.getElementById('flush-success');
+            const errorEl    = document.getElementById('flush-error');
+
+            const flushDialog   = document.getElementById('fsm-flush-dialog');
+            const flushTriggers = document.querySelectorAll('[data-fsm-flus-trigger]');
+            const flushCancels  = document.querySelectorAll('[data-fsm-flush-cancel]');
+
+            flushTriggers.forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                flushDialog?.classList.add('show');
+            }));
+
+            flushCancels.forEach(btn => btn.addEventListener('click', () => {
+                flushDialog?.classList.remove('show');
+            }));
+
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                       ?? document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1]
+                       ?? '';
+
+            btn.addEventListener('click', async () => {
+                // Reset
+                resultWrap.classList.add('d-none');
+                successEl.classList.add('d-none');
+                errorEl.classList.add('d-none');
+
+                // Loading state
+                btn.disabled     = true;
+                const origHtml   = btn.innerHTML;
+                btn.innerHTML    = `
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Flushing…
+                `;
+
+                try {
+                    const res  = await fetch('/Admin/FlushCache', {
+                        method:  'POST',
+                        headers: {
+                            'Content-Type':         'application/json',
+                            'RequestVerificationToken': token
+                        }
+                    });
+
+                    const data = await res.json();
+                    resultWrap.classList.remove('d-none');
+
+                    if (res.ok && data.success) {
+                        successEl.classList.remove('d-none');
+                        setTimeout(() => window.location.href = '/Admin/Health', 2000);
+                    } else {
+                        errorEl.classList.remove('d-none');
+                        btn.disabled  = false;
+                        btn.innerHTML = origHtml;
+                    }
+                } catch {
+                    resultWrap.classList.remove('d-none');
+                    errorEl.classList.remove('d-none');
+                    btn.disabled  = false;
+                    btn.innerHTML = origHtml;
+                }
+            });
+        }());
+    </script>
 }

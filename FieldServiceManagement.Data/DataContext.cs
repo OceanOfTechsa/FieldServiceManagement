@@ -170,6 +170,7 @@ namespace FieldServiceManagement.Data
             modelBuilder.Entity<UserAnnouncement>().HasNoKey();
             modelBuilder.Entity<AnnouncementAdminListItem>().HasNoKey();
             modelBuilder.Entity<SettingsDetailsForDisplay>().HasNoKey();
+            modelBuilder.Entity<UserNotification>().HasNoKey();
         }
     }
 }

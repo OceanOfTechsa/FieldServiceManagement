@@ -41,6 +41,20 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
             return true;
         }
 
+        public async Task<bool> MarkBulkAnnouncementsAsSeenAsync(List<Guid> ids, string email)
+        {
+            var repo = new AnnouncementRepository();
+            var currentUser = await new UserBusiness.UserBusiness().GetUserDetailsByUserNameAsync(email);
+
+            if (currentUser == null || !ids.Any())
+                return false;
+
+            foreach (var id in ids)
+                await repo.MarkAnnouncementAsSeenAsync(id, currentUser.Email);
+
+            return true;
+        }
+
         public async Task<int> GetUnseenAnnouncementCountAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))

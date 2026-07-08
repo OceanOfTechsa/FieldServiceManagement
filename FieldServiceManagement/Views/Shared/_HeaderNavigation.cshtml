@@ -46,6 +46,8 @@
     };
 }
 
+<link rel="stylesheet" href="~/css/FSM/notifications.css" asp-append-version="true" />
+
 @* ─── Sign-out dialog (global, outside header) ───────────────────────────── *@
 <div id="fsm-signout-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="signout-title">
     <div class="fsm-dialog">
@@ -115,6 +117,10 @@
                             else if (User.IsInRole(UserRole.CustomerPortalUser.ToString()))
                             {
                                 <text>Customer Portal User</text>
+                            }
+                            else
+                            {
+                                <text>Unknown</text>
                             }
                         </span>
                     </p>
@@ -547,66 +553,180 @@
                     }
                     <div class="fsm-separator" aria-hidden="true"></div>
                 }
-
-                <div class="fsm-dropdown">
-                    @* Actions button (adapts to your Actions component) *@
-                    <button class="actions-btn nav-dropdown-toggle" type="button" aria-label="Quick actions">
+                
+                <div class="dropdown">
+                    <button class="actions-btn" type="button" id="actionsDropdown" data-bs-toggle="dropdown"
+                            aria-expanded="false" aria-label="Quick actions">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
-                    <div id="fsm-more-menu" class="fsm-dropdown-menu align-center" role="menu">
-                        <div class="dropdown-label d-flex justify-content-between mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
-                                <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
-                                <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
-                            </svg>
-                            Forms
+
+                    <div class="dropdown-menu dropdown-menu-end actions-dropdown p-0 mt-1" aria-labelledby="actionsDropdown">
+
+                        <div class="actions-search-bar">
+                            <div class="actions-search-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="actions-search-icon"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                <input type="text" class="actions-search-input" id="actionsSearchInput" placeholder="Search..." aria-label="Search menu" autocomplete="off" />
+                            </div>
                         </div>
-                        <a href="/"
-                               class="dropdown-item"
-                               role="menuitem">
-                            Submit Work Order
-                        </a>
-                        <a href="/"
-                               class="dropdown-item"
-                               role="menuitem">
-                            Submit Leave Application
-                        </a>
-                        <a href="/"
-                               class="dropdown-item"
-                               role="menuitem">
-                            Submit Asset Application
-                        </a>
-                        <div class="dropdown-label d-flex justify-content-between mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bezier2" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M1 2.5A1.5 1.5 0 0 1 2.5 1h1A1.5 1.5 0 0 1 5 2.5h4.134a1 1 0 1 1 0 1h-2.01q.269.27.484.605C8.246 5.097 8.5 6.459 8.5 8c0 1.993.257 3.092.713 3.7.356.476.895.721 1.787.784A1.5 1.5 0 0 1 12.5 11h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5H6.866a1 1 0 1 1 0-1h1.711a3 3 0 0 1-.165-.2C7.743 11.407 7.5 10.007 7.5 8c0-1.46-.246-2.597-.733-3.355-.39-.605-.952-1-1.767-1.112A1.5 1.5 0 0 1 3.5 5h-1A1.5 1.5 0 0 1 1 3.5zM2.5 2a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10 10a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" />
-                            </svg>
-                            Actions
+
+                        <div class="actions-list">
+
+                            <div class="actions-section-label actions-group-label px-3 py-1 d-flex align-items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                                    <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
+                                    <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
+                                </svg>
+                                Forms
+                            </div>
+
+                            <a href="/" class="actions-item dropdown-item searchable-item d-block px-3 py-2 border-bottom">
+                                Submit Work Order
+                            </a>
+                            <a href="/" class="actions-item dropdown-item searchable-item d-block px-3 py-2 border-bottom">
+                                Submit Leave Application
+                            </a>
+                            <a href="/" class="actions-item dropdown-item searchable-item d-block px-3 py-2 border-bottom">
+                                Submit Asset Application
+                            </a>
+
+                            <div class="actions-section-label actions-group-label px-3 py-1 d-flex align-items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-bezier2" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M1 2.5A1.5 1.5 0 0 1 2.5 1h1A1.5 1.5 0 0 1 5 2.5h4.134a1 1 0 1 1 0 1h-2.01q.269.27.484.605C8.246 5.097 8.5 6.459 8.5 8c0 1.993.257 3.092.713 3.7.356.476.895.721 1.787.784A1.5 1.5 0 0 1 12.5 11h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5H6.866a1 1 0 1 1 0-1h1.711a3 3 0 0 1-.165-.2C7.743 11.407 7.5 10.007 7.5 8c0-1.46-.246-2.597-.733-3.355-.39-.605-.952-1-1.767-1.112A1.5 1.5 0 0 1 3.5 5h-1A1.5 1.5 0 0 1 1 3.5zM2.5 2a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10 10a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" />
+                                </svg>
+                                Actions
+                            </div>
+
+                            @if(User.IsInRole(UserRole.Administrator.ToString()))
+                            {
+                                <a href="/Workforce/Users" class="actions-item dropdown-item searchable-item d-block px-3 py-2">
+                                    Add new user
+                                </a>
+                            }
+                           
+
+                            <div class="actions-no-results text-muted text-center small py-3 d-none">
+                                No matching items found
+                            </div>
+
                         </div>
-                        <a href="/Workforce/Users"
-                               class="dropdown-item"
-                               role="menuitem">
-                            Add new user
-                        </a>
                     </div>
                 </div>
-           
 
-                @* Settings *@
-                @* <a href="/fsm/@organisationId/settings"
-                       class="icon-btn settings-btn @(settingsActive ? "active" : "")"
-                       title="Settings" aria-label="Settings">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
-                </a> *@
-
-              @*   @await Html.PartialAsync("_ThemeToggle") *@
+                @* @await Html.PartialAsync("_ThemeToggle") *@
 
                 @* Notifications *@
-                <button class="icon-btn" type="button" title="Notifications" aria-label="Notifications"
-                        data-fsm-notif-trigger>
-                    <span class="notification-dot" aria-label="You have new notifications"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" /></svg>
-                </button>
+                <div class="dropdown">
+                    <button class="icon-btn" type="button" id="notifDropdown" data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside" aria-expanded="false" aria-label="Notifications">
+                        <span class="notification-dot d-none" aria-label="You have new notifications"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+                        </svg>
+                    </button>
 
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown p-0 mt-1" aria-labelledby="notifDropdown">
+
+                        <div class="d-flex justify-content-between align-items-center px-2 py-2 border-bottom">
+                            <span class="fw-semibold text-black"><i class="bi bi-bell"></i> Notifications</span>
+                            <span role="button" class="notif-mark-read d-flex align-items-center gap-1 text-decoration-none small">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+                                        stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 7 17l-5-5" /><path d="m22 10-7.5 7.5L13 16" /></svg>
+                                Mark all as read
+                            </span>
+                        </div>
+
+                        <div id="mark-all-notifications-error"class="bd-callout bd-callout-danger my-0 p-1 mb-0 bg-opacity-10 smaller d-none" role="alert">
+                                Failed to mark all notifications as read, Kindly try again.
+                        </div>
+
+                        <div class="notif-search-bar d-flex align-items-center">
+                            <div class="notif-search-wrap flex-grow-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="notif-search-icon"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                <input type="text" class="notif-search-input" id="notifSearchInput" placeholder="Search notifications..." aria-label="Search notifications" autocomplete="off" />
+                            </div>
+
+                            <div class="notif-filter-wrap">
+                                <button type="button" class="notif-filter-icon-btn" id="notifFilterToggle" aria-label="Filter notifications" aria-expanded="false">
+                                    <i class="bi bi-funnel"></i>
+                                    <span class="notif-filter-badge d-none"></span>
+                                </button>
+
+                                <div class="notif-filter-panel" id="notifFilterPanel">
+                                    <span class="fw-semibold small text-black notif-filter-title">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                        </svg>
+                                        Filters
+                                    </span>
+
+                                    <div class="notif-filter-group border-top pt-2 mt-1">
+                                        <label class="notif-filter-label">Read status</label>
+                                        <div class="notif-select-wrap">
+                                            <select class="notif-filter-select" id="filterReadStatus">
+                                                <option value="all">All</option>
+                                                <option value="unread">Unread</option>
+                                                <option value="read">Read</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="notif-filter-group">
+                                        <label class="notif-filter-label">Severity</label>
+                                        <div class="notif-select-wrap">
+                                            <select class="notif-filter-select" id="filterSeverity">
+                                                <option value="all">All</option>
+                                                <option value="info">Info</option>
+                                                <option value="success">Success</option>
+                                                <option value="warning">Warning</option>
+                                                <option value="danger">Critical</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="notif-filter-group">
+                                        <label class="notif-filter-label">Date range</label>
+                                        <div class="notif-date-range d-flex align-items-center gap-1">
+                                            <input type="date" class="notif-filter-date" id="filterDateFrom" aria-label="From date">
+                                            <span class="notif-date-sep">–</span>
+                                            <input type="date" class="notif-filter-date" id="filterDateTo" aria-label="To date">
+                                        </div>
+                                    </div>
+
+                                    <div class="notif-filter-group">
+                                        <label class="notif-filter-label">Type</label>
+                                        <div class="notif-filter-checks">
+                                            <label class="notif-filter-check"><input type="checkbox" value="work-order" checked> Work Order</label>
+                                            <label class="notif-filter-check"><input type="checkbox" value="leave-application" checked> Leave Application</label>
+                                            <label class="notif-filter-check"><input type="checkbox" value="asset-application" checked> Asset Application</label>
+                                            <label class="notif-filter-check"><input type="checkbox" value="user-management" checked> User Management</label>
+                                            <label class="notif-filter-check"><input type="checkbox" value="system" checked> System</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="notif-filter-actions d-flex justify-content-between">
+                                        <button type="button" class="notif-filter-clear" id="filterClearBtn"><i class="bi bi-brush"></i> Clear Filters</button>
+                                        <button type="button" class="notif-filter-apply" id="filterApplyBtn">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-list">
+                            <div class="notif-empty-state text-muted text-center small py-4">
+                                Open to load notifications...
+                            </div>
+                        </div>
+
+                        <div class="notif-no-results text-muted text-center small py-3 d-none">
+                            No matching notifications
+                        </div>
+
+                        <div class="px-2 py-2 border-top text-start">
+                            <a href="/Notifications" class="text-decoration-none">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
 
                 @* Mobile hamburger *@
                 @if (!isLoading)

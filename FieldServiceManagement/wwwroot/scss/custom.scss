@@ -1493,6 +1493,15 @@ hr {
     padding: 32px;
     text-align: center;
 }
+.fsm-empty-state-no {
+    min-height: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
+    text-align: center;
+}
 
 .fsm-empty-icon {
     width: 58px;

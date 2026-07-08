@@ -266,7 +266,7 @@ namespace FieldServiceManagement.Web.Navigation
                     new NavSubItem
                    {
                        Title = "View Settings",
-                       Url = "/Admin//Settings/AllSettings",
+                       Url = "/Admin/Settings",
                        Roles = ["SuperAdmin"]
                    },
                ]

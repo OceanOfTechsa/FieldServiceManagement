@@ -1,11 +1,14 @@
 ﻿@model FieldServiceManagement.ViewModels.Announcement.UserAnnouncementViewModel
 
-<link rel="stylesheet" href="~/css/FSM/announcements.css" asp-append-version="true" />
-
-<div class="fsm-announcement-row @(!Model.IsSeen ? "unseen" : "")" data-id="@Model.Id">
+<div class="fsm-announcement-row @(!Model.IsSeen ? "unseen" : "")" 
+     data-id="@Model.Id"
+     data-announcement-id="@Model.Id">
     @Html.AntiForgeryToken()
-    <label class="fsm-announcement-check @(Model.IsSeen == true ? "pe-none" : "")">
-        <input type="checkbox" disabled="@(Model.IsSeen == true)" class="@(Model.IsSeen == true ? "pe-none" : "")" />
+    <label class="fsm-announcement-check @(Model.IsSeen ? "pe-none" : "")">
+        <input type="checkbox"
+               class="fsm-row-checkbox"
+               @(Model.IsSeen ? "disabled" : "")
+               data-announcement-id="@Model.Id" />
         <span></span>
     </label>
 
@@ -22,9 +25,7 @@
         </div>
 
         <div class="fsm-collapsible">
-            <div class="fsm-announcement-text fsm-clamp">
-                @Model.Description
-            </div>
+            <div class="fsm-announcement-text fsm-clamp">@Model.Description</div>
             <button class="fsm-collapsible-toggle" type="button" style="display:none;">Show more</button>
         </div>
 

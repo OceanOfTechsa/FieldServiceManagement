@@ -16,9 +16,7 @@ namespace FieldServiceManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var result = await new AnnouncementBusiness()
-                .GetAnnouncementsForUserAsync(User.Identity?.Name!);
-
+            var result = await new AnnouncementBusiness().GetAnnouncementsForUserAsync(User.Identity?.Name!);
             return View(result.Announcements.Any()
                 ? result
                 : new AnnouncementListViewModel());
@@ -29,22 +27,15 @@ namespace FieldServiceManagement.Controllers
         {
             var result = await new AnnouncementBusiness()
                 .GetAnnouncementsForUserAsync(User.Identity?.Name!);
-
-            return PartialView(
-                "~/Views/Components/Partials/_Announcements.cshtml",
-                result);
+            return PartialView("~/Views/Components/Partials/_Announcements.cshtml",result);
         }
 
         [HttpPost]
         public async Task<IActionResult> MarkAsSeen(Guid id)
         {
-            var result = await new AnnouncementBusiness()
-                .MarkAnnouncementAsSeenAsync(id, User.Identity?.Name!);
-
+            var result = await new AnnouncementBusiness().MarkAnnouncementAsSeenAsync(id, User.Identity?.Name!);
             if (!result)
-            {
                 return BadRequest("Failed to mark announcement as seen.");
-            }
 
             return Ok();
         }
@@ -54,9 +45,24 @@ namespace FieldServiceManagement.Controllers
         {
             var count = await new AnnouncementBusiness()
                 .GetUnseenAnnouncementCountAsync(User.Identity?.Name!);
-
             return Ok(new { count });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkBulkAsSeen([FromBody] MarkBulkAsSeenRequest request)
+        {
+            if (request.Ids == null || !request.Ids.Any())
+                return BadRequest("No announcement IDs provided.");
+            var business = new AnnouncementBusiness();
+            var result = await business.MarkBulkAnnouncementsAsSeenAsync(request.Ids, User.Identity?.Name!);
+
+            if (!result)
+                return BadRequest("Failed to mark announcements as seen.");
+
+            return Ok();
+        }
+
+        public record MarkBulkAsSeenRequest(List<Guid> Ids);
 
         #endregion
 
@@ -73,11 +79,7 @@ namespace FieldServiceManagement.Controllers
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpGet("/Admin/Announcements/Create")]
-        public IActionResult Create()
-        {
-            return View("~/Views/Admin/Announcements/Create.cshtml", new CreateAnnouncementViewModel());
-        }
-
+        public IActionResult Create() => View("~/Views/Admin/Announcements/Create.cshtml", new CreateAnnouncementViewModel());
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpPost("/Admin/Announcements/Create")]
@@ -85,18 +87,14 @@ namespace FieldServiceManagement.Controllers
         public async Task<IActionResult> Create(CreateAnnouncementViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View("~/Views/Admin/Announcements/Create.cshtml", model);
-            }
-
+            
             var newId = await new AnnouncementBusiness().CreateAnnouncementAsync(model, User.Identity?.Name!);
-
             if (newId == Guid.Empty)
             {
                 ModelState.AddModelError("", "Failed to create announcement.");
                 return View("~/Views/Admin/Announcements/Create.cshtml", model);
             }
-
             return RedirectToAction(nameof(IndexAdmin));
         }
 
@@ -148,11 +146,7 @@ namespace FieldServiceManagement.Controllers
             if (request.Id == Guid.Empty)
                 return BadRequest();
 
-            var email = User.Identity?.Name;
-            if (string.IsNullOrWhiteSpace(email))
-                return Unauthorized();
-
-            var success = await new AnnouncementBusiness().ArchiveAnnouncementByIdAsync(request.Id, email);
+            var success = await new AnnouncementBusiness().ArchiveAnnouncementByIdAsync(request.Id, User.Identity.Name!);
             return success ? Ok() : StatusCode(500);
         }
 
@@ -163,11 +157,7 @@ namespace FieldServiceManagement.Controllers
             if (request.Id == Guid.Empty)
                 return BadRequest();
 
-            var email = User.Identity?.Name;
-            if (string.IsNullOrWhiteSpace(email))
-                return Unauthorized();
-
-            var success = await new AnnouncementBusiness().DeleteAnnouncementByIdAsync(request.Id, email);
+            var success = await new AnnouncementBusiness().DeleteAnnouncementByIdAsync(request.Id, User.Identity.Name!);
             return success ? Ok() : StatusCode(500);
         }
 
