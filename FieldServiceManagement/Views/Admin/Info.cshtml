@@ -1,4 +1,5 @@
-﻿@model string
+﻿@using FieldServiceManagement.ViewModels.Shared
+@model string
 @{
     ViewData["Title"] = $"{Model} Health Status";
     Layout = "_Layout";
@@ -15,19 +16,20 @@
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <!-- Toolbar -->
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
-        <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
-                <li class="breadcrumb-item text-blue">Admin</li>
-                <li class="breadcrumb-item text-blue">
-                    <a href="/Admin/Health">
-                        Health
-                    </a>
-                </li>
-                <li class="breadcrumb-item link-success text-capitalize" aria-current="page">@Model</li>
-            </ol>
-        </nav>
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2 h-100">
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            Icon = "bi-person-vcard",
+            Items = new List<BreadcrumbItem>
+            {
+                 new() { Label = "Admin",         Url = null },
+                 new() { Label = "Health", Url = "/Admin/Health"},
+                 new() { Label = Model, Url = null }
+            }
+        })
 
         <div class="d-flex gap-2 align-items-center">
             <span class="text-muted" style="font-size:12px">

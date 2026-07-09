@@ -2152,8 +2152,6 @@ hr {
     }
 }
 
-
-
 // ─── FSM Breadcrumb ───────────────────────────────────────────────────────────
 .fsm-breadcrumb {
     display: inline-flex;
@@ -2176,7 +2174,7 @@ hr {
         cursor: pointer;
         transition: color .15s;
         flex-shrink: 0;
-        margin-right: 2px;
+        margin-right: 0; // spacing now handled by nav-group
 
         i {
             font-size: 12px;
@@ -2184,7 +2182,52 @@ hr {
         }
 
         &:hover {
+            color: var(--accent-dim);
+        }
+    }
+    // ── Nav group: back button + history toggle ────────────────────────────
+    &__nav-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 0;
+        flex-shrink: 0;
+        margin-right: 1px;
+        border-radius: 5px;
+        overflow: hidden;
+        height: 24px;
+
+        &:hover {
+            background-color: var(--accent-subtle)
+        }
+    }
+
+    &__history-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 24px;
+        color: #6b7280;
+        cursor: pointer;
+        transition: color .15s;
+        flex-shrink: 0;
+        border: none;
+        background: none;
+        padding: 0;
+
+        i {
+            font-size: 10px;
+            line-height: 1;
+            transition: transform .15s;
+        }
+
+        &:hover {
             color: #111827;
+            background-color: var(--accent-muted)
+        }
+
+        &[aria-expanded="true"] i {
+            transform: rotate(180deg);
         }
     }
     // ── Each crumb item ───────────────────────────────────────────────────
@@ -2367,6 +2410,115 @@ hr {
                     max-width: 20px; // effectively "..." only
                 }
             }
+        }
+    }
+}
+
+
+.fsm-nav-history {
+    position: relative;
+    z-index: 1050;
+
+    &__menu {
+        z-index: 1055;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 5px;
+        padding: 0;
+        min-width: 260px;
+        max-width: 420px;
+        max-height: 320px;
+        overflow-y: auto;
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
+        font-size: 13px;
+        // ── Mobile: cap width to viewport, avoid horizontal overflow ──────
+        @media (max-width: 480px) {
+            position: fixed !important;
+            left: 8px !important;
+            right: 8px !important;
+            width: auto !important;
+            min-width: 0;
+            max-width: none;
+            max-height: 60vh;
+        }
+    }
+
+    &__item {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        padding: 6px 12px;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+
+        &:hover {
+            background: #f3f4f6;
+        }
+
+        &--current {
+            background: #f9fafb;
+        }
+    }
+
+    &__item-title {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #111827;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+
+        span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__check {
+        flex-shrink: 0;
+        font-size: 12px;
+        color: var(--accent-dim, #374151);
+    }
+
+    &__item-url {
+        color: #9ca3af;
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+
+        @media (max-width: 480px) {
+            white-space: normal;
+            word-break: break-all;
+        }
+    }
+
+    &__empty {
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #9ca3af;
+        text-align: center;
+    }
+
+    &__clear {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding: 6px 12px;
+        font-size: 11px;
+        color: #9ca3af;
+        cursor: pointer;
+        border-top: 1px solid #e5e7eb;
+        transition: color .12s;
+
+        &:hover {
+            color: var(--accent-dim, #374151);
         }
     }
 }
