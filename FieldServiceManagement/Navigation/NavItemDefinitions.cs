@@ -179,7 +179,13 @@ namespace FieldServiceManagement.Web.Navigation
                         Title = "Create Announcement",
                         Url = "/Admin/Announcements/Create",
                         Roles = ["SuperAdmin"]
-                    }
+                    },
+                    new NavSubItem
+                    {
+                        Title = "Announcements Settings",
+                        Url = "/Admin/Announcements/Settings",
+                        Roles = ["SuperAdmin"]
+                    },
                 ]
             },
             new NavItem

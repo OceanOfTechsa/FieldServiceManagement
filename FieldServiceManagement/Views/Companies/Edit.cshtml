@@ -1,6 +1,7 @@
 ﻿@using System.Text.RegularExpressions
 @using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
 @model FieldServiceManagement.ViewModels.Company.CompanyViewModel
 
 @{
@@ -10,19 +11,18 @@
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
         <div class="d-flex gap-1 align-items-center text-black">
-            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item text-blue">Customers</li>
-                    <li class="breadcrumb-item text-blue"><a href="/Customers/Companies">Companies</a></li>
-                    <li class="breadcrumb-item text-blue">
-                        <a href="@Url.Action("Info", "Companies", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) })" class="d-flex align-items-center gap-2 full-name-wrapper">
-                            @Model.Name
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item link-success" aria-current="page">Edit</li>
-                </ol>
-            </nav>
+            @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+            new BreadcrumbViewModel
+            {
+                ShowBack = true,
+                Items = new List<BreadcrumbItem>
+                {
+                    new() { Label = "Customers",         Url = null },         
+                    new() { Label = "Companies", Url = "/Customers/Companies" },
+                    new() { Label = Model.Name, Url = Url.Action("Info", "Companies", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) }) },
+                    new() { Label = "Edit" }                                            
+                }
+            })
         </div>
     </div>
 

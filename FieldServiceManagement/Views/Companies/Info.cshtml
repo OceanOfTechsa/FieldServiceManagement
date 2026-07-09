@@ -43,8 +43,8 @@
             <div class="d-flex flex-column">
                 <div class="d-flex align-items-start gap-1">
                     <a href="/Customers/Companies" class="text-primary">Companies</a>
-                    <i class="bi bi-caret-right-fill"></i>
-                    <span><strong>@company?.Name</strong></span>
+                    <i class="bi bi-arrow-return-right fs-6"></i>
+                    <span>@company?.Name</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     @{
@@ -70,16 +70,30 @@
         @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.CallCenterAgent.ToString())) && company.IsDeleted == false)
         {
             <div class="d-flex gap-2 align-items-center">
-                <button class="btn-sm bg-warning text-white" data-fsm-transfer-trigger>
-                    <i class="bi bi-person-gear"></i> Change Owner
+                <button class="btn-sm bg-warning text-white"
+                        data-bs-toggle="tooltip" data-bs-title="Change Owner"
+                        data-bs-placement="bottom"
+                        data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                        data-fsm-transfer-trigger>
+                    <i class="bi bi-person-gear"></i>
+                    <span class="d-none d-md-inline"> Change Owner</span>
                 </button>
 
-                <button class="btn-sm delete text-white" data-fsm-delete-trigger>
-                    <i class="bi bi-trash"></i> Delete
+                <button class="btn-sm delete text-white"
+                        data-bs-toggle="tooltip" data-bs-title="Delete"
+                        data-bs-placement="bottom"
+                        data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                        data-fsm-delete-trigger>
+                    <i class="bi bi-trash"></i>
+                    <span class="d-none d-md-inline"> Delete</span>
                 </button>
 
-                <a href="/Customers/Companies/Edit?Id=@UrlEncryptionBusiness.EncryptParam(company.Id.ToString())" class="btn-sm btn-primary">
-                    <i class="bi bi-pencil-square"></i> Edit
+                <a href="/Customers/Companies/Edit?Id=@UrlEncryptionBusiness.EncryptParam(company.Id.ToString())" class="btn-sm btn-primary"
+                   data-bs-toggle="tooltip" data-bs-title="Edit"
+                   data-bs-placement="bottom"
+                   data-bs-custom-class="fsm-tooltip mobile-only-tooltip">
+                    <i class="bi bi-pencil-square"></i>
+                    <span class="d-none d-md-inline"> Edit</span>
                 </a>
             </div>
         }
@@ -88,7 +102,7 @@
     <div class="fsm-fixed-view-wrapper">
         <div class="d-flex gap-2 w-100 h-100">
             @* check the height of this *@
-            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel">
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel rounded-2">
                 @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", company)
             </div>
 

@@ -23,18 +23,6 @@
                 @await Html.PartialAsync("_HeaderNavigation")
                 <div class="app-body d-flex justify-content-center align-items-start">
                     @RenderBody()
-
-                <!-- Sound for Dialog -->
-                <audio id="dialogSound" preload="auto" style="display: none;">
-                    <!-- Main MP3 -->
-                    <source src="/Assets/Sounds/system-error-notice.mp3" type="audio/mpeg">
-
-                    <!-- Optional fallback formats -->
-                    <source src="/Assets/Sound/system-error-notice.ogg" type="audio/ogg">
-                    <source src="/Assets/Sound/system-error-notice.wav" type="audio/wav">
-
-                    Your browser does not support the audio element.
-                </audio>
                 </div>
                 @await Html.PartialAsync("_Footer")
             </div>
@@ -58,6 +46,7 @@
         <script src="~/js/footer.js" defer></script>
         <script src="~/js/site.js" defer></script>
         <script src="~/js/BtnLoader.js" defer></script>
+        <script src="~/js/backBtn.js" defer></script>
         <script src="~/js/InputMusk.js" defer></script>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

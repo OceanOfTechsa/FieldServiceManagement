@@ -1,5 +1,4 @@
 ﻿using FieldServiceManagement.Business;
-using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Data.DataModels.User;
 using FieldServiceManagement.Helpers;
 using FieldServiceManagement.ViewModels.Shared;
@@ -37,17 +36,6 @@ namespace FieldServiceManagement.Areas.Identity.Controllers
                 return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Organisation", ReturnUrl = "/Identity/Account/Manage/Settings/Organisation" });
 
             return View(model);
-        }
-
-        [Authorize(Roles = "Administrator, SuperAdmin")]
-        [HttpGet("Addresses")]
-        public async Task<IActionResult> Addresses()
-        {
-            //var model = await new OrganisationBusiness().GetOrganisationById(User.GetOrganisationIdOrThrow());
-            //if (model is null)
-            //    return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Organisation", ReturnUrl = "/Identity/Account/Manage/Settings/Organisation" });
-
-            return View();
         }
     }
 }

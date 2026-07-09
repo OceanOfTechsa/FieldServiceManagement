@@ -160,6 +160,23 @@ namespace FieldServiceManagement.Controllers
             return success ? Ok() : StatusCode(500);
         }
 
+
+        [HttpGet("/Admin/Announcements/Settings")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> SettingsIndex()
+        {
+            //var settings = await new AnnouncementBusiness().GetAnnouncementSettingsAsync();
+            return View("~/Views/Admin/Announcements/Settings/Index.cshtml");
+        }
+
+        [HttpGet("/Admin/Announcements/Settings/Edit")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> SettingsEdit()
+        {
+            //var settings = await new AnnouncementBusiness().GetAnnouncementSettingsAsync();
+            return View("~/Views/Admin/Announcements/Settings/Edit.cshtml");
+        }
+
         public record AnnouncementRequest(Guid Id);
         #endregion
     }

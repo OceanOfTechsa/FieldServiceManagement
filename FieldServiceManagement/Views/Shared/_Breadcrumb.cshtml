@@ -1,0 +1,100 @@
+﻿@model FieldServiceManagement.ViewModels.Shared.BreadcrumbViewModel
+
+<nav aria-label="breadcrumb">
+    <ol class="fsm-breadcrumb py-1">
+
+        @* Optional back button *@
+        @if (Model.ShowBack)
+        {
+            <span role="button"
+                  class="fsm-breadcrumb__back"
+                  id="fsm-breadcrumb-back"
+                  aria-label="Go back"
+                  data-bs-toggle="tooltip"
+                  data-bs-title="Go Back"
+                  data-bs-placement="bottom"
+                  data-bs-custom-class="fsm-tooltip">
+                <i class="bi bi-arrow-left fs-6"></i>
+            </span>
+        }
+
+        @* Home — optional *@
+        @if (Model.ShowHome)
+        {
+            <li class="fsm-breadcrumb__item fsm-breadcrumb__item--home">
+                <a href="/">
+                    <i class="bi bi-house"></i>
+                    <span class="fsm-breadcrumb__label">Home</span>
+                </a>
+            </li>
+        }
+
+        @* Dynamic crumbs *@
+        @for (int i = 0; i < Model.Items.Count; i++)
+        {
+            var item = Model.Items[i];
+            var isLast = i == Model.Items.Count - 1;
+            var isCurrent = isLast && string.IsNullOrWhiteSpace(item.Url);
+            var isNoLink = !isLast && string.IsNullOrWhiteSpace(item.Url);
+            var showDivider = Model.ShowHome || i > 0;
+
+            // First item when home is hidden gets home-style treatment
+            var isFirst = !Model.ShowHome && i == 0;
+
+            @if (isCurrent)
+            {
+                <li class="fsm-breadcrumb__item fsm-breadcrumb__item--current" aria-current="page">
+                    @if (showDivider)
+                    {
+                        <i class="bi bi-arrow-return-right"></i>
+                    }
+                    <span class="fsm-breadcrumb__label" title="@item.Label">@item.Label</span>
+                </li>
+            }
+            else if (isNoLink && isFirst)
+            {
+                // First item, no URL, no home shown — home pill style, plain
+                <li class="fsm-breadcrumb__item fsm-breadcrumb__item--first">
+                    <span class="fsm-breadcrumb__item--first-plain">
+                        <i class="bi @Model.Icon"></i>
+                        <span class="fsm-breadcrumb__label" title="@item.Label">@item.Label</span>
+                    </span>
+                </li>
+            }
+            else if (isNoLink)
+            {
+                // Middle item, no URL — plain with ellipsis on mobile
+                <li class="fsm-breadcrumb__item fsm-breadcrumb__item--plain">
+                    @if (showDivider)
+                    {
+                        <i class="bi bi-arrow-return-right"></i>
+                    }
+                    <span class="fsm-breadcrumb__label" title="@item.Label">@item.Label</span>
+                </li>
+            }
+            else if (isFirst)
+            {
+                // First item with URL, no home shown — home pill style with link
+                <li class="fsm-breadcrumb__item fsm-breadcrumb__item--first">
+                    <a href="@item.Url">
+                        <i class="bi @Model.Icon"></i>
+                        <span class="fsm-breadcrumb__label" title="@item.Label">@item.Label</span>
+                    </a>
+                </li>
+            }
+            else
+            {
+                // Normal linked crumb
+                <li class="fsm-breadcrumb__item">
+                    <a href="@item.Url">
+                        @if (showDivider)
+                        {
+                            <i class="bi bi-arrow-return-right"></i>
+                        }
+                        <span class="fsm-breadcrumb__label" title="@item.Label">@item.Label</span>
+                    </a>
+                </li>
+            }
+        }
+    </ol>
+</nav>
