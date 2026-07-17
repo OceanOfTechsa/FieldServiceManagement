@@ -1,4 +1,8 @@
-﻿using FieldServiceManagement.Business.MappingBusiness;
+﻿using FieldServiceManagement.Business.Configuration;
+using FieldServiceManagement.Business.EmailBusiness;
+using FieldServiceManagement.Business.MappingBusiness;
+using FieldServiceManagement.Business.NotificationBusiness;
+using FieldServiceManagement.Business.NotificationBusiness.Notifications;
 using FieldServiceManagement.Data.DataModels.Announcement;
 using FieldServiceManagement.Enum;
 using FieldServiceManagement.Repository.Repositories;
@@ -55,15 +59,12 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
                 return 0;
             return await new AnnouncementRepository().GetUnseenAnnouncementCountAsync(Email);
         }
-
-        public async Task<Guid> CreateAnnouncementAsync(CreateAnnouncementViewModel Model, string CreatedByEmail)
+        public async Task<Guid> CreateAnnouncementAsync(CreateAnnouncementViewModel Model)
         {
             if (Model == null || string.IsNullOrWhiteSpace(Model.Title))
                 return Guid.Empty;
-         
-            var dataModel = ObjectMapper.Mapper.Map<CreateAnnouncementModel>(Model);
-            dataModel.CreatedByEmail = CreatedByEmail;
-            return await new AnnouncementRepository().CreateAnnouncementAsync(dataModel);
+
+            return await ProcessAnnouncementDeliveryAsync(Model);
         }
 
         public async Task<List<AnnouncementAdminListItemViewModel>> GetAllAnnouncementsForAdminAsync()
@@ -157,12 +158,74 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
             };
         }
 
+        public async Task<CreateAnnouncementViewModel> InitiateCreateAnnouncementModel(string Email)
+        {
+            var model = new CreateAnnouncementViewModel();
+            model.CreatedByEmail = Email;
+            model.AnnouncementDeliveryTypes = new AnnouncementDeliveryTypeBusiness().GetAllAnnouncementDeliveryTypes();
+            return model;
+        }
 
         #region  PRIVATE METHODS
         private static bool IsEmailValid(string? email)
         {
             return !string.IsNullOrWhiteSpace(email)
                    && new EmailAddressAttribute().IsValid(email);
+        }
+
+        private async Task<Guid> ProcessAnnouncementDeliveryAsync(CreateAnnouncementViewModel Model)
+        {
+            var deliveryType = (AnnouncementDeliveryTypeEnum)Model.AnnouncementDeliveryType;
+      
+            switch (deliveryType)
+            {
+                case AnnouncementDeliveryTypeEnum.InApp:
+                case AnnouncementDeliveryTypeEnum.InAppAndEmail:
+                    {
+                        var announcementId = await CreateInAppAnnouncementAsync(Model);
+                        if (deliveryType == AnnouncementDeliveryTypeEnum.InAppAndEmail && announcementId != Guid.Empty)
+                            await SendAnnouncementEmailAsync(Model);
+                        return announcementId;
+                    }
+                case AnnouncementDeliveryTypeEnum.Email:
+                    await SendAnnouncementEmailAsync(Model);
+                    return Guid.Empty;
+                case AnnouncementDeliveryTypeEnum.All:
+                    {
+                        var announcementId = await CreateInAppAnnouncementAsync(Model);
+                        if (announcementId != Guid.Empty)
+                        {
+                            await SendAnnouncementEmailAsync(Model);
+                            await CreateAnnouncementNotificationAsync(Model);
+                        }
+                        return announcementId;
+                    }
+                default:
+                    await CreateAnnouncementNotificationAsync(Model);
+                    return Guid.Empty;
+            }
+        }
+
+        private static async Task<Guid> CreateInAppAnnouncementAsync(CreateAnnouncementViewModel Model)
+        {
+            var dataModel = ObjectMapper.Mapper.Map<CreateAnnouncementModel>(Model);
+            dataModel.CreatedByEmail = Model.CreatedByEmail!;
+            return await new AnnouncementRepository().CreateAnnouncementAsync(dataModel);
+        }
+
+        private async Task SendAnnouncementEmailAsync(CreateAnnouncementViewModel Model)
+        {
+            var recipients = await new UserBusiness.UserBusiness().GetEmailsByRoleIdsAsync(Model.SelectedRoleIds);
+            if (!recipients.Any())
+                return; // nothing to send to; consider logging this case
+
+            var toEmail = AppSettings.GetFSMFromEmail();
+            _ = Task.Run(() => new AnnouncementNotification(Model, toEmail, recipients).SendNotificationWithoutQueue());
+        }
+
+        private async Task CreateAnnouncementNotificationAsync(CreateAnnouncementViewModel Model)
+        {
+            await new UserNotificationBusiness().CreateUserAnnouncementNotificationAsync(Model);
         }
         #endregion
     }

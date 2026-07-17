@@ -132,6 +132,14 @@ namespace FieldServiceManagement.Business.UserBusiness
             return Model;
         }
 
+        public async Task<List<string>> GetEmailsByRoleIdsAsync(List<int> roleIds)
+        {
+            if (roleIds == null || !roleIds.Any())
+                return new List<string>();
+
+            return await new UserRepository().GetEmailsByRoleIdsAsync(roleIds);
+        }
+
         #region PRIVATE METHODS
         public string GenerateTemporaryPassword(int length = 12)
         {

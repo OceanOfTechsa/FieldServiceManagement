@@ -1,7 +1,8 @@
-﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+﻿@using System.Text.RegularExpressions
+@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
 @using FieldServiceManagement.ViewModels.User
-@using System.Text.RegularExpressions
 
 @model IEnumerable<AppUserProfileViewModel>
 
@@ -167,7 +168,21 @@
 
                                 <!-- Created By -->
                                 <td>
-                                    @{
+                                    @if (item.CreatedBy == null)
+                                    {
+                                        <span class="fsm-meta-text">@EmptyFieldReplacer</span>
+                                    }
+                                    else
+                                    {
+                                        @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                        {
+                                            Id = item.CreatedBy.Id,
+                                            Name = item?.CreatedBy?.Name,
+                                            Surname = item?.CreatedBy?.Surname,
+                                            AvatarUrl = item?.CreatedBy?.AvatarUrl
+                                        })
+                                    }
+                                    @*   @{
                                         var createdBy = item?.CreatedBy?.Name + " " + item?.CreatedBy?.Surname ?? "-";
                                         var isSystem       = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
                                         var createdByLabel = isSystem ? "System" : createdBy;
@@ -177,8 +192,8 @@
                                         @if (isSystem)
                                         {
                                             <span class="fsm-pill bg-info-subtle">Self-registered</span>
-                                        }
-                                    </span>
+                                        } *@
+                                    @* </span> *@
                                 </td>
 
                                 <!-- Created At -->

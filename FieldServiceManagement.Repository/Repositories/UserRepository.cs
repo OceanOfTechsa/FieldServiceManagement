@@ -143,7 +143,6 @@ namespace FieldServiceManagement.Repository.Repositories
             );
         }
 
-
         public async Task<List<AppUser>> GetAllUsersByEmailAsync(string email)
         {
             var param = new SqlParameter("@Email", email);
@@ -154,6 +153,25 @@ namespace FieldServiceManagement.Repository.Repositories
         public async Task<int> GetNumberOfUsersByOrganisationId(Guid OrganisationId)
         {
             return _repository.Find(x => x.OrganisationId == OrganisationId).Count();
+        }
+
+        public async Task<List<string>> GetEmailsByRoleIdsAsync(List<int> roleIds)
+        {
+            if (roleIds == null || !roleIds.Any())
+                return new List<string>();
+
+            var roleIdsCsv = string.Join(",", roleIds.Distinct());
+
+            var parameters = new[]
+            {
+                new SqlParameter("@RoleIds", SqlDbType.NVarChar, -1) { Value = roleIdsCsv }
+            };
+
+            var emails = await _dbContext.Database
+                .SqlQueryRaw<string>("EXEC dbo.GetUserEmailsByRoleIds @RoleIds", parameters)
+                .ToListAsync();
+
+            return emails;
         }
 
         #region DISPOSE

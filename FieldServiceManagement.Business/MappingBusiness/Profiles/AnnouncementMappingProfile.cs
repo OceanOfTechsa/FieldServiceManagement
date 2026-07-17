@@ -17,6 +17,11 @@ namespace FieldServiceManagement.Business.MappingBusiness.Profiles
                    src.SelectedRoleIds != null && src.SelectedRoleIds.Any()
                        ? string.Join(",", src.SelectedRoleIds)
                        : null));
+
+
+            #region AnnouncementDeliveryType
+            CreateMap<AnnouncementDeliveryType, AnnouncementDeliveryTypeViewModel>().ReverseMap();
+            #endregion
         }
     }
 }

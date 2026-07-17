@@ -2,6 +2,7 @@
 @using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
 @using FieldServiceManagement.ViewModels.Contact
+@using FieldServiceManagement.ViewModels.Shared
 
 @model IEnumerable<ContactListItemViewModel>
 
@@ -147,13 +148,20 @@
 
                                 <!-- Created By -->
                                 <td>
-                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.CreatedById?.ToString() ?? string.Empty) })" class="d-flex align-items-center gap-2 full-name-wrapper">
-                                        @if(item.CreatedByAvatar is not null)
+                                    @if (item.CreatedById == null)
+                                    {
+                                        <span class="fsm-meta-text">@EmptyFieldReplacer</span>
+                                    }
+                                    else
+                                    {
+                                        @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                         {
-                                            <img src="@($"https://ui-avatars.com/api/?name={item.CreatedByName}&background=random")" class="fsm-avatar-sm" alt="@item.CreatedByName" />
-                                        }
-                                        <span class="fsm-user-name">@(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)</span>
-                                    </a>
+                                            Id = item.CreatedById ?? Guid.Empty,
+                                            Name = item?.CreatedByName,
+                                            Surname = string.Empty,
+                                            AvatarUrl = item?.CreatedByAvatar
+                                        })
+                                    }
                                 </td>
 
                                 <!-- Created At -->

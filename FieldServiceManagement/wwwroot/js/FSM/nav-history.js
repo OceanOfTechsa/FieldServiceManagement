@@ -63,7 +63,17 @@ document.addEventListener('DOMContentLoaded', function () {
         listEl.innerHTML = '';
 
         if (history.length === 0) {
-            listEl.innerHTML = '<li class="fsm-nav-history__empty">No recent pages</li>';
+            listEl.innerHTML = `
+                <div class="fsm-empty-state-no py-3" >
+                    <div class="fsm-empty-icon">
+                        <i class="bi bi-file-earmark-break"></i>
+                    </div>
+
+                    <p class="fsm-nav-history__empty">
+                        No recent pages.
+                    </p>
+                </div >
+            `;
             return;
         }
 
@@ -103,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const clearLi = document.createElement('li');
         clearLi.className = 'fsm-nav-history__clear';
-        clearLi.innerHTML = '<i class="bi bi-brush"></i> Clear history';
+        clearLi.innerHTML = '<i class="bi bi-trash"></i> Clear history';
         clearLi.addEventListener('click', function (e) {
             e.stopPropagation();
             window.NavHistory.clear();

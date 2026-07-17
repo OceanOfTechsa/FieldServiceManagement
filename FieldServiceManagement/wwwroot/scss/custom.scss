@@ -48,6 +48,7 @@
 @import './utilities/api';
 @import 'fsm-components';
 @import 'fsm-sidebar';
+@import 'fsm-loader';
 @import 'header-navigation';
 @import 'Footer';
 @import '_bootstrap-switch.scss';
@@ -2521,4 +2522,66 @@ hr {
             color: var(--accent-dim, #374151);
         }
     }
+}
+
+
+
+/* ── FSM Tooltip ─────────────────────────────────────────────────────────── */
+.fsm-tooltip {
+    --bs-tooltip-bg: #fff;
+    --bs-tooltip-opacity: 1;
+    --bs-tooltip-max-width: 280px;
+    --bs-tooltip-arrow-width: 10px;
+    --bs-tooltip-arrow-height: 7px;
+
+    .tooltip-inner {
+        background: var(--bs-tooltip-bg);
+        color: #374151;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 3px 6px;
+        max-width: 280px;
+        text-align: left;
+        box-shadow: 0 12px 32px rgba(17, 24, 39, .18), 0 4px 10px rgba(17, 24, 39, .10);
+    }
+
+    .tooltip-arrow::before {
+        border-top-color: var(--bs-tooltip-bg) !important;
+    }
+
+    &[data-popper-placement^="bottom"] .tooltip-arrow::before {
+        border-bottom-color: var(--bs-tooltip-bg) !important;
+    }
+
+    &[data-popper-placement^="left"] .tooltip-arrow::before {
+        border-left-color: var(--bs-tooltip-bg) !important;
+    }
+
+    &[data-popper-placement^="right"] .tooltip-arrow::before {
+        border-right-color: var(--bs-tooltip-bg) !important;
+    }
+}
+
+/* Title — GitHub-style: small, tight, no extra weight drama */
+.fsm-tooltip-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+/* Description */
+.fsm-tooltip-description {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+/* If a tooltip has only a title and no description, kill the extra margin */
+.fsm-tooltip-title:only-child {
+    margin-bottom: 0;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #6b7280;
 }

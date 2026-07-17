@@ -32,5 +32,12 @@ namespace FieldServiceManagement.ViewModels.Announcement
         public List<int> SelectedRoleIds { get; set; } = new();
 
         public string? CreatedByEmail { get; set; }
+
+        [DisplayName("Delivery Type")]
+        public int AnnouncementDeliveryType { get; set; }
+
+        public int? Severity { get; set; }
+
+        public List<AnnouncementDeliveryTypeViewModel> AnnouncementDeliveryTypes { get; set; } = new();
     }
 }

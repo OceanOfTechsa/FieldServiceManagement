@@ -66,6 +66,7 @@ namespace FieldServiceManagement.Data
         public DbSet<Form> Forms { get; set; }
         public DbSet<Status> Statuses { get; set; }
         public DbSet<UploadDocument> UploadDocuments { get; set; }
+        public DbSet<AnnouncementDeliveryType> AnnouncementDeliveryTypes { get; set; }
         #endregion
 
         #region Workflow

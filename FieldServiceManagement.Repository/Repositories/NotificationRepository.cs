@@ -4,6 +4,7 @@ using FieldServiceManagement.Data.RepositoryServices;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace FieldServiceManagement.Repository.Repositories
 {
@@ -77,6 +78,37 @@ namespace FieldServiceManagement.Repository.Repositories
                 .ToListAsync();
 
             return result.FirstOrDefault();
+        }
+
+        public async Task<bool> CreateNotificationsBulkAsync(CreateUserNotification model)
+        {
+            if (model.RoleIds == null || !model.RoleIds.Any())
+                return false;
+
+            var roleIdsCsv = string.Join(",", model.RoleIds.Distinct());
+
+            var parameters = new[]
+            {
+                new SqlParameter("@RoleIds", SqlDbType.NVarChar, -1) { Value = roleIdsCsv },
+                new SqlParameter("@OrganisationId", SqlDbType.UniqueIdentifier) { Value = (object)model.OrganisationId ?? DBNull.Value },
+                new SqlParameter("@Type", SqlDbType.NVarChar, -1) { Value = model.Type },
+                new SqlParameter("@Title", SqlDbType.NVarChar, -1) { Value = model.Title },
+                new SqlParameter("@Message", SqlDbType.NVarChar, -1) { Value = model.Message },
+                new SqlParameter("@RelatedEntityType", SqlDbType.NVarChar, -1) { Value = (object)model.RelatedEntityType ?? DBNull.Value },
+                new SqlParameter("@RelatedEntityId", SqlDbType.UniqueIdentifier) { Value = (object)model.RelatedEntityId ?? DBNull.Value },
+                new SqlParameter("@Severity", SqlDbType.TinyInt) { Value = model.Severity },
+                new SqlParameter("@ActionText", SqlDbType.NVarChar, 100) { Value = (object)model.ActionText ?? DBNull.Value },
+                new SqlParameter("@ActionUrl", SqlDbType.NVarChar, 500) { Value = (object)model.ActionUrl ?? DBNull.Value },
+                new SqlParameter("@CreatedById", SqlDbType.UniqueIdentifier) { Value = (object)model.CreatedById ?? DBNull.Value },
+               new SqlParameter("@CreatedByEmail", SqlDbType.NVarChar, 500) { Value = (object)model.CreatedByEmail ?? DBNull.Value }
+            };
+
+            var rowsAffected = await _dbContext.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.CreateNotificationsBulk @RoleIds, @OrganisationId, @Type, @Title, @Message, " +
+                "@RelatedEntityType, @RelatedEntityId, @Severity, @ActionText, @ActionUrl, @CreatedById, @CreatedByEmail",
+                parameters);
+
+            return rowsAffected > 0;
         }
 
         #region DISPOSE

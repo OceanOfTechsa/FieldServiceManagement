@@ -1,0 +1,29 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@model FieldServiceManagement.ViewModels.Shared.ActionUserViewModel
+
+@{
+    var fullName = $"{Model?.Name} {Model?.Surname}".Trim();
+    var createdBy = string.IsNullOrWhiteSpace(fullName) ? new EmptyFieldReplacer().Field : fullName;
+    var isSystem = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+    var createdByLabel = isSystem ? "System" : createdBy;
+    var avatarUrl = string.IsNullOrWhiteSpace(Model?.AvatarUrl)
+     ? $"https://ui-avatars.com/api/?name={fullName}&background=random"
+     : Model.AvatarUrl;
+}
+
+@if (isSystem)
+{
+    <span class="rounded p-0 d-flex justify-content-start align-items-center gap-1 full-name-wrapper">
+        <img src="@avatarUrl" class="fsm-avatar-sm" alt="@Model?.Name" />
+        <span class="fsm-user-name">@createdByLabel</span>
+        <i class="bi bi-bookmarks"></i>
+    </span>
+}
+else
+{
+    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.Id.ToString()!) })"
+       class="rounded p-0 d-flex justify-content-start align-items-center gap-1 full-name-wrapper">
+        <img src="@avatarUrl" class="fsm-avatar-sm" alt="@Model?.Name" />
+        <span class="fsm-user-name">@createdByLabel</span>
+    </a>
+}

@@ -1,6 +1,7 @@
 ﻿using FieldServiceManagement.Business.MappingBusiness;
 using FieldServiceManagement.Data.DataModels.Notification;
 using FieldServiceManagement.Repository.Repositories;
+using FieldServiceManagement.ViewModels.Announcement;
 using FieldServiceManagement.ViewModels.Notification;
 using System.ComponentModel.DataAnnotations;
 
@@ -47,6 +48,26 @@ namespace FieldServiceManagement.Business.NotificationBusiness
             if (!IsEmailValid(email))
                 return 0;
             return await new NotificationRepository().GetUnreadNotificationCountAsync(email);
+        }
+
+        //PREVENT DUPLICATES
+        public async Task<bool> CreateUserAnnouncementNotificationAsync(CreateAnnouncementViewModel model)
+        {
+            if (model.SelectedRoleIds == null || !model.SelectedRoleIds.Any())
+                return false;
+
+            var notification = new CreateUserNotification
+            {
+                RoleIds = model.SelectedRoleIds,
+                Type = "announcement",
+                Title = model.Title,
+                Message = model.Description,
+                RelatedEntityType = "Announcement",
+                Severity = (byte)(model.Severity ?? 0),
+                CreatedByEmail = model.CreatedByEmail!,
+            };
+
+            return await new NotificationRepository().CreateNotificationsBulkAsync(notification);
         }
 
 

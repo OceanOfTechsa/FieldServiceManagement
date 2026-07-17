@@ -695,18 +695,19 @@
 
                                     <div class="notif-filter-group">
                                         <label class="notif-filter-label">Type</label>
-                                        <div class="notif-filter-checks">
-                                            <label class="notif-filter-check"><input type="checkbox" value="work-order" checked> Work Order</label>
-                                            <label class="notif-filter-check"><input type="checkbox" value="leave-application" checked> Leave Application</label>
-                                            <label class="notif-filter-check"><input type="checkbox" value="asset-application" checked> Asset Application</label>
-                                            <label class="notif-filter-check"><input type="checkbox" value="user-management" checked> User Management</label>
-                                            <label class="notif-filter-check"><input type="checkbox" value="system" checked> System</label>
+                                        <div class="row">
+                                            <label class="col-6 align-items-start notif-filter-check"><input type="checkbox" value="work-order" checked> Work Order</label>
+                                            <label class="col-6 align-items-start notif-filter-check"><input type="checkbox" value="leave-application" checked> Leave Application</label>
+                                            <label class="col-6 align-items-start notif-filter-check"><input type="checkbox" value="asset-application" checked> Asset Application</label>
+                                            <label class="col-6 align-items-start notif-filter-check"><input type="checkbox" value="user-management" checked> User Management</label>
+                                            <label class="col-6 align-items-start notif-filter-check"><input type="checkbox" value="announcement" checked> Announcements</label>
+                                            <label class="col-6 align-items-start notif-filter-check"><input type="checkbox" value="system" checked> System</label>
                                         </div>
                                     </div>
 
-                                    <div class="notif-filter-actions d-flex justify-content-between">
-                                        <button type="button" class="notif-filter-clear" id="filterClearBtn"><i class="bi bi-brush"></i> Clear Filters</button>
-                                        <button type="button" class="notif-filter-apply" id="filterApplyBtn">Apply</button>
+                                    <div class="notif-filter-actions bottom-0 d-flex justify-content-between">
+                                        <button type="button" class="notif-filter-clear" id="filterClearBtn"><i class="bi bi-trash"></i> Clear Filters</button>
+                                        <button type="button" class="notif-filter-apply" id="filterApplyBtn"><i class="bi bi-funnel"></i> Apply</button>
                                     </div>
                                 </div>
                             </div>
@@ -722,8 +723,12 @@
                             No matching notifications
                         </div>
 
-                        <div class="px-2 py-2 border-top text-start">
-                            <a href="/Notifications" class="text-decoration-none">View all notifications</a>
+                        <div class="px-2 pt-2 pb-1 border-top text-start">
+                            <div class="d-flex gap-2 text-primary cursor-pointer" role="button"
+                                 data-fsm-notifications-help-trigger
+                            >
+                                <i class="bi bi-question-circle"></i> <span class="small">Help</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -754,8 +759,71 @@
             </div>
         </div>
     </header>
-
 }
+
+<div id="fsm-notifications-help-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <div class="d-flex justify-content-between align-items-center dialog-title" id="help-title">
+            <span><i class="bi bi-question-circle me-1"></i> Help</span>
+            <i class="bi bi-x-circle me-1 cursor-pointer" data-fsm-close-notifications-help></i>
+        </div>
+
+        <div class="bd-callout bd-callout-info my-0 p-2 bg-opacity-10">
+            <span class="small">
+                <strong>Kindly Note:</strong> Below are instructions designed to help you use search and filters effectively.
+            </span>
+        </div>
+
+        <!-- Search -->
+        <div class="p-2 mb-3 border-bottom">
+            <div class="fw-semibold small mb-1 text-black">
+                <i class="bi bi-search me-1"></i> Search
+            </div>
+            <p class="small text-muted mb-2">
+                Type any keyword to search across both the <strong>title</strong> and <strong>description</strong> of notifications. Matching text is highlighted so you can spot it quickly.
+            </p>
+            <div class="d-flex align-items-center gap-2 small">
+                <span class="d-inline-block rounded-circle bg-warning" style="width: 8px; height: 8px;"></span>
+                <span class="text-muted">Matching characters are highlighted in <span class="bg-warning-subtle  align-items-center gap-2 border-warning border-start border-2 rounded-0 px-1">Amber</span></span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="fw-semibold small mb-2 text-black px-2">
+            <i class="bi bi-funnel me-1"></i> Filters
+        </div>
+
+        <div class="p-2 pt-0 mb-3 border-bottom">
+            <div class="small fw-medium mb-1">1. Read Status</div>
+            <p class="small text-muted mb-0">
+                Filter notifications by whether you've already read them. Choose <strong>All</strong>, <strong>Unread</strong>, or <strong>Read</strong>.
+            </p>
+        </div>
+
+        <div class="p-2 pt-0 mb-3 border-bottom">
+            <div class="small fw-medium mb-1">2. Severity</div>
+            <p class="small text-muted mb-0">
+                Filter by how urgent an notifications is: <strong>All</strong>, <strong>Info</strong>, <strong>Success</strong>, <strong>Warning</strong>, or <strong>Critical</strong>.
+            </p>
+        </div>
+
+        <div class="p-2 pt-0 mb-3 border-bottom">
+            <div class="small fw-medium mb-1">3. Date Range</div>
+            <p class="small text-muted mb-0">
+                Narrow results to notifications published between a start and end date.
+            </p>
+        </div>
+
+        <div class="p-2 pt-0">
+            <div class="small fw-medium mb-1">4. Type</div>
+            <p class="small text-muted mb-0">
+                Filter by category: <strong>Work Order</strong>, <strong>Leave Application</strong>, <strong>Asset Application</strong>, <strong>User Management</strong>, or <strong>System</strong>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
 @* ─── JS (deferred, placed before </body> in layout) ──────────────────────── *@
 @section Scripts {
     <script src="~/js/header-navigation.js" defer></script>

@@ -235,7 +235,7 @@
                 </div>
 
                 <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
-                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) })" type="button" class="btn btn-light btn-xs border">
+                    <a href="@Url.Action("Info", "Companies", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) })" type="button" class="btn btn-light btn-xs border">
                         Cancel
                     </a>
                     <button type="submit" id="save-user-btn" class="btn btn-primary btn-xs" data-loading-text="Saving" data-spinner-size="spinner-xs">

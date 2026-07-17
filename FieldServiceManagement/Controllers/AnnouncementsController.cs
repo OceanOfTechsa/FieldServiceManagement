@@ -78,7 +78,11 @@ namespace FieldServiceManagement.Controllers
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpGet("/Admin/Announcements/Create")]
-        public IActionResult Create() => View("~/Views/Admin/Announcements/Create.cshtml", new CreateAnnouncementViewModel());
+        public async Task<IActionResult> Create()
+        {
+            var model = await new AnnouncementBusiness().InitiateCreateAnnouncementModel(User?.Identity?.Name!);
+            return View("~/Views/Admin/Announcements/Create.cshtml", model);
+        }
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpPost("/Admin/Announcements/Create")]
@@ -88,7 +92,7 @@ namespace FieldServiceManagement.Controllers
             if (!ModelState.IsValid)
                 return View("~/Views/Admin/Announcements/Create.cshtml", model);
             
-            var newId = await new AnnouncementBusiness().CreateAnnouncementAsync(model, User.Identity?.Name!);
+            var newId = await new AnnouncementBusiness().CreateAnnouncementAsync(model);
             if (newId == Guid.Empty)
             {
                 ModelState.AddModelError("", "Failed to create announcement.");

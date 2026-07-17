@@ -2,6 +2,7 @@
 @using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
 @using FieldServiceManagement.ViewModels.Company
+@using FieldServiceManagement.ViewModels.Shared
 
 @model IEnumerable<CompanyListItemViewModel>
 
@@ -151,10 +152,19 @@
 
                                 <!-- Created By -->
                                 <td>
-                                    <span class="fsm-meta-text">
-                                        @* <img src="@($"https://ui-avatars.com/api/?name={item.}&background=random")" class="fsm-avatar-lg" alt="@item.Name" /> *@
-                                        @(string.IsNullOrWhiteSpace(item.CreatedByName) ? @EmptyFieldReplacer : item.CreatedByName)
-                                    </span>
+                                    @if (item.CreatedByName == null)
+                                    {
+                                        <span class="fsm-meta-text">@EmptyFieldReplacer</span>
+                                    }
+                                    else
+                                    {
+                                        @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                        {
+                                            Id = Guid.Empty,
+                                            Name = item?.CreatedByName,
+                                            Surname = string.Empty,
+                                        })
+                                    }
                                 </td>
 
                                 <!-- Created At -->

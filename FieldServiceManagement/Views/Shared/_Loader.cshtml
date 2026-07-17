@@ -1,0 +1,73 @@
+﻿@{
+    var size = ViewData["Size"]?.ToString() ?? "md";
+    var colour = ViewData["Colour"]?.ToString() ?? "primary";
+    var text = ViewData["Text"]?.ToString();
+    var overlay = (bool?)ViewData["Overlay"] ?? false;
+}
+
+@if (overlay)
+{
+    <div class="fsm-loader-overlay">
+
+        <div class="fsm-loader fsm-loader--@size fsm-loader--@colour"
+             role="status"
+             aria-live="polite">
+
+            <div class="fsm-loader__track">
+
+                <span class="dot dot-1"></span>
+                <span class="dot dot-2"></span>
+                <span class="dot dot-3"></span>
+                <span class="dot dot-4"></span>
+                <span class="dot dot-5"></span>
+
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(text))
+            {
+                <div class="fsm-loader__text">
+
+                    @text
+
+                </div>
+            }
+
+            <span class="visually-hidden">
+                Loading...
+            </span>
+
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="fsm-loader fsm-loader--@size fsm-loader--@colour"
+         role="status"
+         aria-live="polite">
+
+        <div class="fsm-loader__track">
+
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+            <span class="dot dot-4"></span>
+            <span class="dot dot-5"></span>
+
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(text))
+        {
+            <div class="fsm-loader__text">
+
+                @text
+
+            </div>
+        }
+
+        <span class="visually-hidden">
+            Loading...
+        </span>
+
+    </div>
+}

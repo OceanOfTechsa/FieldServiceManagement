@@ -45,6 +45,22 @@ const signoutTriggers = document.querySelectorAll('[data-fsm-signout-trigger]');
 const signoutCancel  = document.querySelectorAll('[data-fsm-signout-cancel]');
 const signoutConfirm = document.getElementById('fsm-signout-confirm');
 
+
+// Notifications Help Dialog
+const notificatiosHelpDialog = document.getElementById('fsm-notifications-help-dialog');
+const notificationsHelpTriggers = document.querySelectorAll('[data-fsm-notifications-help-trigger]');
+const notificationsHelpCancels = document.querySelectorAll('[data-fsm-close-notifications-help]');
+
+
+notificationsHelpTriggers.forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notificatiosHelpDialog?.classList.add('show');
+}));
+
+notificationsHelpCancels.forEach(btn => btn.addEventListener('click', () => {
+    notificatiosHelpDialog?.classList.remove('show');
+}));
+
 // ─── Scroll behaviour ─────────────────────────────────────────────────────────
 let ticking          = false;
 let effectTriggered  = false;
@@ -499,7 +515,12 @@ function openSheet(sheet) {
                 : '';
 
             const borderClass = index === notifications.length - 1 ? '' : ' border-bottom';
-
+            function truncateText(text, maxLength = 29) {
+                if (!text) return '';
+                return text.length > maxLength
+                    ? text.slice(0, maxLength).trimEnd() + '…'
+                    : text;
+            }
             html += `
             <div class="notification-item${borderClass} searchable-notif d-flex px-2 py-2"
                  data-id="${escapeHtml(n.id)}"
@@ -508,8 +529,8 @@ function openSheet(sheet) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${iconPath}</svg>
                 </span>
                 <div class="flex-grow-1">
-                    <div class="d-flex align-items-center">
-                        <span class="fw-semibold small notif-title">${highlightText(n.title, term)}</span>
+                   <div class="d-flex align-items-center">
+                        <span class="fw-semibold small notif-title" title="${escapeHtml(n.title)}">${highlightText(truncateText(n.title, 29), term)}</span>
                         <span class="text-muted small ms-auto">${timeAgo(n.createdAt)}</span>
                     </div>
                     <div class="small text-muted notif-message">${highlightText(n.message, term)}</div>
