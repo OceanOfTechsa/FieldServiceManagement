@@ -151,8 +151,11 @@
                                 <!-- Status -->
                                 <td>
                                     @{
-                                        var status = (UserStatus)(item.User.StatusId ?? (int)UserStatus.InActive);
-                                        string statusCss = ((UserStatus)item.User.StatusId!).ResolveStatusCssClass();
+                                        UserStatus status = item.User.StatusId.HasValue
+                                            ? (UserStatus)item.User.StatusId.Value
+                                            : UserStatus.InActive;
+
+                                        string statusCss = status.ResolveStatusCssClass();
                                     }
                                     <span class="d-inline-flex align-items-center gap-2">
                                         <span class="fsm-status-dot @statusCss"></span>
