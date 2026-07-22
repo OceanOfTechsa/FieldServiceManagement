@@ -99,10 +99,9 @@
                                         <img src="@($"https://ui-avatars.com/api/?name={fullName}&background=random")" class="fsm-avatar" alt="@fullName" />
                                         <span class="fsm-user-name">
                                             @{
-                                                var salutationDisplay = ((UserSalutation?)@item.Salutation)?.GetDisplayName() ?? "Unknown";
-                                                var salutationLabel = Regex.Replace(salutationDisplay, "(?<=[a-z])(?=[A-Z])", " ");
+                                                var salutationDisplay = ((UserSalutation?)@item.Salutation)?.GetNormalisedDisplayName() ?? "Unknown";
                                             }
-                                            @salutationLabel. @fullName
+                                            @salutationDisplay. @fullName
                                         </span>
                                     </a>
                                 </td>

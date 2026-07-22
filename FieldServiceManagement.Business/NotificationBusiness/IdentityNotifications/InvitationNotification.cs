@@ -11,12 +11,16 @@ namespace FieldServiceManagement.Business.NotificationBusiness.IdentityNotificat
         private readonly AppUserProfileViewModel _currentUser;
         private readonly UserInvitationViewModel _model;
         private readonly string _tempPass;
+        private readonly string _salutation;
 
         public InvitationNotification(AppUserProfileViewModel currentUser, UserInvitationViewModel model, string tempPass) : base($"Invite: You are invited to join {currentUser?.Organisation?.Name} on OOT FSM", model.Email)
         {
             _currentUser = currentUser!;
             _model = model;
             _tempPass = tempPass;
+            _salutation = _model.SalutationId.ToString() is not null
+            ? ((UserSalutation)_model.SalutationId).GetNormalisedDisplayName()
+            : string.Empty;
         }
 
         protected override string MergeEmailTemplate()
@@ -35,7 +39,7 @@ namespace FieldServiceManagement.Business.NotificationBusiness.IdentityNotificat
         private string EmailContent()
         {
             return
-                $"<p><strong>Hello {_model.Name} {_model.Surname},</strong></p>" +
+                $"<p><strong>Hello {_salutation}. {_model.Name} {_model.Surname},</strong></p>" +
 
                 $"<p>" +
                 $"{_currentUser.User.Name} {_currentUser.User.Surname} has invited you to join " +
@@ -44,7 +48,7 @@ namespace FieldServiceManagement.Business.NotificationBusiness.IdentityNotificat
 
                 $"<p>" +
                 $"Your assigned role is: " +
-                $"<strong>{((UserRole)_model?.UserType!).GetDisplayName()}</strong>." +
+                $"<strong>{((UserRole)_model?.UserType!).GetNormalisedDisplayName()}</strong>." +
                 $"</p>" +
 
                 $"<p>" +

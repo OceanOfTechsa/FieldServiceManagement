@@ -17,8 +17,5 @@ public class HomeController : Controller
     
     public IActionResult About() => View();
 
-    public IActionResult Offline(string? ReturnUrl)
-    {
-        return View((object)ReturnUrl!);
-    }
+    public IActionResult Offline(string? ReturnUrl) => View((object)ReturnUrl!);
 }

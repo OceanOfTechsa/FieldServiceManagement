@@ -25,5 +25,6 @@ namespace FieldServiceManagement.Data.DataModels.User
         public Guid? UpdatedById { get; set; }
 
         public string? EmployeeNumber { get; set; }
+        public int SalutationId { get; set; }
     }
 }

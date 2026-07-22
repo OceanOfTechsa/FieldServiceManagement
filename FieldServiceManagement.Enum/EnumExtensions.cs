@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace FieldServiceManagement.Enum
 {
@@ -10,10 +11,14 @@ namespace FieldServiceManagement.Enum
             var field = value.GetType().GetField(value.ToString());
 
             var attribute = field?.GetCustomAttribute<DisplayAttribute>();
-
             return attribute?.Name ?? value.ToString();
         }
 
+        public static string GetNormalisedDisplayName(this System.Enum value)
+        {
+            var displayName = GetDisplayName(value);
+            return Regex.Replace(displayName, "(?<=[a-z])(?=[A-Z])", " ");
+        }
 
         public static string ResolveUserRoleName(int userRoleId)
         {
@@ -25,7 +30,20 @@ namespace FieldServiceManagement.Enum
                 (int)UserRole.FieldAgent => "Field Agent",
                 (int)UserRole.Dispatcher => "Dispatcher",
                 (int)UserRole.CallCenterAgent => "Call Center Agent",
+                (int)UserRole.CustomerPortalUser => "Customer Portal User",
                 _ => "Unknown"
+            };
+        }
+
+        public static string ResolveStatusCssClass(this UserStatus status)
+        {
+            return status switch
+            {
+                UserStatus.Active => "bg-success",
+                UserStatus.Invited => "bg-warning",
+                UserStatus.InActive => "bg-secondary",
+                UserStatus.Deleted => "bg-danger",
+                _ => "bg-secondary"
             };
         }
     }

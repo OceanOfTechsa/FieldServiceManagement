@@ -64,8 +64,7 @@
                             _ => ""
                         };
 
-                        var roleDisplay = ((UserRole?)Model.User.UserRoleId)?.GetDisplayName() ?? "Unknown";
-                        var roleLabel   = Regex.Replace(roleDisplay, "(?<=[a-z])(?=[A-Z])", " ");
+                        var roleDisplay = ((UserRole?)Model.User.UserRoleId)?.GetNormalisedDisplayName() ?? "Unknown";
                     }
 
                     <div class="fsm-user-meta d-none d-md-inline-flex">
@@ -85,7 +84,7 @@
 
                         <span class="fsm-meta-item d-none d-md-inline-flex">
                             <i class="bi bi-person-circle"></i>
-                            <span>@roleLabel</span>
+                            <span>@roleDisplay</span>
                         </span>
 
                         <span class="fsm-meta-sep" aria-hidden="true"></span>

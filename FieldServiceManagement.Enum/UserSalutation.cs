@@ -5,8 +5,11 @@
         Mr = 1,
         Mrs = 2,
         Ms = 3,
-        Dr = 4,
-        Prof = 5,
-        Mx = 6,
+        Miss = 4,
+        Dr = 5,
+        Prof = 6,
+        Rev = 7,
+        Hon = 8,
+        Mx = 9,
     }
 }

@@ -26,7 +26,7 @@ namespace FieldServiceManagement.Business.AuditsBusiness
                 PerformByUserId = currentUser.User.Id,
                 PerformedByName = currentUser.User.Name,
                 Action = "ProfileCreated",
-                Comment = $"User account created for {model.Email} with role {((UserRole)userProfile.UserRoleId!).GetDisplayName()} via invitation.",
+                Comment = $"User account created for {model.Email} with role {((UserRole)userProfile.UserRoleId!).GetNormalisedDisplayName()} via invitation.",
                 IpAddress = new LocalIPResolver().GetRoutedIPv4()!,
                 IsDeleted = false,
                 CreatedAt = DateTime.Now.SaDateTime()
@@ -75,7 +75,7 @@ namespace FieldServiceManagement.Business.AuditsBusiness
 
             AddChange(changes, "UserRole",before.UserRoleId,after.UserRoleId,
                 value => value.HasValue
-                    ? ((UserRole)value.Value).GetDisplayName()
+                    ? ((UserRole)value.Value).GetNormalisedDisplayName()
                     : null);
 
             AddChange(

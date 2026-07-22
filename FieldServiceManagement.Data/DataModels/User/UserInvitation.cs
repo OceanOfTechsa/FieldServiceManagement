@@ -14,5 +14,6 @@ namespace FieldServiceManagement.Data.DataModels.User
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddDays(10);
+        public int SalutationId { get; set; }
     }
 }

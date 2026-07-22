@@ -115,10 +115,9 @@
                                 <!-- Type -->
                                 <td>
                                     @{
-                                        var TypeDisplay = ((CompanyType?)@item.Type)?.GetDisplayName() ?? "Unknown";
-                                        var typeLabel = Regex.Replace(TypeDisplay, "(?<=[a-z])(?=[A-Z])", " ");
+                                        var TypeDisplay = ((CompanyType?)@item.Type)?.GetNormalisedDisplayName() ?? "Unknown";
                                     }
-                                    <span class="fsm-meta-text">@typeLabel</span>
+                                    <span class="fsm-meta-text">@TypeDisplay</span>
                                 </td>
 
                                 <!-- Service Address -->

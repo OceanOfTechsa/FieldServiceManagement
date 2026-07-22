@@ -2,6 +2,7 @@
 using FieldServiceManagement.Data.DataModels.Shared;
 using FieldServiceManagement.Enum;
 using FieldServiceManagement.Repository.Repositories;
+using FieldServiceManagement.ViewModels.Extensions;
 using FieldServiceManagement.ViewModels.SubscriptionPlan;
 using FieldServiceManagement.ViewModels.User;
 
@@ -18,7 +19,7 @@ namespace FieldServiceManagement.Business
         public async Task<BusinessResult> ApplySubscriptionPlanRules(AppUserProfileViewModel Model,SubscriptionRuleContext Context)
         {
 
-            if (Model?.OrgSubscription?.EndDate < DateTime.UtcNow)
+            if (Model?.OrgSubscription?.EndDate < DateTime.Now.SaDateTime())
                 return BusinessResult.Fail($"Your subscription expired on {Model?.OrgSubscription?.EndDate:MMM dd, yyyy}. Access to this feature has been restricted. Please renew your subscription or contact support to restore full access.");
 
             var plan = Model.SubscriptionPlan;

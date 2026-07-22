@@ -81,10 +81,9 @@
                         <span class="text-muted">Type</span>
                         <span class="text-black">
                             @{
-                                var type = ((CompanyType?)Model?.Type)?.GetDisplayName() ?? "Unknown";
-                                var typeLabel = Regex.Replace(type, "(?<=[a-z])(?=[A-Z])", " ");
+                                var type = ((CompanyType?)Model?.Type)?.GetNormalisedDisplayName() ?? "Unknown";
                             }
-                            <span>@typeLabel</span>
+                            <span>@type</span>
                         </span>
                     </div>
 

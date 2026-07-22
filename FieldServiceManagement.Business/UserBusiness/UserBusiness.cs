@@ -204,7 +204,8 @@ namespace FieldServiceManagement.Business.UserBusiness
                 UpdatedAt = DateTime.Now.SaDateTime(),
                 CreatedById = currentUser.User.Id,
                 UpdatedById = currentUser.User.Id,
-                EmployeeNumber = model.EmployeeNumber
+                EmployeeNumber = model.EmployeeNumber,
+                SalutationId = model.SalutationId
             });
 
             return createdUser;

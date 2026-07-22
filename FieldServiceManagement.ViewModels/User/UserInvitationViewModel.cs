@@ -1,5 +1,4 @@
-﻿using FieldServiceManagement.Enum;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace FieldServiceManagement.ViewModels.User
 {
@@ -33,5 +32,8 @@ namespace FieldServiceManagement.ViewModels.User
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddDays(10);
+
+        [Display(Name = "Salutation")]
+        public int SalutationId { get; set; }
     }
 }

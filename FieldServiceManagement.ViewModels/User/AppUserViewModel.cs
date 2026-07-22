@@ -30,5 +30,8 @@ namespace FieldServiceManagement.ViewModels.User
         [DisplayName("Employee Number")]
         public string? EmployeeNumber { get; set; }
         public bool? TwoFactorEnabled { get; set; }
+
+        [DisplayName("Salutation")]
+        public int SalutationId { get; set; }
     }
 }

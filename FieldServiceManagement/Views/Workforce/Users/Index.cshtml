@@ -110,6 +110,9 @@
                         foreach (var item in filteredUsers)
                         {
                             <tr data-sort-value="@item.User.Name">
+                                @{
+                                    var salutationDisplay = ((UserSalutation?)@item.User.SalutationId)?.GetNormalisedDisplayName() ?? "Unknown";
+                                }
                                 <!-- Full Name -->
                                 <td>
                                     <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.User.Id.ToString()) })"
@@ -119,7 +122,7 @@
                                                 : item.User.AvatarUrl)"
                                              class="fsm-avatar"
                                              alt="@item.User.Name" />
-                                        <span class="fsm-user-name">@item.User.Name @item.User.Surname</span>
+                                        <span class="fsm-user-name">@salutationDisplay. @item.User.Name @item.User.Surname</span>
                                     </a>
                                 </td>
 
@@ -140,25 +143,16 @@
                                 <!-- Role -->
                                 <td>
                                     @{
-                                        var roleDisplay = ((UserRole?)item.User.UserRoleId)?.GetDisplayName() ?? "Unknown";
-                                        var roleLabel   = Regex.Replace(roleDisplay, "(?<=[a-z])(?=[A-Z])", " ");
+                                        var roleDisplay = ((UserRole?)item.User.UserRoleId)?.GetNormalisedDisplayName() ?? "Unknown";
                                     }
-                                    <span class="fsm-meta-text">@roleLabel</span>
+                                    <span class="fsm-meta-text">@roleDisplay</span>
                                 </td>
 
                                 <!-- Status -->
                                 <td>
                                     @{
                                         var status = (UserStatus)(item.User.StatusId ?? (int)UserStatus.InActive);
-
-                                        string statusCss = status switch
-                                        {
-                                            UserStatus.Active   => "bg-success",
-                                            UserStatus.Invited  => "bg-warning",
-                                            UserStatus.InActive => "bg-secondary",
-                                            UserStatus.Deleted  => "bg-danger",
-                                            _                   => "bg-secondary"
-                                        };
+                                        string statusCss = ((UserStatus)item.User.StatusId!).ResolveStatusCssClass();
                                     }
                                     <span class="d-inline-flex align-items-center gap-2">
                                         <span class="fsm-status-dot @statusCss"></span>
@@ -177,23 +171,11 @@
                                         @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                         {
                                             Id = item.CreatedBy.Id,
-                                            Name = item?.CreatedBy?.Name,
-                                            Surname = item?.CreatedBy?.Surname,
-                                            AvatarUrl = item?.CreatedBy?.AvatarUrl
+                                            Name = item?.CreatedBy?.Name!,
+                                            Surname = item?.CreatedBy?.Surname!,
+                                            AvatarUrl = item?.CreatedBy?.AvatarUrl!
                                         })
                                     }
-                                    @*   @{
-                                        var createdBy = item?.CreatedBy?.Name + " " + item?.CreatedBy?.Surname ?? "-";
-                                        var isSystem       = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
-                                        var createdByLabel = isSystem ? "System" : createdBy;
-                                    }
-                                    <span class="fsm-meta-text d-flex align-items-center gap-2">
-                                        @createdByLabel
-                                        @if (isSystem)
-                                        {
-                                            <span class="fsm-pill bg-info-subtle">Self-registered</span>
-                                        } *@
-                                    @* </span> *@
                                 </td>
 
                                 <!-- Created At -->
