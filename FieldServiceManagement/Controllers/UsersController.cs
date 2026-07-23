@@ -105,9 +105,8 @@ namespace FieldServiceManagement.Controllers
                 BuildLanguagesList(model);
                 return View(model);
             }
-            var performedBy = await new UserBusiness().GetUserDetailsByUserNameAsync(User?.Identity?.Name!);
-            new UserBusiness().UpdateUserAsync(model.User, performedBy);
-
+        
+            await new UserBusiness().UpdateUserAsync(model.User, User?.Identity?.Name!);
             return RedirectToAction("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(model.User.Id.ToString()) });
         }
 

@@ -1,5 +1,6 @@
 ﻿using FieldServiceManagement.Areas.Identity.Models;
 using FieldServiceManagement.Data;
+using FieldServiceManagement.Data.DataModels.Shared;
 using FieldServiceManagement.Data.DataModels.User;
 using FieldServiceManagement.Data.RepositoryServices;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
@@ -58,6 +59,38 @@ namespace FieldServiceManagement.Repository.Repositories
         public async void UpdateUserAsync(AppUser model)
         {
             _repository.Update(model);
+        }
+
+        public async Task<Guid?> UpdateUserProfileAsync(AppUser Model, string? UpdatedByEmail, string? IpAddress = null)
+        {
+            var parameters = new[]
+            {
+                new SqlParameter("@Id", Model.Id),
+                new SqlParameter("@Name", Model.Name),
+                new SqlParameter("@Surname", (object?)Model.Surname ?? DBNull.Value),
+                new SqlParameter("@Email", Model.Email),
+                new SqlParameter("@Phone", (object?)Model.Phone ?? DBNull.Value),
+                new SqlParameter("@AvatarUrl", (object?)Model.AvatarUrl ?? DBNull.Value),
+                new SqlParameter("@UserRoleId", (object?)Model.UserRoleId ?? DBNull.Value),
+                new SqlParameter("@PreferredLanguageId", (object?)Model.PreferredLanguageId ?? DBNull.Value),
+                new SqlParameter("@IsActive", Model.IsActive),
+                new SqlParameter("@StatusId", (object?)Model.StatusId ?? DBNull.Value),
+                new SqlParameter("@EmployeeNumber", (object?)Model.EmployeeNumber ?? DBNull.Value),
+                new SqlParameter("@SalutationId", Model.SalutationId),
+                new SqlParameter("@UpdatedByEmail", UpdatedByEmail!),
+                new SqlParameter("@IpAddress", (object?)IpAddress ?? DBNull.Value)
+            };
+
+            var query = @"EXEC [dbo].[UpdateUser] @Id, @Name, @Surname, @Email, @Phone, @AvatarUrl, @UserRoleId, @PreferredLanguageId, @IsActive, @StatusId, @EmployeeNumber, @SalutationId, @UpdatedByEmail, @IpAddress";
+
+            var result = await _dbContext.Database.SqlQueryRaw<RepoResults>(query, parameters).ToListAsync();
+            var row = result.FirstOrDefault();
+            if (row?.Success != true)
+            {
+                throw new InvalidOperationException(
+                    $"UpdateUser failed: {row?.ErrorMessage} (line {row?.ErrorLine} in {row?.ErrorProcedure})");
+            }
+            return row.Id;
         }
 
         public async Task<AppUser?> InsertAppUser(AppUser model)

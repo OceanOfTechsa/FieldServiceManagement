@@ -53,8 +53,7 @@ namespace FieldServiceManagement.Areas.Identity.Controllers
             }
 
             var performedBy = await new UserBusiness().GetUserDetailsByUserNameAsync(User?.Identity?.Name!);
-            new UserBusiness().UpdateUserAsync(model, performedBy);
-
+            await new UserBusiness().UpdateUserAsync(model, User?.Identity?.Name!);
             return RedirectToAction(nameof(Personal));
         }
 

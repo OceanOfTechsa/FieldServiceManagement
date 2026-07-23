@@ -85,16 +85,11 @@ namespace FieldServiceManagement.Business.UserBusiness
         public async Task<AppUserProfileViewModel> GetAllUserDetailsByIdAsync(Guid UserId)
             => await BuildUserProfileAsync(ByEmail: null, ById: UserId);
        
-        public async void UpdateUserAsync(AppUserViewModel model, AppUserViewModel performedBy)
+        public async Task<Guid?> UpdateUserAsync(AppUserViewModel Model, string Email)
         {
-            var beforeProfile = await GetUserDetailsByIdAsync(model.Id);
-            var dbModel = ObjectMapper.Mapper.Map<AppUser>(model);
-            dbModel.AvatarUrl = string.IsNullOrWhiteSpace(model.AvatarUrl)
-                ? $"https://ui-avatars.com/api/?name={model.Name}+{model.Surname}&background=random"
-                : model.AvatarUrl;
-            dbModel.UpdatedAt = DateTime.Now.SaDateTime();
-            new UserRepository().UpdateUserAsync(dbModel);
-            await new ProfileAuditsBusiness().LogProfileUpdateAsync(before: beforeProfile, after: model,performedBy: performedBy);
+            var dbModel = ObjectMapper.Mapper.Map<AppUser>(Model);
+            dbModel.AvatarUrl = string.IsNullOrWhiteSpace(Model.AvatarUrl) ? $"https://ui-avatars.com/api/?name={Model.Name}+{Model.Surname}&background=random" : Model.AvatarUrl;
+            return await new UserRepository().UpdateUserProfileAsync(dbModel, Email, new LocalIPResolver().GetRoutedIPv4()!);
         }
 
         // <summary>

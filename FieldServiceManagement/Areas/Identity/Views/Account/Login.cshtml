@@ -5,7 +5,28 @@
     Layout = "_IdentityLayout";
     ViewData["Title"] = "Sign In";
 }
+<style>
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
 
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(45, 49, 64, 0.25);
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+</style>
 
 @if (!string.IsNullOrEmpty(Model.Browser) &&
      (Model.Browser.Contains("Trident/") || Model.Browser.Contains("MSIE ")))
@@ -57,7 +78,9 @@
 
 @if (Model.IsInDev)
 {
-    <a asp-area="Identity" asp-controller="Account" asp-action="Developerlogin" class="text-center mt-5">Developer Login</a>
+    <div class="separator mt-3">
+        <a asp-area="Identity" asp-controller="Account" asp-action="Developerlogin">Developer Login</a>
+    </div>
 }
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
