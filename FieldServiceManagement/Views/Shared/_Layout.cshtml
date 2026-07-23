@@ -16,7 +16,7 @@
         <title>@ViewData["Title"] | OOT FSM • The end-to-end field service management platform</title>
         <meta name="description" content="Automate the entire spectrum of field operations with the one stop field service management platform." />
     </head>
-    <body class="antialiased fsm-app">
+    <body class="antialiased fsm-app" data-user-key="@(User.Identity!.IsAuthenticated ? User.FindFirst("sub")?.Value ?? User.Identity.Name : "anonymous")">
         @RenderSection("Styles", required: false)
         <div class="">
             <div class="">

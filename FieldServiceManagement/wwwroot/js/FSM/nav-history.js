@@ -1,11 +1,29 @@
 ﻿// ── Part 1: Track navigation on every page load ────────────────────────────
 (function () {
-    const STORAGE_KEY = 'navHistory';
+    const BASE_KEY = 'navHistory';
     const MAX_ENTRIES = 20;
+
+    function hashString(str) {
+        let hash = 5381;
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) + hash) + str.charCodeAt(i);
+            hash = hash & hash; 
+        }
+        return (hash >>> 0).toString(36);
+    }
+
+    function getUserKey() {
+        const raw = (document.body?.dataset?.userKey || 'anonymous').trim().toLowerCase();
+        return raw === 'anonymous' ? raw : hashString(raw);
+    }
+
+    function getStorageKey() {
+        return `${BASE_KEY}:${getUserKey()}`;
+    }
 
     function getHistory() {
         try {
-            const raw = sessionStorage.getItem(STORAGE_KEY);
+            const raw = sessionStorage.getItem(getStorageKey());
             return raw ? JSON.parse(raw) : [];
         } catch (e) {
             console.warn('Failed to parse navHistory, resetting.', e);
@@ -31,14 +49,14 @@
             history.shift();
         }
 
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        sessionStorage.setItem(getStorageKey(), JSON.stringify(history));
     }
 
     pushCurrentPage();
 
     window.NavHistory = {
         get: getHistory,
-        clear: () => sessionStorage.removeItem(STORAGE_KEY)
+        clear: () => sessionStorage.removeItem(getStorageKey())
     };
 })();
 
