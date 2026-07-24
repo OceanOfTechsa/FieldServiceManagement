@@ -1,5 +1,6 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @model FieldServiceManagement.ViewModels.Settings.SettingsDetails
+@using FieldServiceManagement.ViewModels.Shared
 
 @{
     ViewData["Title"] = "Settings";
@@ -8,15 +9,17 @@
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
-        <div class="d-flex gap-1 align-items-center text-black">
-            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item text-blue">Admin</li>
-                    <li class="breadcrumb-item link-success" aria-current="page">Settings</li>
-                </ol>
-            </nav>
-        </div>
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            Icon = "bi-gear",
+            Items = new List<BreadcrumbItem>
+            {
+                new() { Label = "Settigs", Url = null },
+            }
+        })
 
         <div class="d-flex gap-2 align-items-start">
             <div class="d-flex align-items-center position-relative">
@@ -64,6 +67,7 @@
                         <th>Value</th>
                         <th>Description</th>
                         <th>Is Active</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,6 +89,49 @@
                                         <span>@(item.isActive ? "Yes" : "No")</span>
                                     </span>
                                 </td>
+                                <td class="d-none d-sm-table-cell"> 
+                                    <div class="d-flex align-items-center gap-2 text-danger small" data-fsm-delete-trigger role="button" data-id="@item.id" data-name="@item.key">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </div>
+
+                                     <div id="fsm-delete-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+                                        <div class="fsm-dialog fsm-dialog-lg">
+                                            <p id="delete-title" class="dialog-title">Delete Setting</p>
+                                            <div class="dialog-danger">
+                                                <div class="warn-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="warn-text">
+                                                    <p>Delete Confirmation Required</p>
+                                                    <p class="warn-sub" id="fsm-delete-item-label">This action is <strong>permanent and cannot be undone</strong>. Deleting this setting will affect every part of the system that depends on it.</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="dialog-body">
+                                                This deletion is <strong>irreversible</strong> and may impact any system, report, or process that relies on this setting. Please select <strong>Delete</strong> to proceed, or <strong>Cancel</strong> to return without making any changes.
+                                            </div>
+                                            <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
+                                                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                                                Failed to delete this user, Please try again. <button class="read-more-btn text-black small">Read more</button>
+                                            </div>
+
+                                            <form id="fsm-delete-form" asp-controller="Settings" asp-action="Delete" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" id="fsm-delete-id-input" value="" />
+
+                                                <div class="dialog-footer">
+                                                    <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" id="fsm-delete-confirm">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                         }
                     }
@@ -98,7 +145,7 @@
                                     </div>
                                     <h6 class="fw-semibold mb-1">No Setting found</h6>
                                     <p class="text-muted small mb-3">No Setting match the selected filter.</p>
-                                    <a href="/Companies/Create" class="btn btn-primary btn-xs">
+                                    <a href="/Admin/Settings/Create" class="btn btn-primary btn-xs">
                                         <i class="fa-solid fa-plus"></i>
                                         New Setting
                                     </a>
@@ -215,6 +262,10 @@
         const searchInput   = document.getElementById('searchInput');
         const table         = document.querySelector('.fsm-table');
         const tbody         = table.querySelector('tbody');
+
+        const deleteDialog   = document.getElementById('fsm-delete-dialog');
+        const deleteTriggers = document.querySelectorAll('[data-fsm-delete-trigger]');
+        const deleteCancels  = document.querySelectorAll('[data-fsm-delete-cancel]');
 
         // ── Empty state row (search) ──────────────────────────────────────
         const emptyStateRow = document.createElement('tr');
@@ -342,5 +393,27 @@
 
         // ── Initial render ────────────────────────────────────────────────
         render();
+
+
+
+        document.querySelectorAll('[data-fsm-delete-trigger]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+
+                document.getElementById('fsm-delete-id-input').value = id;
+                document.getElementById('fsm-delete-item-label').innerHTML =
+                    `This action is <strong>permanent and cannot be undone</strong>. Deleting <strong>${name}</strong> will affect every part of the system that depends on it.`;
+
+                // show the dialog — adjust to match however fsm-delete-dialog is currently toggled
+                document.getElementById('fsm-delete-dialog').classList.add('show');
+            });
+        });
+
+        document.querySelectorAll('[data-fsm-delete-cancel]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('fsm-delete-dialog').classList.remove('show');
+            });
+        });
     </script>
 }

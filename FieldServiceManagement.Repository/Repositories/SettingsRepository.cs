@@ -1,5 +1,6 @@
 ﻿using FieldServiceManagement.Data;
 using FieldServiceManagement.Data.DataModels.Settings;
+using FieldServiceManagement.Data.DataModels.Shared;
 using FieldServiceManagement.Data.RepositoryServices;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
 using FieldServiceManagement.Repository.Contracts;
@@ -51,6 +52,19 @@ namespace FieldServiceManagement.Repository.Repositories
             model.RecordCount = model.settingsDetails.Any() ? model.settingsDetails.First().RecordCount : 0;
 
             return model;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var parameters = new[]
+            {
+                new SqlParameter("@Id", id)
+            };
+
+            var query = @"EXEC [dbo].[DeleteSetting] @Id";
+            var result = await _dbContext.Database.SqlQueryRaw<RepoResultsInt>(query, parameters).ToListAsync();
+            var row = result.FirstOrDefault();
+            return row?.Success == true;
         }
 
 

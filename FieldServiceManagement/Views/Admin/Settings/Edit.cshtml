@@ -1,4 +1,5 @@
 ﻿@model FieldServiceManagement.ViewModels.Settings.SettingsViewModel
+@using FieldServiceManagement.ViewModels.Shared
 
 @{
     ViewData["Title"] = "Edit Setting";
@@ -6,16 +7,19 @@
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
-        <div class="d-flex gap-1 align-items-center text-black">
-            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item text-blue">Admin</li>
-                    <li class="breadcrumb-item text-blue"><a href="/Admin/Settings">Settings</a></li>
-                    <li class="breadcrumb-item link-success" aria-current="page">Edit</li>
-                </ol>
-            </nav>
-        </div>
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            Icon = "bi-gear",
+            Items = new List<BreadcrumbItem>
+            {
+                new() { Label = "Settigs", Url = "/Admin/Settings" },
+                 new() { Label = Model.key, Url = null },
+                new() { Label = "Edit", Url = null},
+            }
+        })
     </div>
 
     <div class="fsm-fixed-view-wrapper-forms" id="fsm-edit-setting">
@@ -47,8 +51,15 @@
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
                                     @Html.LabelFor(m => m.key, new { @class = "form-label" })
-                                    <span class="text-danger mt-2">*</span>
-                                    @Html.TextBoxFor(m => m.key, new { @class = "form-control", @placeholder = "E.g., DefaultPageSize" })
+                                    @Html.TextBoxFor(m => m.key, new {
+                                        @class = "form-control",
+                                        @placeholder = "E.g., DefaultPageSize",
+                                        @readonly = "readonly",
+                                        data_bs_toggle = "tooltip",
+                                        data_bs_title = "This key cannot be changed after creation. To make changes, delete this setting and add a new one.",
+                                        data_bs_placement = "bottom",
+                                        data_bs_custom_class = "fsm-tooltip",
+                                    })
                                     @Html.ValidationMessageFor(m => m.key, "", new { @class = "field-error" })
                                 </div>
                             </div>
@@ -67,6 +78,7 @@
                             <div class="col-12">
                                 <div class="form-group">
                                     @Html.LabelFor(m => m.description, new { @class = "form-label" })
+                                                                  <span class="text-danger mt-2">*</span>
                                     @Html.TextAreaFor(m => m.description, new { @class = "form-control", @rows = 4, @placeholder = "Describe what this setting controls..." })
                                     @Html.ValidationMessageFor(m => m.description, "", new { @class = "field-error" })
                                 </div>

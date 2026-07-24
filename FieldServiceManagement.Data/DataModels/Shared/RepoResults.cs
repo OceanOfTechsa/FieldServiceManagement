@@ -11,4 +11,14 @@ namespace FieldServiceManagement.Data.DataModels.Shared
         public int? ErrorLine { get; set; }
         public string? ErrorProcedure { get; set; }
     }
+
+    [Keyless]
+    public class RepoResultsInt
+    {
+        public int Id { get; set; }
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
+        public int? ErrorLine { get; set; }
+        public string? ErrorProcedure { get; set; }
+    }
 }

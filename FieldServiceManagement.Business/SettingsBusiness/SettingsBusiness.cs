@@ -1,6 +1,7 @@
 ﻿using FieldServiceManagement.Business.Configuration;
 using FieldServiceManagement.Business.MappingBusiness;
 using FieldServiceManagement.Data.DataModels.Settings;
+using FieldServiceManagement.Repository.Contracts;
 using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Settings;
 
@@ -64,16 +65,6 @@ namespace FieldServiceManagement.Business.SettingsBusiness
             }
         }
 
-        public string GetMOUContactPersonEmails()
-        {
-            var list = GetSettingByKey("MOUContactPerson");
-            if (list == null || list.Count == 0) return string.Empty;
-
-            var emails = list.Select(x => x.value)
-                .Where(v => !string.IsNullOrWhiteSpace(v))
-                .Distinct(StringComparer.OrdinalIgnoreCase);
-            return string.Join(",", emails);
-        }
 
         public string GetAssetEmails()
         {
@@ -97,6 +88,11 @@ namespace FieldServiceManagement.Business.SettingsBusiness
                 }
                 return ObjectMapper.Mapper.Map<List<SettingsViewModel>>(entity);
             }
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await new SettingsRepository().DeleteAsync(id);
         }
     }
 }

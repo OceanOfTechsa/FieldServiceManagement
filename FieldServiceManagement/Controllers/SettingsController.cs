@@ -53,5 +53,27 @@ namespace FieldServiceManagement.Controllers
             }
             return View(model);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id == 0 || id == null)
+            {
+                TempData["ErrorMessage"] = "Invalid setting selected for deletion.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var success = await new SettingsBusiness().DeleteAsync(id);
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Failed to delete this setting. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["SuccessMessage"] = "Setting deleted successfully.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

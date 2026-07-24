@@ -2525,7 +2525,6 @@ hr {
 }
 
 
-
 /* ── FSM Tooltip ─────────────────────────────────────────────────────────── */
 .fsm-tooltip {
     --bs-tooltip-bg: #fff;
@@ -2533,6 +2532,8 @@ hr {
     --bs-tooltip-max-width: 280px;
     --bs-tooltip-arrow-width: 10px;
     --bs-tooltip-arrow-height: 7px;
+    opacity: 0 !important;
+    transition: opacity .5s ease-in-out !important;
 
     .tooltip-inner {
         background: var(--bs-tooltip-bg);
@@ -2561,6 +2562,11 @@ hr {
         border-right-color: var(--bs-tooltip-bg) !important;
     }
 }
+
+    .fsm-tooltip.show {
+        opacity: var(--bs-tooltip-opacity) !important;
+        transition: opacity .55s ease .08s !important;
+    }
 
 /* Title — GitHub-style: small, tight, no extra weight drama */
 .fsm-tooltip-title {

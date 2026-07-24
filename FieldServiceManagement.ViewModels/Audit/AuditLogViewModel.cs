@@ -19,7 +19,7 @@ namespace FieldServiceManagement.ViewModels.Audit
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow.SaDateTime();
         public bool IsDeleted { get; set; } = false;
 
-        public bool? ShowEntityType { get; set; }
+        public bool? ShowEntityType { get; set; } = false; 
 
         public string? VisibleTo { get; set; }
         public bool ShowComment { get; set; }

@@ -70,19 +70,28 @@ const fsmTooltipPopperConfig = (defaultBsPopperConfig) => ({
     ]
 });
 
-document.querySelectorAll('[data-fsm-tooltip]').forEach(el => {
-    const title = el.dataset.fsmTitle ?? '';
-    const description = el.dataset.fsmDescription ?? '';
+document.querySelectorAll('[data-fsm-tooltip], [data-bs-toggle="tooltip"]').forEach(el => {
+    if (el.dataset.fsmTooltip !== undefined) {
+        const title = el.dataset.fsmTitle ?? '';
+        const description = el.dataset.fsmDescription ?? '';
 
-    new bootstrap.Tooltip(el, {
-        html: true,
-        placement: 'top',
-        customClass: 'fsm-tooltip',
-        title: `<div class="fsm-tooltip-card"><div class="fsm-tooltip-title">${title}</div><div class="fsm-tooltip-description">${description}</div></div>`,
-        template: `<div class="tooltip fsm-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>`,
-        popperConfig: fsmTooltipPopperConfig
-    });
+        new bootstrap.Tooltip(el, {
+            html: true,
+            placement: 'top',
+            customClass: 'fsm-tooltip',
+            title: `<div class="fsm-tooltip-card">
+                        <div class="fsm-tooltip-title"> ${title}</div>
+                        <div class="fsm-tooltip-description">${description}</div>
+                    </div>`,
+            template: `<div class="tooltip fsm-tooltip" role="tooltip">
+                        <div class="tooltip-arrow"></div>
+                        <div class="tooltip-inner"></div>
+                    </div>`,
+            popperConfig: fsmTooltipPopperConfig
+        });
+    } else {
+        new bootstrap.Tooltip(el);
+    }
 });
-
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))

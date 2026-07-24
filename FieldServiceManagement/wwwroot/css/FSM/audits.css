@@ -1,0 +1,236 @@
+﻿.al-root {
+    --al-primary: #009966;
+    --al-muted: #6b7280;
+    --al-border: #e5e7eb;
+    --al-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 14px;
+    color: #111827;
+}
+
+.al-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.al-subtitle {
+    font-size: 12px;
+    color: var(--al-muted);
+    margin: 0;
+}
+
+.al-filter-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.al-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--al-muted);
+    background: #fff;
+    border: 1px solid var(--al-border);
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+    .al-filter-btn:hover {
+        color: #111827;
+        border-color: #9ca3af;
+    }
+
+.al-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 160px;
+    background: #fff;
+    border: 1px solid var(--al-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.10);
+    z-index: 50;
+    overflow: hidden;
+}
+
+    .al-dropdown.open {
+        display: block;
+    }
+
+.al-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+}
+
+.al-dropdown-item:hover {
+    background: #f9fafb;
+}
+
+.al-dropdown-item.active {
+    color: var(--al-primary);
+    font-weight: 500;
+}
+
+.al-dropdown-item .al-check {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.al-dropdown-item.active .al-check {
+    opacity: 1;
+    color: var(--al-primary);
+}
+
+.al-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.al-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    gap: 8px;
+    color: var(--al-muted);
+}
+
+.al-day-divider {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 6px 0;
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(4px);
+    margin-bottom: 10px;
+}
+
+.al-day-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--al-muted);
+}
+
+.al-row {
+    display: flex;
+    gap: 14px;
+}
+
+.al-spine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.al-icon-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .al-icon-box svg {
+        width: 14px;
+        height: 14px;
+    }
+
+.al-line {
+    width: 1px;
+    flex: 1;
+    min-height: 16px;
+    margin-top: 6px;
+}
+
+.al-line-dashed {
+    border-left: 1px dashed #d1d5db;
+}
+
+.al-line-solid {
+    background: #d1d5db;
+}
+
+.al-content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2px;
+}
+
+.al-action {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 0;
+    color: #111827;
+}
+
+    .al-action span {
+        font-weight: 400;
+        color: #374151;
+        font-family: var(--al-font-mono);
+        text-transform: capitalize;
+    }
+
+.al-entity-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--accent-muted, #ecfdf5);
+    color: var(--accent, #059669);
+    margin-left: 6px;
+}
+
+.al-meta {
+    font-size: 11.5px;
+    color: var(--al-muted);
+    margin: 0;
+    margin-top: -2px;
+}
+
+.al-actor {
+    font-weight: 500;
+}
+
+.al-details-box {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 12.8px;
+    line-height: 1.4;
+    border: 1px solid #e2e8f0; /* ← default border */
+    background: #f8fafc; /* ← default background */
+    color: #727986; /* ← default text */
+}
+
+    .al-details-box > * + * {
+        margin-top: 5px;
+    }
+
+.date-input {
+    height: 30px;
+    font-size: 12px;
+    width: 180px;
+}
