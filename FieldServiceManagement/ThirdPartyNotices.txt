@@ -1,19 +1,49 @@
-MIT License
+Copyright © 2026 Ocean of Tech. All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software, including all source code, object code, compiled binaries,
+algorithms, databases, user interfaces, APIs, libraries, documentation,
+designs, graphics, configuration files, and all other associated materials
+(collectively referred to as the "Software"), is the exclusive and proprietary
+property of Ocean of Tech and is protected by applicable copyright laws,
+international copyright treaties, intellectual property laws, trade secret
+laws, and other applicable legislation.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The Software contains confidential and proprietary information belonging to
+Ocean of Tech. It is provided solely to authorized individuals or organizations
+under the terms of a valid license agreement or written authorization from
+Ocean of Tech. No ownership rights are transferred through the use, possession,
+or licensing of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Except where expressly permitted in writing by Ocean of Tech, no person or
+entity may:
+
+• Copy, reproduce, duplicate, or redistribute the Software.
+• Modify, adapt, translate, or create derivative works.
+• Reverse engineer, decompile, disassemble, or otherwise attempt to discover
+  the source code or underlying technology.
+• Merge the Software with other software or systems.
+• Publish, disclose, transmit, lease, rent, lend, sublicense, assign, or sell
+  any portion of the Software.
+• Remove, alter, or obscure any copyright, trademark, confidentiality, or
+  proprietary notices contained within the Software.
+• Use the Software for any unauthorized commercial or competitive purpose.
+
+Unauthorized access, copying, modification, distribution, disclosure,
+reproduction, or use of the Software, in whole or in part, is strictly
+prohibited and may constitute a violation of copyright law, trade secret law,
+contract law, and other applicable intellectual property laws. Ocean of Tech
+reserves the right to pursue all available civil and criminal remedies to the
+maximum extent permitted by law.
+
+The names "Ocean of Tech", its logos, product names, service names, branding,
+and all related marks are trademarks or registered trademarks of Ocean of Tech.
+Nothing contained within the Software shall be interpreted as granting any
+license or right to use such trademarks without prior written consent.
+
+THIS COPYRIGHT NOTICE SHALL NOT BE REMOVED, MODIFIED, OR OBSCURED FROM ANY
+AUTHORIZED COPY OF THE SOFTWARE OR ITS ACCOMPANYING DOCUMENTATION.
+
+FOR LICENSING INQUIRIES, PERMISSIONS, COMMERCIAL USE, OR LEGAL MATTERS,
+CONTACT OCEAN OF TECH THROUGH ITS OFFICIAL COMMUNICATION CHANNELS.
+
+Copyright © 2026 Ocean of Tech. All Rights Reserved.

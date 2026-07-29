@@ -1,4 +1,6 @@
-﻿using FieldServiceManagement.Data.DataModels.User;
+﻿using ElmahCore.Mvc;
+using FieldServiceManagement.Business.Configuration;
+using FieldServiceManagement.Data.DataModels.User;
 using FieldServiceManagement.StartupModules.Middleware;
 using FieldServiceManagement.StartupModules.ServiceModules;
 using Microsoft.AspNetCore.Identity;
@@ -6,7 +8,6 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using System.Globalization;
-using ElmahCore.Mvc;
 
 namespace FieldServiceManagement.Web.StartupModules.PipelineModules;
 
@@ -28,7 +29,7 @@ public static class PipelineExtensions
             app.UseExceptionHandler("/Error/500");
             app.UseHsts();
         }
-
+        app.UseMaintenanceMode(AppSettings.isSystemMaintenance);
         app.UseMiddleware<SecurityHeadersMiddleware>();
 
         // app.UseMiddleware<AuthGateMiddleware>();

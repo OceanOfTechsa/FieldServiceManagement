@@ -1,0 +1,18 @@
+﻿@using FieldServiceManagement.Business.Configuration
+@using FieldServiceManagement.Business.EmailQueueBusiness
+
+@if ((AppSettings.isSystemNoteActive) && (!string.IsNullOrEmpty(AppSettings.systemNote)))
+    @Html.Raw(AppSettings.systemNote)
+                    
+@{
+    var result = EmailQueueBusiness.HaveWeReachedEmailThresholdForTheDay();
+}
+
+@if (result.thresholdReached)
+{
+    <div class="bd-callout bd-callout-warning my-0 p-2 bg-opacity-10 mt-3 mx-2">
+        <span class="small">
+            <i class="bi bi-exclamation-circle"></i> <strong>Kindly Note:</strong> Due to a high volume of transactions, email notifications may be delayed by up to 24 hours.
+        </span>
+    </div>
+}

@@ -1,5 +1,7 @@
 ﻿@using FieldServiceManagement.Helpers
 @model FieldServiceManagement.Areas.Identity.Models.LoginViewModel
+@using FieldServiceManagement.Business.Configuration
+
 
 @{
     Layout = "_IdentityLayout";
@@ -31,6 +33,10 @@
 @if (!string.IsNullOrEmpty(Model.Browser) &&
      (Model.Browser.Contains("Trident/") || Model.Browser.Contains("MSIE ")))
 @await Html.PartialAsync("~/Views/Shared/_BrowserNotice.cshtml")
+    @if ((AppSettings.isSystemNoteActiveOnLogin) && (!string.IsNullOrEmpty(AppSettings.systemNote)))
+    {
+       @await Html.PartialAsync("~/Views/Shared/_ImportantNote.cshtml")
+    }
 
 <div class="mb-4">
     <h2 class="font-sans fw-semibold mb-0" style="font-size:1.75rem;">Sign in</h2>
@@ -79,7 +85,7 @@
 @if (Model.IsInDev)
 {
     <div class="separator mt-3">
-        <a asp-area="Identity" asp-controller="Account" asp-action="Developerlogin">Developer Login</a>
+        <a asp-area="Identity" asp-controller="Account" asp-action="Developerlogin" class="btn btn-xs rounded-pill btn-primary"><i class="bi bi-braces"></i> Developer Login</a>
     </div>
 }
 @section Scripts {

@@ -1,0 +1,102 @@
+﻿@using FieldServiceManagement.Models
+@model MaintenanceModel
+
+@{
+    ViewData["Title"] = "Scheduled Maintenance";
+    Layout = "~/Areas/Identity/Views/Shared/_IdentityLayout.cshtml";
+}
+
+<style>
+    :root { --error: #ff4444; }
+    .code { font-size: 5rem; font-weight: 600; color: var(--error); letter-spacing: -0.02em; line-height: 1; margin-bottom: 1rem; }
+    .title { font-family: var(--sans); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 2rem; }
+    .btn { display: inline-block; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.75rem 1.5rem; text-decoration: none; transition: border-color 0.15s, color 0.15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<div class="maintenance-container">
+    <div> 
+
+        <div class="code">503</div>
+        <div class="bd-callout bd-callout-warning my-0 p-2 py-1 bg-opacity-10 small mb-2 align-items-center gap-2 d-flex">
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+            System Maintenance in Progress...
+        </div>
+
+        <h1 class="title">We'll be back soon</h1>
+        
+        <p class="desc">@Model.MaintenanceMessage</p>
+
+        <div class="mb-4">
+            <strong>Estimated completion time:</strong><br>
+            <span class="fs-6 text-primary">@Model.MaintenanceEstimatedTime</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Custom Maintenance Dialog
+    function showMaintenanceDialog() {
+        const dialogHTML = `
+            <div id="fsm-maintenance-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" style="display:flex;">
+                <div class="fsm-dialog fsm-dialog-lg">
+                    <p class="dialog-title">System Maintenance Active</p>
+
+                    <div class="dialog-danger">
+                        <div class="warn-icon">
+                            <i class="bi bi-tools fs-3 text-warning"></i>
+                        </div>
+                        <div class="warn-text">
+                            <p>You cannot leave this page</p>
+                            <p class="warn-sub">
+                                The system is currently under maintenance.<br>
+                                <strong>Leaving or refreshing may result in loss of data or errors.</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="dialog-body">
+                        Please remain on this page until maintenance is complete.
+                        Our team is working to restore full service as quickly as possible.
+                    </div>
+
+                    <div class="dialog-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeMaintenanceDialog()">
+                            I Understand
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('fsm-maintenance-dialog')?.remove();
+        document.body.insertAdjacentHTML('beforeend', dialogHTML);
+    }
+
+    function closeMaintenanceDialog() {
+        document.getElementById('fsm-maintenance-dialog')?.remove();
+    }
+
+    // ── 1. In-app link clicks: fully controllable, show the custom dialog ──
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+
+        // Allow same-page anchors (e.g. #section) and explicit opt-outs
+        if (link.getAttribute('href')?.startsWith('#')) return;
+        if (link.hasAttribute('data-allow-navigation')) return;
+
+        e.preventDefault();
+        showMaintenanceDialog();
+    }, true);
+
+    // ── 2. Browser reload / tab close / actual navigation away:
+    //     browser shows its OWN native confirmation — cannot be replaced
+    //     with a custom dialog. This is a hard browser security limitation.
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    });
+</script>

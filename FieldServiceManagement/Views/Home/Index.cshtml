@@ -62,11 +62,10 @@
     <div class="fsm-fixed-view-wrapper mt-1">
         <div class="d-flex gap-2 w-100 h-100">
             <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column align-items-center pt-9 px-2">
-
                 <div class="fsm-welcome-brand mb-4">
                     <img src="@AppSettings.fsmLogo" alt="OOT FSM" class="brand-avatar-lg" />
                 </div>
-
+                 
                 <h1 class="fsm-welcome-title" style="font-size:clamp(4rem,3.5vw,2.8rem);">Welcome</h1>
                 <p class="fsm-welcome-sub fw-semibold">OOT Field Service Management</p>
 
@@ -86,6 +85,8 @@
                 <span class="fsm-welcome-build">
                     <i class="bi bi-box-seam"></i> Build: @fileVersion
                 </span>
+
+                 @await Html.PartialAsync("~/Views/Shared/_ImportantNote.cshtml")
             </div>
         </div>
     </div>
