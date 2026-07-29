@@ -10,9 +10,9 @@ public static class ResendModule
     {
         services.AddOptions();
         services.AddHttpClient<ResendClient>();
-        services.Configure<ResendClientOptions>(o =>
+        services.Configure<ResendClientOptions>(options =>
         {
-            o.ApiToken = env.IsDevelopment()
+            options.ApiToken = env.IsDevelopment()
                 ? Environment.GetEnvironmentVariable("RESEND_APITOKEN")!
                 : AppSettings.GetResendApiToken();
         });

@@ -2,3 +2,219 @@
     ViewData["Title"] = "Organisations";
     Layout = "_Layout";
 }
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            <i class="bi bi-funnel"></i>
+            <div id="app" class="mt-2">
+                <enum-dropdown :options="statusOptions"
+                               v-model="selectedStatus"
+                               placeholder="All"
+                               param-name="status"
+                               suffix="Users">
+                </enum-dropdown>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-start">
+            <div class="d-flex align-items-center position-relative">
+
+                <button type="button" class="btn border-fsm btn-xs mb-0" id="searchBtn"><i class="bi bi-search"></i></button>
+
+                <div id="searchWrapper" class="search-wrapper">
+                    <input class="border-fsm form-control search-input"
+                           placeholder="Search by name or email..."
+                           id="searchInput" />
+
+                    <button id="cancelSearch" class="cancel-btn">
+                        ✕
+                    </button>
+                </div>
+
+            </div>
+            <a href="/Workforce/Users/Invite" class="btn btn-primary btn-xs"
+               title="Invite User"
+               aria-label="Invite User">
+                <i class="fa-solid fa-plus"></i>
+                Invite User
+            </a>
+        </div>
+    </div>
+
+     <!-- Users Table -->
+    <div class="border-0 rounded-2 overflow-hidden mx-2">
+        <div class="table-responsive fsm-table-wrapper">
+            <table class="table align-middle mb-0 fsm-table">
+                <thead>
+                    <tr>
+                        <th class="fsm-sortable" data-sort="name">
+                            Full Name
+                            <span class="fsm-sort-icon">
+                                <i class="bi bi-chevron-expand"></i>
+                            </span>
+                        </th>
+                        <th>Employee ID</th>
+                        <th>Email</th>
+                        <th>
+                            <div id="role-filter-app" class="text-muted">
+                                <enum-dropdown :options="roleOptions"
+                                               v-model="selectedRole"
+                                               placeholder="All Roles"
+                                               param-name="role"
+                                               suffix="">
+                                </enum-dropdown>
+                            </div>
+                        </th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Created Time</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @* @if (filteredUsers.Any())
+                    {
+                        foreach (var item in filteredUsers)
+                        {
+                            <tr data-sort-value="@item.User.Name">
+                                @{
+                                    var salutationDisplay = ((UserSalutation?)@item.User.SalutationId)?.GetNormalisedDisplayName() ?? "Unknown";
+                                }
+                                <!-- Full Name -->
+                                <td>
+                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(item.User.Id.ToString()) })"
+                                       class="d-flex align-items-center gap-2 full-name-wrapper">
+                                        <img src="@(string.IsNullOrWhiteSpace(item.User.AvatarUrl)
+                                                ? $"https://ui-avatars.com/api/?name={item.User.Name + " " + item.User.Surname}&background=random"
+                                                : item.User.AvatarUrl)"
+                                             class="fsm-avatar"
+                                             alt="@item.User.Name" />
+                                        <span class="fsm-user-name">@salutationDisplay. @item.User.Name @item.User.Surname</span>
+                                    </a>
+                                </td>
+
+                                <!-- Employee ID -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(string.IsNullOrWhiteSpace(item.User.EmployeeNumber)
+                                            ? @EmptyFieldReplacer
+                                            : item.User.EmployeeNumber)
+                                    </span>
+                                </td>
+
+                                <!-- Email -->
+                                <td>
+                                    <span class="fsm-meta-text">@item.User.Email</span>
+                                </td>
+
+                                <!-- Role -->
+                                <td>
+                                    @{
+                                        var roleDisplay = ((UserRole?)item.User.UserRoleId)?.GetNormalisedDisplayName() ?? "Unknown";
+                                    }
+                                    <span class="fsm-meta-text">@roleDisplay</span>
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    @{
+                                        UserStatus status = item.User.StatusId.HasValue
+                                            ? (UserStatus)item.User.StatusId.Value
+                                            : UserStatus.InActive;
+
+                                        string statusCss = status.ResolveStatusCssClass();
+                                    }
+                                    <span class="d-inline-flex align-items-center gap-2">
+                                        <span class="fsm-status-dot @statusCss"></span>
+                                        <span>@status.ToString()</span>
+                                    </span>
+                                </td>
+
+                                <!-- Created By -->
+                                <td>
+                                    @if (item.CreatedBy == null)
+                                    {
+                                        <span class="fsm-meta-text">@EmptyFieldReplacer</span>
+                                    }
+                                    else
+                                    {
+                                        @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                        {
+                                            Id = item.CreatedBy.Id,
+                                            Name = item?.CreatedBy?.Name!,
+                                            Surname = item?.CreatedBy?.Surname!,
+                                            AvatarUrl = item?.CreatedBy?.AvatarUrl!
+                                        })
+                                    }
+                                </td>
+
+                                <!-- Created At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @item?.User.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item?.User.CreatedAt.ToString("tt").ToUpper()
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7">
+                                <div class="fsm-empty-state">
+                                    <div class="fsm-empty-icon">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">No users found</h6>
+                                    <p class="text-muted small mb-3">No users match the selected filter.</p>
+                                    <a href="/Workforce/Users/Invite" class="btn btn-primary btn-xs"
+                                       title="New User"
+                                       aria-label="New User">
+                                        <i class="fa-solid fa-plus"></i>
+                                        New User
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (selectedStatus == "Deleted" && filteredUsers.Any())
+                    {
+                    <tr>
+                        <td colspan="7">
+                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                                <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    @(filteredUsers.Count > 1 ? "These user accounts have" : "This user account has")
+                                    been permanently deleted from the system.
+                                    All associated data has been moved to a different user and no further actions can be taken using
+                                    @(filteredUsers.Count > 1 ? "these accounts" : "this account").
+                            </div>
+                        </td>
+                    </tr>
+                    } *@
+                </tbody>
+            </table>
+        </div>
+
+        <div class="fsm-table-footer">
+            <span>
+                @* Total Users : <strong>@filteredUsers.Count</strong> @if (selectedStatus != "All" || selectedRole != "All")
+                {
+                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>    
+                } *@
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                <span class="fsm-page-current">1</span>
+                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                <select class="fsm-per-page">
+                    <option value="10">10 Records per page</option>
+                    <option value="25">25 Records per page</option>
+                    <option value="50">50 Records per page</option>
+                    <option value="100">100 Records per page</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>

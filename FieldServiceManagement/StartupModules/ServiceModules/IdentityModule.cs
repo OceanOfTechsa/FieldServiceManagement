@@ -47,8 +47,8 @@ public static class IdentityModule
 
         services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, AppClaimsPrincipalFactory>();
 
-        services.Configure<CookieTempDataProviderOptions>(o =>
-            o.Cookie.Name = "fsm.tmp");
+        services.Configure<CookieTempDataProviderOptions>(options =>
+            options.Cookie.Name = "fsm.tmp");
 
         return services;
     }
