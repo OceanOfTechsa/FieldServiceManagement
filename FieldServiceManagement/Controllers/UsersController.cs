@@ -45,7 +45,7 @@ namespace FieldServiceManagement.Controllers
             if (profile is null)
                 return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "User" });
 
-            if (profile.User.OrganisationId != User.GetOrganisationId())
+            if (profile.User.OrganisationId != User.GetOrganisationIdOrThrow())
                 return Forbid();
 
             return View(profile);

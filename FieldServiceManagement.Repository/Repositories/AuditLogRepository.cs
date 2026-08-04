@@ -7,7 +7,7 @@ namespace FieldServiceManagement.Repository.Repositories
 {
     public class AuditLogRepository
     {
-        private DataContext _dbContext;
+        private readonly DataContext _dbContext;
         private readonly IRepository<AuditLog> _repository;
         private bool _disposed = false;
 

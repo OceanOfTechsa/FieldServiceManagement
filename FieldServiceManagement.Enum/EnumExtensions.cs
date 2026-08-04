@@ -46,5 +46,23 @@ namespace FieldServiceManagement.Enum
                 _ => "bg-secondary"
             };
         }
+
+        public static string GetNormalisedDisplayName(this SubscriptionPlanEnum plan) => plan switch
+        {
+            SubscriptionPlanEnum.Free => "Free",
+            SubscriptionPlanEnum.Starter => "Starter",
+            SubscriptionPlanEnum.Professional => "Professional",
+            SubscriptionPlanEnum.Enterprise => "Enterprise",
+            _ => plan.ToString()
+        };
+
+        public static string ResolvePlanCssClass(this SubscriptionPlanEnum plan) => plan switch
+        {
+            SubscriptionPlanEnum.Free => "fsm-tag--free",
+            SubscriptionPlanEnum.Starter => "fsm-tag--starter",
+            SubscriptionPlanEnum.Professional => "fsm-tag--professional",
+            SubscriptionPlanEnum.Enterprise => "fsm-tag--enterprise",
+            _ => "fsm-tag--starter"
+        };
     }
 }

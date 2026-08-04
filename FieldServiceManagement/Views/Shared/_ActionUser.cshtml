@@ -1,4 +1,5 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Business.UserBusiness;
 @model FieldServiceManagement.ViewModels.Shared.ActionUserViewModel
 
 @{
@@ -7,7 +8,7 @@
     var isSystem = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
     var createdByLabel = isSystem ? "System" : createdBy;
     var avatarUrl = string.IsNullOrWhiteSpace(Model?.AvatarUrl)
-     ? $"https://ui-avatars.com/api/?name={fullName}&background=random"
+     ? AvatarHelper.GetAvatar(Model?.Name, Model?.Surname)
      : Model.AvatarUrl;
 }
 
@@ -24,6 +25,6 @@ else
     <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.Id.ToString()!) })"
        class="rounded p-0 d-flex justify-content-start align-items-center gap-1 full-name-wrapper">
         <img src="@avatarUrl" class="fsm-avatar-sm" alt="@Model?.Name" />
-        <span class="fsm-user-name">@createdByLabel</span>
+        <span class="fsm-user-name">@createdByLabel <i class="bi bi-folder-symlink"></i></span> 
     </a>
 }

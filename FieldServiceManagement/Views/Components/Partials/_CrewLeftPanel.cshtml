@@ -1,0 +1,172 @@
+﻿@model FieldServiceManagement.ViewModels.Crew.CrewFullProfileViewModel;
+@using FieldServiceManagement.ViewModels.Shared
+
+@{
+    var crew = Model;
+}
+
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="crewInfoAccordion">
+
+    @if (crew.IsDeleted)
+    {
+        <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
+            <h2 class="accordion-header px-2">
+                <button class="accordion-button bg-danger-subtle text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        aria-expanded="true"
+                        aria-controls="crewInfoCollapse">
+                    <div>Deletion Details</div>
+
+                    <div class="ms-2"
+                         data-bs-toggle="tooltip"
+                         data-bs-title="This crew has been permanently deleted from the system."
+                         data-bs-placement="top"
+                         data-bs-custom-class="fsm-tooltip">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show">
+                <div class="accordion-body px-2 pt-1 mt-0">
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus-fill"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">Crew Status</span>
+                                <span class="text-black">
+                                    <span class="fsm-pill bg-danger text-white me-2">Deleted</span>
+                                    Deleted on @crew.UpdatedAt?.ToString("MMM dd, yyyy hh:mm tt")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-person-circle"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">Deleted By</span>
+                                <span class="text-black">@crew.UB_Name @crew.UB_Surname</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#crewInfoCollapse"
+                    aria-expanded="true"
+                    aria-controls="crewInfoCollapse">
+                Crew Information
+            </button>
+        </h2>
+        <div id="crewInfoCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#crewInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-people"></i>
+                        <span class="text-muted">Name</span>
+                        <span class="text-black">@crew.Name</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-lines-fill"></i>
+                        <span class="text-muted">Crew Size</span>
+                        <span class="text-black">
+                            @(crew.CrewSize.HasValue ? crew.CrewSize.ToString() : "-")
+                        </span>
+                    </div>
+
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-people"></i>
+                        <span class="text-muted">Crew Members</span>
+                        <span class="text-black">
+                            @Model.Members.Count()
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @{
+                            var (statusLabel, statusCss) = crew!.IsDeleted
+                                ? ("Deleted", "bg-danger")
+                                : crew.IsActive
+                                    ? ("Active", "bg-success")
+                                    : ("Inactive", "bg-secondary");
+                        }
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus"></i>
+                            <span class="text-muted">Status</span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="fsm-status-dot @statusCss"></span>
+                                <span class="text-black ms-1">@statusLabel</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-card-text"></i>
+                        <span class="text-muted">Description</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(crew.Description) ? "-" : crew.Description)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <div class="accordion-body px-2">
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Created By</span>
+                        
+                        <div class="my-2">
+                            @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                            {
+                                Id = crew.CB_Id ?? Guid.Empty,
+                                Name = crew?.CB_Name!,
+                                Surname = crew?.CB_Surname!,
+                                AvatarUrl = crew?.CB_AvatarUrl!
+                            })
+                        </div>
+
+                        <span class="small text-black mb-2 small">On @crew?.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</span>
+                    </div>
+                </div>
+
+                @if(crew!.UB_Id.HasValue)
+                {
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        <div class="gap-1">
+                            <span class="small text-black mb-1">Modified By</span>
+                            <div class="my-2">
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = crew.UB_Id ?? Guid.Empty,
+                                    Name = crew?.UB_Name!,
+                                    Surname = crew?.UB_Surname!,
+                                    AvatarUrl = crew?.UB_AvatarUrl!
+                                })
+                            </div>
+                            <span class="small text-black mb-2 small">
+                                @(crew.UpdatedAt.HasValue ? "On " + crew.UpdatedAt.Value.ToString("MMM dd, yyyy hh:mm tt") : "-")
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

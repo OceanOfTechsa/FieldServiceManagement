@@ -5,6 +5,7 @@
         AddUser,
         AddWorkOrder,
         AddForm,
-        AddStorage
+        AddStorage,
+        CreateCrew
     }
 }

@@ -5,6 +5,7 @@ namespace FieldServiceManagement.Business.Configuration
 {
     public class AppSettings
     {
+        public static string AppName => GetSettingValue("AppName");
         public static readonly string CompanyName = "Ocean of Tech";
         public static readonly string SystemDiagnosisText = "Running System Diagnosis";
         public static readonly string CompanyUrl = "https://oceanoftech.co.za";
@@ -28,7 +29,7 @@ namespace FieldServiceManagement.Business.Configuration
         public static bool isSystemMaintenance => GetBooleanSetting("isSystemMaintenance");
         public static string systemMaintenanceNote => GetSettingValue("systemMaintenanceNote");
         public static string systemMaintenanceEstimatedTime => GetSettingValue("systemMaintenanceEstimatedTime");
-
+        public static string AvatarBaseUrl => GetSettingValue("AvatarBaseUrl");
         public static string systemNote => GetSettingValue("systemNote");
         public static string GetUrLEncryptionKey()
         {

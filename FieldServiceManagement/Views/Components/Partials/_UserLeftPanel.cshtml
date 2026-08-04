@@ -1,11 +1,12 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
 @model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
 
 @{
     var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
 }
-<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0" id="userInfoAccordion">
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="userInfoAccordion">
 
     @if(Model.User.StatusId == (int)UserStatus.Invited)
     {
@@ -19,7 +20,13 @@
                         aria-controls="userInfoCollapse">
                     <div>Invite Mail Details</div>
 
-                    <div data-toggle="tooltip" class="ms-2" title="Invite email sent! If you can't find it, copy the subject shown below and search for the email."><i class="bi bi-info-circle"></i></div>
+                    <div class="ms-2"
+                        data-bs-toggle="tooltip" 
+                        data-bs-title="Invite email sent! If you can't find it, copy the subject shown below and search for the email. Also check your Spam/Junk folder."
+                        data-bs-placement="right"
+                        data-bs-custom-class="fsm-tooltip"
+                    >
+                    <i class="bi bi-info-circle"></i></div>
                 </button>
             </h2>
             <div class="accordion-collapse collapse show">
@@ -37,11 +44,11 @@
                                     <span class="text-black">
                                         @if (isExpired)
                                         {
-                                            <span class="fsm-pill bg-danger text-white me-2">Expired</span>
+                                            <span class="fsm-tag fsm-tag--bubble fsm-tag--free">Expired</span>
                                         }
                                         else
                                         {
-                                            <span class="fsm-pill bg-primary text-white me-2">Active</span>
+                                            <span class="fsm-tag fsm-tag--bubble fsm-tag--professional">Active</span>
                                         }
                                     </span>
                                 </div>
@@ -103,8 +110,13 @@
                         aria-controls="userInfoCollapse">
                     <div>Deletion  Details</div>
 
-                    <div data-toggle="tooltip" class="ms-2" title="This user account has been permanently deleted from the system.
-                        All associated data has been moved to a different user and no further actions can be taken using this account">
+                    <div class="ms-2"
+                         data-bs-toggle="tooltip"
+                         data-bs-title="This user account has been permanently deleted from the system.
+                        All associated data has been moved to a different user and no further actions can be taken using this account."
+                         data-bs-placement="right"
+                         data-bs-custom-class="fsm-tooltip"
+                    >
                         <i class="bi bi-info-circle"></i>
                     </div>
                 </button>
@@ -154,6 +166,7 @@
                         <span class="text-muted">Salutation</span>
                         @{
                             var salutaion = ((UserSalutation)Model?.User.SalutationId!).GetNormalisedDisplayName() ?? "Uknown";
+                            var roleDisplay = ((UserRole?)Model.User.UserRoleId)?.GetNormalisedDisplayName() ?? "Unknown";
                         }
                         <span class="text-black">@salutaion</span>
                     </div>
@@ -162,11 +175,25 @@
                         <span class="text-muted">First Name</span>
                         <span class="text-black">@Model?.User.Name</span>
                     </div>
+
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-vcard"></i>
                         <span class="text-muted">Last Name</span>
                         <span class="text-black">@Model?.User.Surname</span>
                     </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-envelope"></i>
+                        <span class="text-muted">Email</span>
+                        <span class="text-black">@Model?.User.Email</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="text-muted">Role</span>
+                        <span class="text-black">@roleDisplay</span>
+                    </div>
+
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-vcard"></i>
@@ -177,6 +204,7 @@
                                            : Model?.User.EmployeeNumber)
                         </span>
                     </div>
+
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-telephone"></i>
@@ -198,6 +226,24 @@
                         <i class="bi bi-mic"></i>
                         <span class="text-muted">Language</span>
                         <span class="text-black">English - United States</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @{
+                            var (statusLabel, statusCss) = Model!.User.IsDeleted
+                                ? ("Deleted", "bg-danger")
+                                : Model.User.IsActive
+                                    ? ("Active", "bg-success")
+                                    : ("Inactive", "bg-secondary");
+                        }
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus"></i>
+                            <span class="text-muted">Status</span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="fsm-status-dot @statusCss"></span>
+                                <span class="text-black ms-1">@statusLabel</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -312,12 +358,15 @@
                         }
                         else
                         {
-                            <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedBy?.Id.ToString()!) })"
-                                   class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
-                                <span class="d-flex align-items-center gap-2">
-                                    @createdByLabel
-                                </span>
-                            </a>
+                            <div class="my-2">
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = Model!.CreatedBy!.Id!,
+                                    Name = Model!.CreatedBy!.Name!,
+                                    Surname = Model!.CreatedBy!.Surname!,
+                                    AvatarUrl = Model!.CreatedBy!.AvatarUrl!
+                                })
+                            </div>
                         }
 
                         <span class="small text-black mb-2 small">On @Model?.User.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.User.CreatedAt.ToString("tt").ToUpper()</span>
@@ -344,12 +393,13 @@
                         }
                         else
                         {
-                            <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.User.Id.ToString()!) })"
-                                   class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
-                                <span class="d-flex align-items-center gap-2">
-                                    @modifiedByLabel
-                                </span>
-                            </a>
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = Model!.CreatedBy!.Id!,
+                                    Name = Model!.CreatedBy!.Name!,
+                                    Surname = Model!.CreatedBy!.Surname!,
+                                    AvatarUrl = Model!.CreatedBy!.AvatarUrl!
+                                })
                         }
 
                         <span class="small text-black mb-2 small">On @Model?.User.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.User.UpdatedAt?.ToString("tt").ToUpper()</span>

@@ -43,6 +43,7 @@ using FieldServiceManagement.Data.DataModels.WorkflowStageDefinition;
 using FieldServiceManagement.Data.DataModels.WorkOrder;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
 using FieldServiceManagement.ViewModels.Settings;
+using FieldServiceManagement.Data.DataModels.Crew;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -109,6 +110,8 @@ namespace FieldServiceManagement.Data
         public DbSet<Asset> Assets { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Crew> Crews { get; set; }
+        public DbSet<CrewMember> CrewMembers { get; set; }
         #endregion
 
         #region Error

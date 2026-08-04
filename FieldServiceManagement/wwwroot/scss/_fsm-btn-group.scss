@@ -1,0 +1,152 @@
+﻿@import "_fsm-variables";
+
+.fsm-btn-group {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    background: #fff;
+    border-radius: 4px;
+    overflow: visible;
+    height: 28px;
+
+    .btn-main,
+    &__trigger {
+        letter-spacing: 0.5px;
+        border: none;
+        font-size: 12px;
+        cursor: pointer;
+        background: transparent;
+        color: inherit;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-main {
+        padding: 0px 10px;
+        height: 28px;
+        width: auto;
+        line-height: 30px;
+        border-radius: 4px; // full radius by default (no trigger present)
+        // flatten the right side only when a trigger sibling follows
+        &:has(+ .fsm-btn-group__trigger) {
+            border-radius: 4px 0 0 4px;
+        }
+    }
+
+    &__trigger {
+        padding: 0px 5px;
+        display: flex;
+        align-items: center;
+        border-left: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 0 4px 4px 0;
+        position: relative;
+        z-index: 1;
+
+        i {
+            width: 14px;
+            height: 16px;
+            transition: transform 0.15s ease;
+        }
+
+        &[aria-expanded="true"] i {
+            transform: rotate(180deg);
+        }
+
+        &.show,
+        &[aria-expanded="true"] {
+            z-index: 2;
+            border-radius: 4px;
+            border-left-color: transparent;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            filter: brightness(0.9);
+        }
+    }
+
+        .btn-main:hover,
+        &__trigger:hover {
+            filter: brightness(0.92);
+        }
+
+    &__menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        min-width: 180px;
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        padding: 0px;
+        display: none;
+        z-index: 6000;
+
+        &.show {
+            display: block;
+        }
+    }
+
+    &__item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 4px 4px;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        background: transparent;
+        font-size: 13px;
+        color: var(--fsm-text-default, #1a1a1a);
+        text-decoration: none;
+        border-radius: 0px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        z-index: 6000;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+    }
+}
+
+    // Colour modifiers — only these change per group
+    .fsm-btn-group.bg-primary {
+        .btn-main,
+        .fsm-btn-group__trigger {
+            background: $fsm-accent;
+            color: #fff;
+        }
+    }
+
+    .fsm-btn-group.bg-success {
+        .btn-main,
+        .fsm-btn-group__trigger {
+            background: $fsm-success;
+            color: #fff;
+        }
+    }
+
+    .fsm-btn-group.bg-info {
+        .btn-main,
+        .fsm-btn-group__trigger {
+            background: $fsm-info;
+            color: #fff;
+        }
+    }
+
+    .fsm-btn-group.bg-warning {
+        .btn-main,
+        .fsm-btn-group__trigger {
+            background: $fsm-warning;
+            color: #fff;
+        }
+    }
+
+    .fsm-btn-group.bg-danger {
+        .btn-main,
+        .fsm-btn-group__trigger {
+            background: $fsm-danger;
+            color: #fff;
+        }
+    }

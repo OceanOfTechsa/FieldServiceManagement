@@ -1,0 +1,17 @@
+﻿@using FieldServiceManagement.Enum
+@model int?
+
+@{
+    var bubble = ViewData["Bubble"] as bool? ?? false;
+
+    if (Model == null)
+    {
+        return;
+    }
+
+    var plan = (SubscriptionPlanEnum)Model.Value;
+    var cssClass = plan.ResolvePlanCssClass();
+    var label = plan.GetNormalisedDisplayName();
+}
+
+<span class="fsm-tag @(bubble ? "fsm-tag--bubble" : "") @cssClass">@label</span>

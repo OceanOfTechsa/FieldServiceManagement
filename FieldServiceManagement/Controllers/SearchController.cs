@@ -1,10 +1,13 @@
 ﻿using FieldServiceManagement.Business.AddressBusiness;
 using FieldServiceManagement.Business.CountryBusiness;
+using FieldServiceManagement.Business.CrewBusiness;
 using FieldServiceManagement.Business.CurrencyBusiness;
 using FieldServiceManagement.Business.IndustryBusiness;
 using FieldServiceManagement.Business.LanguageBusiness;
 using FieldServiceManagement.Business.StateBusiness;
 using FieldServiceManagement.Business.TimezoneBusiness;
+using FieldServiceManagement.Business.UserBusiness;
+using FieldServiceManagement.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using static FieldServiceManagement.Helpers.HtmlHelpers;
 
@@ -75,6 +78,37 @@ namespace FieldServiceManagement.Controllers
         {
             var BillingAddress = new AddressBusiness().GetAddressBySearchNameAndOrganisationIdAsync(SanitizeInput(SearchName), User?.Identity?.Name!);
             return Json(BillingAddress);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCrew(string term)
+        {
+            var organisationId = User.GetOrganisationIdOrThrow();
+            var results = await new CrewBusiness().SearchCrewsAsync(SanitizeInput(term), organisationId);
+
+            var payload = results.Select(c => new
+            {
+                id = c.Id,
+                name = c.CrewSize.HasValue ? $"{c.Name} ({c.CrewSize} members)" : c.Name
+            });
+
+            return Json(payload);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUser(string term)
+        {
+            var organisationId = User.GetOrganisationIdOrThrow();
+
+            var results = await new UserBusiness().SearchUsersAsync(term, organisationId);
+
+            var payload = results.Select(u => new
+            {
+                id = u.Id,
+                name = $"{u.Name} {u.Surname}".Trim() + (string.IsNullOrWhiteSpace(u.Email) ? "" : $" ({u.Email})")
+            });
+
+            return Json(payload);
         }
     }
 }

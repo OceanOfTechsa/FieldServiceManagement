@@ -1,16 +1,14 @@
-﻿@using System.Text.RegularExpressions
-@using FieldServiceManagement.Business.URLEncryptionBusiness
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
 
 @model FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel
-
-
-<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0" id="userInfoAccordion">
+ 
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="companyInfoAccordion">
     @if (Model?.IsDeleted == true)
     {
         <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
             <h2 class="accordion-header px-2">
-                <button class="accordion-button bg-danger-subtle" text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                <button class="accordion-button bg-danger-subtle text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
                         type="button"
                         data-bs-toggle="collapse"
                         aria-expanded="true"

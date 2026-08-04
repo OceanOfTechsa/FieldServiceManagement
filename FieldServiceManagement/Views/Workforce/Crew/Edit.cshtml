@@ -1,0 +1,113 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.ViewModels.Shared
+@model FieldServiceManagement.ViewModels.Crew.CrewViewModel
+
+@{
+    ViewData["Title"] = $"Edit {Model.Name}";
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        <div class="d-flex gap-1 align-items-center text-black">
+            @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+            new BreadcrumbViewModel
+            {
+                ShowBack = true,
+                Items = new List<BreadcrumbItem>
+                {
+                    new() { Label = "Workforce",         Url = null },
+                    new() { Label = "Crews", Url = "/Workforce/Crew" },
+                    new() { Label = Model.Name, Url = Url.Action("Info", "Crew", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) }) },
+                    new() { Label = "Edit" }
+                }
+            })
+        </div>
+    </div>
+
+    <div class="fsm-fixed-view-wrapper-forms" id="fsm-new-user">
+        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+
+            @using (Html.BeginForm("Edit", "Crew", new { area = "" }, FormMethod.Post, null, new { id = "edit-crew-form", style = "display:flex;flex-direction:column;flex:1;overflow:hidden;" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.OrganisationId)
+                @Html.HiddenFor(m => m.IsDeleted)
+                @Html.HiddenFor(m => m.CreatedBy)
+                @Html.HiddenFor(m => m.CreatedAt)
+                @Html.HiddenFor(m => m.UpdatedBy)
+
+                <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="my-3">
+
+                    @if (!ViewData.ModelState.IsValid)
+                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-12 col-md-8">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "E.g., Installation Team A" })
+                                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Crew Size -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.CrewSize, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.CrewSize, new { @class = "form-control", type = "number", min = "0", @placeholder = "E.g., 4" })
+                                @Html.ValidationMessageFor(m => m.CrewSize, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Description, new { @class = "form-label" })
+                                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4", @placeholder = "Optional description of this crew's role or focus area" })
+                                @Html.ValidationMessageFor(m => m.Description, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <div class="mt-2 d-flex gap-1 align-items-center">
+                                    <label for="IsActive">IsActive?</label>
+                                    @Html.CheckBoxFor(model => model.IsActive, new
+                                    {
+                                        id = "IsActive",
+                                        @class = "",
+                                        data_toggle = "switch",
+                                        data_size = "mini",
+                                        data_handle_width = "2",
+                                        data_on_text = "Yes",
+                                        data_off_text = "No"
+                                    })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
+                    <a href="@Url.Action("Info", "Crew", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) })" type="button" class="btn btn-light btn-xs border">
+                        Cancel
+                    </a>
+                    <button type="submit" id="save-crew-btn" class="btn btn-primary btn-xs" data-loading-text="Saving" data-spinner-size="spinner-xs">
+                        Save changes
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            $("[data-toggle='switch']").bootstrapSwitch();
+        });
+    </script>
+}

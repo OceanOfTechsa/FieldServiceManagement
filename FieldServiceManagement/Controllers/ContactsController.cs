@@ -12,6 +12,7 @@ using X.PagedList.Extensions;
 
 namespace FieldServiceManagement.Controllers
 {
+    [Authorize]
     [Route("Customers/[controller]")]
     public class ContactsController : Controller
     {

@@ -5,6 +5,7 @@ using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Extensions;
 using FieldServiceManagement.ViewModels.SubscriptionPlan;
 using FieldServiceManagement.ViewModels.User;
+using FieldServiceManagement.Business.Configuration;
 
 namespace FieldServiceManagement.Business
 {
@@ -22,7 +23,7 @@ namespace FieldServiceManagement.Business
             if (Model?.OrgSubscription?.EndDate < DateTime.Now.SaDateTime())
                 return BusinessResult.Fail($"Your subscription expired on {Model?.OrgSubscription?.EndDate:MMM dd, yyyy}. Access to this feature has been restricted. Please renew your subscription or contact support to restore full access.");
 
-            var plan = Model.SubscriptionPlan;
+            var plan = Model?.SubscriptionPlan;
             if (plan == null)
                 return BusinessResult.Fail("No subscription plan found for the current organisation.");
 
@@ -30,11 +31,12 @@ namespace FieldServiceManagement.Business
                 return BusinessResult.Fail("Your current subscription plan is inactive. Please contact support or upgrade your plan.");
 
 
-            var orgId = Model.User.OrganisationId;
+            var orgId = Model!.User.OrganisationId;
 
             return Context switch
             {
                 SubscriptionRuleContext.AddUser => await CheckMaxUsers(plan, orgId),
+                SubscriptionRuleContext.CreateCrew => await ShouldAllowCrewCreation(plan),
                 //SubscriptionRuleContext.AddWorkOrder => await CheckMaxWorkOrders(plan, orgId),
                 //SubscriptionRuleContext.AddForm => await CheckMaxForms(plan, orgId),
                 //SubscriptionRuleContext.AddStorage => await CheckMaxStorage(plan, orgId),
@@ -53,6 +55,14 @@ namespace FieldServiceManagement.Business
             if (count >= plan.MaxUsers.Value)
                 return BusinessResult.Fail($"Your plan allows a maximum of {plan.MaxUsers.Value} user(s). " +
                                            $"Please upgrade your plan to add more users.");
+            return BusinessResult.Ok();
+        }
+
+        private async Task<BusinessResult> ShouldAllowCrewCreation(SubscriptionPlanViewModel Plan)
+        {
+            if(Plan.Id == (int)SubscriptionPlanEnum.Free || Plan.Id == (int)SubscriptionPlanEnum.Starter)
+                return BusinessResult.Fail("Sorry, your current edition of " + AppSettings.AppName + " does not support the Crew feature.\r\nUpgrade to continue.");
+            
             return BusinessResult.Ok();
         }
 

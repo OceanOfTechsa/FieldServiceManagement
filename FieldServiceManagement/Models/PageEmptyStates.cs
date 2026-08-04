@@ -43,6 +43,17 @@ namespace FieldServiceManagement.Models
             ]
         };
 
+        public static PageEmptyStateViewModel Crew => new()
+        {
+            PageTitle = "Crew",
+            PageContent = "Crew refers to a group of field technicians who are assigned to work together on specific work orders. Crews are typically created when a job requires more than one person with different set of skills for jobs such as large-scale installations, complex repairs. It is possible to track the activities, time spent, and performance of crews, just as it is done for individual technicians.",
+            HelpEnum = PublicHelpEnum.Crew,
+            ImageUrl = "/Assets/Images/Application/crews.svg",
+            Actions =
+            [
+                new() { Label = "Create Crew", Url="/Workforce/Crew/Create", Icon = "bi-people-fill" }
+            ]
+        };
         // Add more pages here following the same pattern...
     }
 }

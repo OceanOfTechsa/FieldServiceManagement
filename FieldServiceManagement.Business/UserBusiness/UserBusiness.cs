@@ -16,9 +16,9 @@ namespace FieldServiceManagement.Business.UserBusiness
 {
     public class UserBusiness
     {
-        public async Task<(Guid UserId, Guid OrganisationId)> CompleteOnboardingAsync(OnboardingViewModel model, string identityUserId)
+        public async Task<(Guid UserId, Guid OrganisationId)> CompleteOnboardingAsync(OnboardingViewModel Model, string IdentityUserId)
         {
-            return await new UserRepository().CreateUserProfileAndOrganisationAsync(model,identityUserId, new LocalIPResolver().GetRoutedIPv4());
+            return await new UserRepository().CreateUserProfileAndOrganisationAsync(Model,IdentityUserId, new LocalIPResolver().GetRoutedIPv4());
         }
         public async Task<AppUserViewModel> GetUserDetailsByUserNameAsync(string Username)
         {
@@ -44,33 +44,38 @@ namespace FieldServiceManagement.Business.UserBusiness
             return result;
         }
 
-        public async Task<BusinessResult> SendUserInvitationAsync(UserInvitationViewModel model, string email, UserManager<ApplicationUser> userManager)
+        public Guid GetUserOrganisationIdByUserEmail(string Email)
         {
-            var existingUser = new UserRepository().GetByUserName(model.Email);
+            return new UserRepository().GetUserOrganisationIdByUserEmail(Email);
+        }
+
+        public async Task<BusinessResult> SendUserInvitationAsync(UserInvitationViewModel Model, string Email, UserManager<ApplicationUser> UserManager)
+        {
+            var existingUser = new UserRepository().GetByUserName(Model.Email);
             if (existingUser != null)
                 return BusinessResult.Fail("A user account already exists with this email address.");
 
-            var currentUser = await new UserBusiness().GetAllUserDetailsByUsernameAsync(email!);
+            var currentUser = await new UserBusiness().GetAllUserDetailsByUsernameAsync(Email!);
             var result = await new SubscriptionPlanBusiness().ApplySubscriptionPlanRules(currentUser, SubscriptionRuleContext.AddUser);
             if (!result.Success) return result;
 
             try
             {
                 var tempPass = GenerateTemporaryPassword();
-                var registerResult = await new AuthBusiness(userManager).RegisterUserAsync(model.Email, tempPass);
+                var registerResult = await new AuthBusiness(UserManager).RegisterUserAsync(Model.Email, tempPass);
                 if (!registerResult.Succeeded)
                     return BusinessResult.Fail(registerResult.Errors.FirstOrDefault()?.Description ?? "Failed to register user.");
 
                 var userInvitationBusiness = new UserInvitationBusiness();
-                var existingInvitation = userInvitationBusiness.CheckIfUserInvitationExistsByEmail(model.Email, currentUser.User.OrganisationId);
+                var existingInvitation = userInvitationBusiness.CheckIfUserInvitationExistsByEmail(Model.Email, currentUser.User.OrganisationId);
                 if (existingInvitation != null)
                     return BusinessResult.Fail("An invitation has already been sent to this email address for your organisation.");
-                userInvitationBusiness.CreateUserInvitationAsync(model, currentUser);
+                userInvitationBusiness.CreateUserInvitationAsync(Model, currentUser);
 
-                var createdUser = await InitiateUserProfile(model, currentUser, userManager);
+                var createdUser = await InitiateUserProfile(Model, currentUser, UserManager);
 
-                new ProfileAuditsBusiness().LogProfileAuditAsync(model, currentUser, createdUser!);
-                new InvitationNotification(currentUser, model, tempPass).SendNotificationWithoutQueue();
+                new ProfileAuditsBusiness().LogProfileAuditAsync(Model, currentUser, createdUser!);
+                new InvitationNotification(currentUser, Model, tempPass).SendNotificationWithoutQueue();
                 return BusinessResult.Ok();
             }
             catch (Exception ex)
@@ -88,7 +93,7 @@ namespace FieldServiceManagement.Business.UserBusiness
         public async Task<Guid?> UpdateUserAsync(AppUserViewModel Model, string Email)
         {
             var dbModel = ObjectMapper.Mapper.Map<AppUser>(Model);
-            dbModel.AvatarUrl = string.IsNullOrWhiteSpace(Model.AvatarUrl) ? $"https://ui-avatars.com/api/?name={Model.Name}+{Model.Surname}&background=random" : Model.AvatarUrl;
+            dbModel.AvatarUrl = AvatarHelper.GetAvatar(Model.Name, Model.Surname);
             return await new UserRepository().UpdateUserProfileAsync(dbModel, Email, new LocalIPResolver().GetRoutedIPv4()!);
         }
 
@@ -127,18 +132,31 @@ namespace FieldServiceManagement.Business.UserBusiness
             return Model;
         }
 
-        public async Task<List<string>> GetEmailsByRoleIdsAsync(List<int> roleIds)
+        public async Task<List<string>> GetEmailsByRoleIdsAsync(List<int> RoleIds)
         {
-            if (roleIds == null || !roleIds.Any())
+            if (RoleIds == null || !RoleIds.Any())
                 return new List<string>();
 
-            return await new UserRepository().GetEmailsByRoleIdsAsync(roleIds);
+            return await new UserRepository().GetEmailsByRoleIdsAsync(RoleIds);
+        }
+
+        public async Task<List<UserSearchResultViewModel>> SearchUsersAsync(string term, Guid organisationId)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return new List<UserSearchResultViewModel>();
+
+            if (!term.Equals("all", StringComparison.OrdinalIgnoreCase) && term.Length < 2)
+                return new List<UserSearchResultViewModel>();
+            
+            var results = await new UserRepository().SearchUsersAsync(term.Trim(), organisationId);
+
+            return ObjectMapper.Mapper.Map<List<UserSearchResultViewModel>>(results);
         }
 
         #region PRIVATE METHODS
-        public string GenerateTemporaryPassword(int length = 12)
+        public string GenerateTemporaryPassword(int Length = 12)
         {
-            if (length < 8)
+            if (Length < 8)
                 throw new ArgumentException("Password length must be at least 8 characters.");
 
             const string lower = "abcdefghijklmnopqrstuvwxyz";
@@ -148,7 +166,7 @@ namespace FieldServiceManagement.Business.UserBusiness
 
             string all = lower + upper + numbers + symbols;
 
-            var password = new char[length];
+            var password = new char[Length];
             var rng = RandomNumberGenerator.Create();
 
             password[0] = lower[GetRandomIndex(rng, lower.Length)];
@@ -156,40 +174,40 @@ namespace FieldServiceManagement.Business.UserBusiness
             password[2] = numbers[GetRandomIndex(rng, numbers.Length)];
             password[3] = symbols[GetRandomIndex(rng, symbols.Length)];
 
-            for (int i = 4; i < length; i++)
+            for (int i = 4; i < Length; i++)
             {
                 password[i] = all[GetRandomIndex(rng, all.Length)];
             }
             return new string(password.OrderBy(_ => GetRandomInt(rng)).ToArray());
         }
 
-        private int GetRandomIndex(RandomNumberGenerator rng, int max)
+        private int GetRandomIndex(RandomNumberGenerator Rng, int Max)
         {
-            return GetRandomInt(rng) % max;
+            return GetRandomInt(Rng) % Max;
         }
 
-        private int GetRandomInt(RandomNumberGenerator rng)
+        private int GetRandomInt(RandomNumberGenerator Rng)
         {
             var bytes = new byte[4];
-            rng.GetBytes(bytes);
+            Rng.GetBytes(bytes);
             return BitConverter.ToInt32(bytes, 0) & int.MaxValue;
         }
 
-        private static async Task<AppUser?> InitiateUserProfile(UserInvitationViewModel model, AppUserProfileViewModel currentUser, UserManager<ApplicationUser> userManager)
+        private static async Task<AppUser?> InitiateUserProfile(UserInvitationViewModel Model, AppUserProfileViewModel CurrentUser, UserManager<ApplicationUser> UserManager)
         {
-            var user = await userManager.FindByEmailAsync(model.Email);
+            var user = await UserManager.FindByEmailAsync(Model.Email);
             if(user == null)
                 return null;
 
             AppUser? createdUser = await new UserRepository().InsertAppUser(new AppUser
             {
-                OrganisationId = currentUser.User.OrganisationId,
-                Name = model.Name,
-                Surname = model.Surname,
-                Email = model.Email,
+                OrganisationId = CurrentUser.User.OrganisationId,
+                Name = Model.Name,
+                Surname = Model.Surname,
+                Email = Model.Email,
                 Phone = string.Empty,
                 AvatarUrl = string.Empty,
-                UserRoleId = model.UserType,
+                UserRoleId = Model.UserType,
                 IsActive = true,
                 StatusId = (int)UserStatus.Invited,
                 IsOwner = false,
@@ -197,10 +215,10 @@ namespace FieldServiceManagement.Business.UserBusiness
                 IsDeleted = false,
                 CreatedAt = DateTime.Now.SaDateTime(),
                 UpdatedAt = DateTime.Now.SaDateTime(),
-                CreatedById = currentUser.User.Id,
-                UpdatedById = currentUser.User.Id,
-                EmployeeNumber = model.EmployeeNumber,
-                SalutationId = model.SalutationId
+                CreatedById = CurrentUser.User.Id,
+                UpdatedById = CurrentUser.User.Id,
+                EmployeeNumber = Model.EmployeeNumber,
+                SalutationId = Model.SalutationId
             });
 
             return createdUser;

@@ -15,6 +15,7 @@ namespace FieldServiceManagement.Business.MappingBusiness.Profiles
             CreateMap<UserProfileAudit, UserProfileAuditViewModel>().ReverseMap();
             CreateMap<UserInvitation, UserInvitationViewModel>().ReverseMap();
             CreateMap<UserProfileDetails, UserProfileDetailsViewModel>().ReverseMap();
+            CreateMap<UserSearchResult, UserSearchResultViewModel>().ReverseMap();
         }
     }
 }

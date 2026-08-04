@@ -150,9 +150,9 @@
          @if (User.IsInRole("Administrator") || User.IsInRole("SuperAdmin"))
         {
             <div class="oc-sub-card">
-                <div class="sub-header">
+                <div class="sub-header align-items-center">
                     <h6>Subscription</h6>
-                    <span class="fsm-pill @(Model?.SubscriptionPlan?.Id == (int)SubscriptionPlanEnum.Free ? "bg-warning text-white" : "badge-paid")">@Model?.SubscriptionPlan?.Name</span>
+                    @await Html.PartialAsync("_PlanBadge", Model?.SubscriptionPlan?.Id, new ViewDataDictionary(ViewData) { { "Bubble", true } })
                 </div>
                 <div class="sub-stats">
                     <div class="stat-item">

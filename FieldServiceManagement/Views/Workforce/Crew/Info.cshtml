@@ -1,0 +1,1021 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
+@using FieldServiceManagement.Business.UserBusiness;
+@using FieldServiceManagement.Business.Configuration
+@model FieldServiceManagement.ViewModels.Crew.CrewFullProfileViewModel;
+
+@{
+    ViewData["Title"] = Model?.Name;
+    // TODO: replace with however the project actually surfaces the per-request CSP nonce
+    // (e.g. an injected ICspNonceService / HttpContext.Items["csp-nonce"]).
+    // A hardcoded nonce defeats the purpose of a nonce-based CSP.
+    var cspNonce = Context.Items.TryGetValue("csp-nonce", out var n) ? n?.ToString() : null;
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+           new BreadcrumbViewModel
+           {
+               ShowBack = true,
+               ShowHome = true,
+               Icon = "bi bi-people",
+               Items = new List<BreadcrumbItem>
+               {
+                   new() { Label = "Workforce", Url = null},
+                    new() { Label = "Crew",         Url = "/Workforce/Crew" },
+                    new() { Label = Model!.Name!, Url = null},
+               }
+           })
+    </div>
+
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel 
+rounded-2">
+                @await Html.PartialAsync("~/Views/Components/Partials/_CrewLeftPanel.cshtml", Model)
+            </div>
+
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
+            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+                <div class="fsm-tab-bar" id="fsm-crew-tab-bar">
+                    <div class="fsm-tab-track" id="fsm-crew-tab-track">
+                        <button class="fsm-tab active" data-tab="members" data-index="0"><i class="bi bi-people"></i> Members</button>
+                        <button class="fsm-tab" data-tab="timeline" data-index="1"><i class="bi bi-bezier2"></i> Timeline</button>
+                        @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString())) && Model.IsDeleted == false)
+                        {
+                            <button class="fsm-tab" data-tab="settings" data-index="2"><i class="bi bi-gear"></i> Settings</button>
+                        }
+                    </div>
+
+                    <div class="fsm-tab-more fsm-dropdown" id="fsm-crew-tab-more" style="display:none;">
+                        <button class="fsm-tab-more-btn nav-dropdown-toggle"
+                                id="fsm-crew-tab-more-btn"
+                                type="button"
+                                aria-expanded="false"
+                                aria-label="More tabs">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="fsm-dropdown-menu fsm-tab-more-menu show"
+                             id="fsm-crew-tab-more-menu"
+                             role="menu">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fsm-tab-content flex-grow-1 overflow-auto">
+                    <div class="fsm-tab-panel" data-panel="timeline">
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", Model.AuditLogs)
+                    </div>
+                    <div class="fsm-tab-panel p-0 active" data-panel="members">
+                        <div class="d-flex justify-content-between align-items-center py-1 pb-0 px-2 border-bottom border-fsm gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="position-relative" style="max-width:220px; max-height:40px;">
+                                    <i class="bi bi-search position-absolute" style="left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:#9ca3af;"></i>
+                                    <input type="text" id="members-search" class="form-control form-control-sm ps-4" placeholder="Search members..." />
+                                </div>
+                                <span class="text-muted small" id="members-count-label">@Model.Members.Count() member@(Model.Members.Count() == 1 ? "" : "s")</span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm my-0" role="group" aria-label="View toggle">
+                                    <button type="button" class="btn btn-secondary active" id="members-view-table" data-view="table"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="Table View"
+                                            data-bs-placement="top"
+                                            data-bs-custom-class="fsm-tooltip">
+                                        <i class="bi bi-list-ul"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="members-view-cards" data-view="cards"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="Card View"
+                                            data-bs-placement="top"
+                                            data-bs-custom-class="fsm-tooltip">
+                                        <i class="bi bi-grid-3x3-gap"></i>
+                                    </button>
+                                </div>
+
+                                @if (User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString()))
+                                {
+                                    <button class="btn-sm btn-primary my-0 mb-2" data-fsm-add-to-crew-trigger>
+                                        <i class="bi bi-person-plus"></i>
+                                        <span class="d-none d-md-inline"> Add Member</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <div id="members-empty-state" class="fsm-empty-state py-5 @(Model.Members.Any() ? "d-none" : "")">
+                            <div class="fsm-empty-icon"><i class="bi bi-people"></i></div>
+                            <h6 class="mb-1" id="members-empty-title">No members yet</h6>
+                            <p class="text-muted small mb-0" id="members-empty-sub">Add a user to this crew to get started.</p>
+                        </div>
+
+                        <div id="members-content" class="@(Model.Members.Any() ? "" : "d-none")">
+                            <!-- Table view -->
+                            <div id="members-table-view" class="members-view">
+                                <table class="table align-middle mb-0 fsm-table">
+                                    <thead>
+                                        <tr class="bg-secondary-subtle">
+                                            <th class="fsm-sortable cursor-pointer" data-sort="name">Name <i class="bi bi-arrow-down-up fsm-sort-icon"></i></th>
+                                            <th class="fsm-sortable cursor-pointer" data-sort="email">Email <i class="bi bi-arrow-down-up fsm-sort-icon"></i></th>
+                                            <th class="fsm-sortable cursor-pointer" data-sort="role">Role <i class="bi bi-arrow-down-up fsm-sort-icon"></i></th>
+                                            <th class="fsm-sortable cursor-pointer" data-sort="joined">Joined <i class="bi bi-arrow-down-up fsm-sort-icon"></i></th>
+                                            <th class="fsm-sortable cursor-pointer" data-sort="status">Status <i class="bi bi-arrow-down-up fsm-sort-icon"></i></th>
+                                            <th>Action(s)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="members-table-body">
+                                        @foreach (var member in Model.Members)
+                                        {
+                                            <tr data-name="@member.Name @member.Surname" data-email="@member.Email"
+                                                data-role="@(member.IsLead ? "Lead" : "Member")" data-joined="@member.JoinedAt.ToString("yyyy-MM-dd")"
+                                                data-status="@(member.UserIsActive ? "Active" : "Inactive")">
+                                                <td>
+                                                    <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(member.UserId.ToString()) })"
+                                                       class="d-flex align-items-center gap-2 text-decoration-none full-name-wrapper">
+                                                        <img src="@(
+                                                             string.IsNullOrWhiteSpace(member.AvatarUrl) ||
+                                                             member.AvatarUrl.StartsWith(AppSettings.AvatarBaseUrl, StringComparison.OrdinalIgnoreCase)
+                                                                ? AvatarHelper.GetAvatar(member.Name, member.Surname)
+                                                                : member.AvatarUrl
+                                                         )"
+                                                             alt="Avatar"
+                                                             class="fsm-avatar-sm" />
+                                                        <span class="fsm-user-name">@member.Name @member.Surname</span>
+                                                    </a>
+                                                </td>
+                                                <td>@member.Email</td>
+                                                <td>
+                                                    @if (member.IsLead)
+                                                    {
+                                                        <span class="fsm-tag fsm-tag--bubble fsm-tag--free">Lead</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="fsm-tag fsm-tag--bubble fsm-tag--professional">Member</span>
+                                                    }
+                                                </td>
+                                                <td>@member.JoinedAt.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    <span class="d-inline-flex align-items-center gap-1">
+                                                        <span class="fsm-status-dot @(member.UserIsActive ? "bg-success" : "bg-secondary")"></span>
+                                                        <span class="small">@(member.UserIsActive ? "Active" : "Inactive")</span>
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2 text-danger small"
+                                                         role="button"
+                                                         data-member-remove-trigger
+                                                         data-user-id="@member.UserId"
+                                                         data-user-name="@member.Name @member.Surname"
+                                                         data-crew-name="@Model.Name"
+                                                         data-is-lead="@member.IsLead.ToString().ToLowerInvariant()">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </div> 
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Card view -->
+                            <div id="members-card-view" class="members-view d-none px-2 py-3">
+                                <div class="row g-3" id="members-card-body">
+                                    @foreach (var member in Model.Members)
+                                    {
+                                        <div class="col-12 col-sm-6 col-lg-4 members-card-item"
+                                             data-name="@member.Name @member.Surname" data-email="@member.Email"
+                                             data-role="@(member.IsLead ? "Lead" : "Member")" data-joined="@member.JoinedAt.ToString("yyyy-MM-dd")"
+                                             data-status="@(member.UserIsActive ? "Active" : "Inactive")"
+                                        >
+                                            <div class="border rounded-2 p-2 h-100 position-relative">
+                                                <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(member.UserId.ToString()) })"
+                                                   class="text-decoration-none text-reset d-block">
+                                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                                        <img src="@(
+                                                             string.IsNullOrWhiteSpace(member.AvatarUrl) ||
+                                                             member.AvatarUrl.StartsWith(AppSettings.AvatarBaseUrl, StringComparison.OrdinalIgnoreCase)
+                                                                ? AvatarHelper.GetAvatar(member.Name, member.Surname)
+                                                                : member.AvatarUrl
+                                                         )"
+                                                                alt="Avatar" class="fsm-avatar-lg" />
+                                                        <div class="d-flex flex-column">
+                                                            <span class="text-black fw-medium">@member.Name @member.Surname</span>
+                                                            <span class="text-muted small">@member.Email</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center justify-content-between mt-2">
+                                                        @if (member.IsLead)
+                                                        {
+                                                            <span class="fsm-tag fsm-tag--bubble fsm-tag--free">Lead</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="fsm-tag fsm-tag--bubble fsm-tag--professional">Member</span>
+                                                        }
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between align-items-start mt-3">
+                                                        <p class="text-muted small mb-0 mt-2">Joined @member.JoinedAt.ToString("MMM dd, yyyy")</p>
+
+                                                        <span class="d-inline-flex align-items-center gap-1">
+                                                            <span class="fsm-status-dot @(member.UserIsActive ? "bg-success" : "bg-secondary")"></span>
+                                                            <span class="small text-muted">@(member.UserIsActive ? "Active" : "Inactive")</span>
+                                                        </span>
+                                                    </div>
+                                                </a>
+
+                                                <button type="button" class="btn btn-link p-0 text-danger position-absolute top-0 end-0 m-3"
+                                                        data-member-remove-trigger
+                                                        data-user-id="@member.UserId"
+                                                        data-user-name="@member.Name @member.Surname"
+                                                        data-crew-name="@Model.Name"
+                                                        data-is-lead="@member.IsLead.ToString().ToLowerInvariant()"
+                                                >
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="members-no-results" class="fsm-empty-state py-5 d-none">
+                            <div class="fsm-empty-icon"><i class="bi bi-search"></i></div>
+                            <h6 class="mb-1">No matches found</h6>
+                            <p class="text-muted small mb-0">Try a different search term.</p>
+                        </div>
+                    </div>
+                     @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString())) && Model.IsDeleted == false)
+                     {
+                        <div class="fsm-tab-panel p-0 h-100" data-panel="settings">
+                            <div class="flex-grow-1 h-100 w-100 bg-white rounded-2 overflow-hidden d-flex">
+                                <div class="fsm-tab-bar-vertical" id="fsm-crew-settings-tab-bar">
+                                    <div class="fsm-tab-track-vertical" id="fsm-crew-settings-tab-track">
+                                        <button class="fsm-tab-vertical active" data-tab="details" data-index="0">Manage Details</button>
+                                        <button class="fsm-tab-vertical" data-tab="lead" data-index="1">Manage Lead</button>
+                                        <button class="fsm-tab-vertical" data-tab="delete" data-index="2">Delete Crew</button>
+                                    </div>
+
+                                    <div class="fsm-tab-more-vertical fsm-dropdown" id="fsm-crew-settings-tab-more" style="display:none;">
+                                        <button class="fsm-tab-more-btn-vertical nav-dropdown-toggle"
+                                                id="fsm-crew-settings-tab-more-btn"
+                                                type="button"
+                                                aria-expanded="false"
+                                                aria-label="More tabs">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <div class="fsm-dropdown-menu fsm-tab-more-menu-vertical show"
+                                             id="fsm-crew-settings-tab-more-menu"
+                                             role="menu">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="fsm-tab-content-vertical flex-grow-1 overflow-auto h-100">
+                                    <div class="fsm-tab-panel-vertical active h-100 p-0" data-panel="details">
+                                        @using (Html.BeginForm("Edit", "Crew", new { area = "" }, FormMethod.Post, null, new { id = "edit-crew-form", style = "display:flex;flex-direction:column;flex:1;overflow:hidden;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            @Html.HiddenFor(m => m.Id)
+                                            @Html.HiddenFor(m => m.OrganisationId)
+                                            @Html.HiddenFor(m => m.IsDeleted)
+                                            @Html.HiddenFor(m => m.CreatedAt)
+
+                                            <div style="flex:1;overflow-y:auto;padding:0px 14px;" class="my-3 h-100">
+
+                                                @if (!ViewData.ModelState.IsValid)
+                                                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    
+
+                                                <div class="row g-3">
+                                                    <!-- Name -->
+                                                    <div class="col-12 col-md-8">
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                                                            <span class="text-danger mt-2">*</span>
+                                                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "E.g., Installation Team A" })
+                                                            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Crew Size -->
+                                                    <div class="col-12 col-md-4">
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(m => m.CrewSize, new { @class = "form-label" })
+                                                            @Html.TextBoxFor(m => m.CrewSize, new { @class = "form-control", type = "number", min = "0", @placeholder = "E.g., 4" })
+                                                            @Html.ValidationMessageFor(m => m.CrewSize, "", new { @class = "field-error" })
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Description -->
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(m => m.Description, new { @class = "form-label" })
+                                                            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4", @placeholder = "Optional description of this crew's role or focus area" })
+                                                            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "field-error" })
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <div class="mt-2 d-flex gap-1 align-items-center">
+                                                                <label for="IsActive">IsActive?</label>
+                                                                @Html.CheckBoxFor(model => model.IsActive, new
+                                                                {
+                                                                    id = "IsActive",
+                                                                    @class = "",
+                                                                    data_toggle = "switch",
+                                                                    data_size = "mini",
+                                                                    data_handle_width = "2",
+                                                                    data_on_text = "Yes",
+                                                                    data_off_text = "No"
+                                                                })
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="fsm-form-footer mb-0">
+                                                <button type="submit" id="save-crew-details-btn" class="btn btn-primary btn-xs mb-0" data-loading-text="Saving" data-spinner-size="spinner-xs">
+                                                    Save changes
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="fsm-tab-panel-vertical h-100 p-0" data-panel="lead">
+                                        <form id="change-lead-form" action="@Url.Action("ChangeLead", "Crew")" method="post" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="CrewId" value="@Model.Id" />
+
+                                            <div style="flex:1;overflow-y:auto;padding:0px 14px;" class="my-3 h-100">
+
+                                                @{
+                                                    var currentLead = Model.Members.FirstOrDefault(m => m.IsLead);
+                                                }
+
+                                                @if (currentLead != null)
+                                                {
+                                                    <div class="d-flex flex-column align-items-start mb-2 mx-2">
+                                                        <span class="mt-2">Current lead</span>
+
+                                                        <div class="d-flex align-items-center gap-2 border rounded-2 p-2 w-100 mt-1">
+                                                            <img src="@(
+                                                                 string.IsNullOrWhiteSpace(currentLead.AvatarUrl) ||
+                                                                 currentLead.AvatarUrl.StartsWith(AppSettings.AvatarBaseUrl, StringComparison.OrdinalIgnoreCase)
+                                                                    ? AvatarHelper.GetAvatar(currentLead.Name, currentLead.Surname)
+                                                                    : currentLead.AvatarUrl
+                                                                                                                                     )"
+                                                                 alt="Avatar"
+                                                                 class="fsm-avatar-lg" />
+                                                            <div class="d-flex flex-column">
+                                                                <span class="fsm-user-name">@currentLead.Name @currentLead.Surname</span>
+                                                                <span class="text-muted small">@currentLead.Email</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex flex-column align-items-start mb-2 mx-2">
+                                                        <span class="mt-2 text-muted small">No lead assigned yet.</span>
+                                                    </div>
+                                                }
+
+                                                <div class="d-flex flex-column align-items-start mb-2 mx-2">
+                                                    <span class="d-flex align-items-center mt-2 gap-2">User <span class="text-danger">*</span></span>
+
+                                                    <select class="dialog-select w-100" id="user-select" name="UserId">
+                                                        <option value="">Search for a user...</option>
+                                                    </select>
+
+                                                    <div class="mt-1 d-none" id="no-users-found-lead">
+                                                        <span class="small text-muted">No users found.</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="bd-callout bd-callout-info my-0 p-1 bg-opacity-10 mb-3 mt-2 mx-2">
+                                                    <span class="smaller">
+                                                        <i class="bi bi-info-circle fw-semibold ms-1"></i> Type <strong>All</strong> to display all users.
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="fsm-form-footer mb-0">
+                                                <button type="submit" id="save-crew-lead-btn" class="btn btn-primary btn-xs mb-0" data-loading-text="Saving" data-spinner-size="spinner-xs">
+                                                    Change lead
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="fsm-tab-panel-vertical h-100 p-0" data-panel="delete">
+                                        <div style="flex:1;overflow-y:auto;padding:0px 14px;" class="my-3 h-100">
+
+                                            <div class="d-flex flex-column align-items-start mb-2 mx-2">
+                                                <span class="fw-semibold mt-2">Delete this crew</span>
+                                                <span class="text-muted small mt-1">
+                                                    This will permanently remove the crew, its members, and any associated records. This action cannot be undone.
+                                                </span>
+                                            </div>
+
+                                            <div class="bd-callout bd-callout-danger my-0 p-1 bg-opacity-10 mb-3 mt-2 mx-2">
+                                                <span class="smaller">
+                                                    <i class="bi bi-exclamation-triangle fw-semibold ms-1"></i> Members assigned to this crew will need to be reassigned before deletion.
+                                                </span>
+                                            </div>
+
+                                            <div class="mx-2">
+                                                <button class="btn-sm delete text-white"
+                                                        data-bs-toggle="tooltip" data-bs-title="Delete"
+                                                        data-bs-placement="bottom"
+                                                        data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                                                        data-fsm-delete-trigger>
+                                                    <i class="bi bi-trash"></i>
+                                                    <span class="d-none d-md-inline"> Delete @AppSettings.AppName Organisation</span>
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="fsm-member-remove-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="remove-member-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="remove-member-title" class="dialog-title">Remove User</p>
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Removal Confirmation Required</p>
+                <p class="warn-sub">
+                    Are you sure you want to remove
+                    <strong id="fsm-user-name"></strong>
+                    from
+                    <strong id="fsm-crew-name"></strong>?
+                </p>
+            </div>
+        </div>
+
+        <div id="fsm-lead-warning"
+             class="bd-callout bd-callout-warning d-none my-0 p-1 bg-opacity-10 mb-0 mt-2 mx-2">
+            <span class="smaller">        <i class="bi bi-exclamation-triangle fw-semibold ms-1"></i> This member is the current crew lead. Removing them will leave the crew without a lead.</span>
+        </div>
+
+        <div class="dialog-body">
+            Select <strong>Remove</strong> to remove this user, or Select <strong>Cancel</strong> to exist with no changes.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            Failed to delete this user, Please try again. <button class="read-more-btn text-black small">Read more</button>
+        </div>
+
+        <!--
+            NOTE: this previously posted to asp-controller="Settings" asp-action="Delete", which does not
+            belong to crew-member management. Pointed it at Crew/RemoveMember — confirm this matches the
+            actual action name/route on CrewController before shipping.
+        -->
+        <form id="fsm-delete-form" asp-controller="Crew" asp-action="RemoveMember" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="userId" id="fsm-delete-user-id">
+            <input type="hidden" name="crewId" value="@Model.Id">
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-member-remove-cancel>Cancel</button>
+                <button type="submit" class="btn btn-danger btn-sm mt-1" id="fsm-remove-confirm">
+                    Remove
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">Crew Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 overflow-y-auto">
+        @await Html.PartialAsync("~/Views/Components/Partials/_CrewLeftPanel.cshtml", Model)
+    </div>
+</div>
+
+<div id="fsm-delete-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-crew-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="delete-crew-title" class="dialog-title">Delete Crew</p>
+
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Delete Confirmation Required</p>
+                <p class="warn-sub">Are you sure you want to permanently delete the crew <strong>@Model.Name</strong>?</p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            This deletion is <strong>irreversible</strong>. Please select <strong>Delete Crew</strong> to proceed, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="fsm-delete-crew-error">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            <span id="fsm-delete-crew-error-text">Failed to delete this crew. Please try again.</span>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+            <!--
+                NOTE: this button previously had no click handler at all — "Delete Crew" was a dead button.
+                Wired it to a fetch POST below. Confirm "/Workforce/Crew/Delete" is the real route/action.
+            -->
+            <button class="btn-confirm" id="fsm-delete-confirm" data-loading-text="Deleting">
+                Delete Crew
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="fsm-add-member-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="add-member-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+
+        <p id="add-member-title" class="dialog-title">Add Member to Crew</p>
+
+        <div class="dialog-info">
+            <div class="warn-icon">
+                <i class="bi bi-people"></i>
+            </div>
+
+            <div class="warn-text">
+                <p>Crew Assignment</p>
+
+                <p class="warn-sub">
+                    Select a user to add to
+                    <strong>@Model.Name</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column align-items-start mb-2 mx-2">
+            <span class="d-flex align-items-center mt-2 gap-2">User <span class="text-danger">*</span></span>
+
+            <select class="dialog-select w-100" id="user-dialog-select">
+                <option value="">Search for a user...</option>
+            </select>
+
+            <div class="mt-1 d-none" id="no-users-found-add">
+                <span class="small text-muted">No users found.</span>
+            </div>
+        </div>
+
+        <div class="bd-callout bd-callout-info my-0 p-1 bg-opacity-10 mb-3 mt-2 mx-2">
+            <span class="smaller">
+                <i class="bi bi-info-circle fw-semibold ms-1"></i> Type <strong>All</strong> to display all users.
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mx-2 mb-2">
+            <label for="is-lead-toggle" class="mb-0">Assign as crew lead?</label>
+            <input id="is-lead-toggle"
+                   type="checkbox"
+                   data-toggle="switch"
+                   data-size="mini"
+                   data-handle-width="2"
+                   data-on-text="Yes"
+                   data-off-text="No" />
+        </div>
+
+        <div class="bd-callout bd-callout-warning my-0 p-1 bg-opacity-10 mb-2 mx-2 d-none" id="lead-override-note">
+            <span class="smaller">
+                <i class="bi bi-exclamation-triangle fw-semibold ms-1"></i>
+                This will replace the current crew lead. Only one member can be lead at a time.
+            </span>
+        </div>
+
+        <div class="dialog-body">
+            Select <strong>Add to Crew</strong> to continue, or
+            <strong>Cancel</strong> to close this dialog without making any changes.
+        </div>
+
+        <div class="bg-primary-subtle text-black small p-1 px-2 d-flex align-items-start gap-2 d-none" id="fsm-add-member-results">
+            <i class="bi bi-check-circle-fill text-primary d-none" id="success-icn"></i>
+            <i class="bi bi-exclamation-circle-fill text-danger d-none" id="error-icn"></i>
+            <span id="fsm-add-member-message"></span>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-add-member-cancel>
+                Cancel
+            </button>
+
+            <button class="btn-confirm" type="button" id="fsm-add-member-confirm" data-loading-text="Adding to crew">
+                <span class="spinner-border spinner-border-sm text-light d-none" aria-hidden="true" id="loader"></span>
+                <span role="status" id="loading-text" class="d-none">Adding to crew...</span>    
+                <span class="btn-text" id="btn-text">Add to Crew</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript" nonce="@cspNonce">
+        (function () {
+            'use strict';
+
+            // ---------------------------------------------------------------
+            // Members: table/card view toggle (persisted per-user, per-crew)
+            // ---------------------------------------------------------------
+            function hashString(str) {
+                let hash = 5381;
+                for (let i = 0; i < str.length; i++) {
+                    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+                    hash = hash & hash;
+                }
+                return (hash >>> 0).toString(36);
+            }
+
+            function getUserKey() {
+                const raw = (document.body?.dataset?.userKey || 'anonymous').trim().toLowerCase();
+                return raw === 'anonymous' ? raw : hashString(raw);
+            }
+
+            const tableBtn = document.getElementById('members-view-table');
+            const cardsBtn = document.getElementById('members-view-cards');
+            const tableView = document.getElementById('members-table-view');
+            const cardView = document.getElementById('members-card-view');
+            const VIEW_STORAGE_KEY = `fsm-members-view-${getUserKey()}`;
+
+            function applyView(view) {
+                if (view === 'cards') {
+                    cardsBtn?.classList.add('active');
+                    tableBtn?.classList.remove('active');
+                    cardView?.classList.remove('d-none');
+                    tableView?.classList.add('d-none');
+                } else {
+                    tableBtn?.classList.add('active');
+                    cardsBtn?.classList.remove('active');
+                    tableView?.classList.remove('d-none');
+                    cardView?.classList.add('d-none');
+                }
+            }
+
+            function setView(view) {
+                applyView(view);
+                try {
+                    localStorage.setItem(VIEW_STORAGE_KEY, view);
+                } catch (e) {
+                    // localStorage unavailable (private browsing, quota, etc.) — fail silently, view still applied for this session
+                }
+            }
+
+            if (tableBtn && cardsBtn) {
+                tableBtn.addEventListener('click', () => setView('table'));
+                cardsBtn.addEventListener('click', () => setView('cards'));
+
+                let savedView = 'table';
+                try {
+                    savedView = localStorage.getItem(VIEW_STORAGE_KEY) || 'table';
+                } catch (e) {
+                    // localStorage unavailable — default to table
+                }
+                applyView(savedView);
+            }
+
+            // ---------------------------------------------------------------
+            // Members: search + sort
+            // ---------------------------------------------------------------
+            const searchInput = document.getElementById('members-search');
+            const tableRows = Array.from(document.querySelectorAll('#members-table-body tr'));
+            const cardItems = Array.from(document.querySelectorAll('.members-card-item'));
+            const noResults = document.getElementById('members-no-results');
+            const membersContent = document.getElementById('members-content');
+            const countLabel = document.getElementById('members-count-label');
+            const sortHeaders = document.querySelectorAll('.fsm-sortable');
+
+            if (searchInput && (tableRows.length || cardItems.length)) {
+                let currentSort = { key: null, dir: 1 };
+
+                function applyFilterAndSort() {
+                    const term = searchInput.value.trim().toLowerCase();
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        const haystack = `${row.dataset.name} ${row.dataset.email}`.toLowerCase();
+                        const match = !term || haystack.includes(term);
+                        row.style.display = match ? '' : 'none';
+                        if (match) visibleCount++;
+                    });
+
+                    cardItems.forEach(card => {
+                        const haystack = `${card.dataset.name} ${card.dataset.email}`.toLowerCase();
+                        const match = !term || haystack.includes(term);
+                        card.style.display = match ? '' : 'none';
+                    });
+
+                    if (currentSort.key) {
+                        const tbody = document.getElementById('members-table-body');
+                        const sorted = [...tableRows].sort((a, b) => {
+                            const aVal = a.dataset[currentSort.key] || '';
+                            const bVal = b.dataset[currentSort.key] || '';
+                            return aVal.localeCompare(bVal, undefined, { numeric: true }) * currentSort.dir;
+                        });
+                        sorted.forEach(row => tbody?.appendChild(row));
+
+                        const cardBody = document.getElementById('members-card-body');
+                        const sortedCards = [...cardItems].sort((a, b) => {
+                            const aVal = a.dataset[currentSort.key] || '';
+                            const bVal = b.dataset[currentSort.key] || '';
+                            return aVal.localeCompare(bVal, undefined, { numeric: true }) * currentSort.dir;
+                        });
+                        sortedCards.forEach(card => cardBody?.appendChild(card));
+                    }
+
+                    if (countLabel) {
+                        countLabel.textContent = `${visibleCount} member${visibleCount === 1 ? '' : 's'}`;
+                    }
+
+                    if (visibleCount === 0 && term) {
+                        noResults?.classList.remove('d-none');
+                        membersContent?.classList.add('d-none');
+                    } else {
+                        noResults?.classList.add('d-none');
+                        membersContent?.classList.remove('d-none');
+                    }
+                }
+
+                searchInput.addEventListener('input', applyFilterAndSort);
+
+                sortHeaders.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const key = header.dataset.sort;
+
+                        if (currentSort.key === key) {
+                            currentSort.dir *= -1;
+                        } else {
+                            currentSort.key = key;
+                            currentSort.dir = 1;
+                        }
+
+                        sortHeaders.forEach(h => h.classList.remove('fsm-sort-asc', 'fsm-sort-desc'));
+                        header.classList.add(currentSort.dir === 1 ? 'fsm-sort-asc' : 'fsm-sort-desc');
+
+                        applyFilterAndSort();
+                    });
+                });
+            }
+
+            // ---------------------------------------------------------------
+            // Dialogs: open/close wiring
+            // ---------------------------------------------------------------
+            const deleteDialog = document.getElementById('fsm-delete-dialog');
+            document.querySelectorAll('[data-fsm-delete-trigger]').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteDialog?.classList.add('show');
+            }));
+            document.querySelectorAll('[data-fsm-delete-cancel]').forEach(btn => btn.addEventListener('click', () => {
+                deleteDialog?.classList.remove('show');
+            }));
+
+            const memberRemoveDialog = document.getElementById('fsm-member-remove-dialog');
+            document.querySelectorAll('[data-member-remove-trigger]').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('fsm-user-name').textContent = btn.dataset.userName;
+                document.getElementById('fsm-crew-name').textContent = btn.dataset.crewName;
+                document.getElementById('fsm-delete-user-id').value = btn.dataset.userId;
+
+                const isLead = btn.dataset.isLead === 'true';
+                document.getElementById('fsm-lead-warning').classList.toggle('d-none', !isLead);
+                document.getElementById('fsm-remove-confirm').disabled = isLead;
+                memberRemoveDialog?.classList.add('show');
+            }));
+            document.querySelectorAll('[data-member-remove-cancel]').forEach(btn => btn.addEventListener('click', () => {
+                memberRemoveDialog?.classList.remove('show');
+            }));
+
+            const addMemberDialog = document.getElementById('fsm-add-member-dialog');
+            document.querySelectorAll('[data-fsm-add-to-crew-trigger]').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addMemberDialog?.classList.add('show');
+            }));
+            document.querySelectorAll('[data-fsm-add-member-cancel]').forEach(btn => btn.addEventListener('click', () => {
+                addMemberDialog?.classList.remove('show');
+            }));
+
+            // ---------------------------------------------------------------
+            // Delete crew: this button previously had NO handler at all.
+            // ---------------------------------------------------------------
+            const deleteConfirmBtn = document.getElementById('fsm-delete-confirm');
+            const deleteErrorBox = document.getElementById('fsm-delete-crew-error');
+            const deleteErrorText = document.getElementById('fsm-delete-crew-error-text');
+
+            deleteConfirmBtn?.addEventListener('click', async function () {
+                const btn = this;
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = btn.dataset.loadingText || 'Deleting...';
+                deleteErrorBox?.classList.add('d-none');
+
+                try {
+                    const res = await fetch('/Workforce/Crew/Delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ crewId: '@Model.Id' })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        window.location.href = '/Workforce/Crew';
+                        return;
+                    }
+
+                    if (deleteErrorText) {
+                        deleteErrorText.textContent = data.errorMessage || 'Failed to delete this crew. Please try again.';
+                    }
+                    deleteErrorBox?.classList.remove('d-none');
+                } catch (err) {
+                    if (deleteErrorText) {
+                        deleteErrorText.textContent = 'Something went wrong. Please try again.';
+                    }
+                    deleteErrorBox?.classList.remove('d-none');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            });
+
+            // ---------------------------------------------------------------
+            // User search (Choices.js) — shared between "Change Lead" select
+            // and "Add Member" dialog select. Previously duplicated verbatim
+            // with a shared debounce timer and a colliding #no-users-found id.
+            // ---------------------------------------------------------------
+            function initUserChoices(selectId, notFoundId) {
+                const el = document.getElementById(selectId);
+                if (!el) return null;
+
+                const choices = new Choices(el, {
+                    searchEnabled: true,
+                    searchPlaceholderValue: 'Search users...',
+                    itemSelectText: '',
+                    shouldSort: false,
+                    removeItemButton: true,
+                    noResultsText: 'No users found',
+                    noChoicesText: 'Type to search users',
+                    loadingText: 'Loading...',
+                });
+
+                let searchTimeout;
+                el.addEventListener('search', function (e) {
+                    clearTimeout(searchTimeout);
+                    const term = e.detail.value;
+                    const notFoundEl = document.getElementById(notFoundId);
+
+                    searchTimeout = setTimeout(async () => {
+                        if (!term || term.length < 2) return;
+
+                        try {
+                            const res = await fetch(`/Search/GetUser?term=${encodeURIComponent(term)}`);
+                            const users = await res.json();
+
+                            choices.clearChoices();
+
+                            if (!users.length) {
+                                notFoundEl?.classList.remove('d-none');
+                                return;
+                            }
+
+                            notFoundEl?.classList.add('d-none');
+                            choices.setChoices(
+                                users.map(u => ({ value: u.id, label: u.name })),
+                                'value',
+                                'label',
+                                true
+                            );
+                        } catch (err) {
+                            console.error('User search failed:', err);
+                        }
+                    }, 300);
+                });
+
+                return choices;
+            }
+
+            initUserChoices('user-select', 'no-users-found-lead');
+            const userDialogChoices = initUserChoices('user-dialog-select', 'no-users-found-add');
+
+            // ---------------------------------------------------------------
+            // Add member dialog
+            // ---------------------------------------------------------------
+            const currentCrewHasLead = @Json.Serialize(Model.Members.Any(m => m.IsLead));
+
+            $(function () {
+                $('#is-lead-toggle').bootstrapSwitch();
+
+                $('#is-lead-toggle').on('switchChange.bootstrapSwitch', function (e, state) {
+                    const note = document.getElementById('lead-override-note');
+                    if (state && currentCrewHasLead) {
+                        note.classList.remove('d-none');
+                    } else {
+                        note.classList.add('d-none');
+                    }
+                });
+            });
+
+            document.getElementById('fsm-add-member-confirm')?.addEventListener('click', async function () {
+                const userId = document.getElementById('user-dialog-select').value;
+                const isLead = $('#is-lead-toggle').bootstrapSwitch('state');
+                const crewId = '@Model.Id';
+
+                const resultsBox = document.getElementById('fsm-add-member-results');
+                const successIcn = document.getElementById('success-icn');
+                const errorIcn = document.getElementById('error-icn');
+                const resultMessage = document.getElementById('fsm-add-member-message');
+                const loader = document.getElementById('loader');
+                const loadingText = document.getElementById('loading-text');
+                const btnText = document.getElementById('btn-text');
+
+                function showError(message) {
+                    resultsBox.classList.remove('d-none');
+                    errorIcn.classList.remove('d-none');
+                    successIcn.classList.add('d-none');
+                    resultsBox.classList.remove('bg-primary-subtle');
+                    resultsBox.classList.add('bg-danger-subtle');
+                    resultMessage.textContent = message;
+                    loader.classList.add('d-none');
+                    loadingText.classList.add('d-none');
+                    btnText.classList.remove('d-none');
+                }
+
+                if (!userId) {
+                    showError('Please select a user.');
+                    return;
+                }
+
+                const btn = this;
+                btn.disabled = true;
+                loader.classList.remove('d-none');
+                loadingText.classList.remove('d-none');
+                btnText.classList.add('d-none');
+
+                try {
+                    const res = await fetch('/Workforce/Crew/AddMember', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, crewId, isLead })
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        resultsBox.classList.remove('d-none');
+                        successIcn.classList.remove('d-none');
+                        errorIcn.classList.add('d-none');
+                        loader.classList.add('d-none');
+                        loadingText.classList.add('d-none');
+                        resultMessage.textContent = 'User added to crew successfully.';
+                        setTimeout(() => location.reload(), 1200);
+                    } else {
+                        showError(data.errorMessage || 'Failed to add user to crew.');
+                    }
+                } catch (err) {
+                    showError('Something went wrong. Please try again.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            });
+        })();
+    </script>
+}

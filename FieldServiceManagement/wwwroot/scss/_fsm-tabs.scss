@@ -1,0 +1,289 @@
+﻿
+// ── Tab bar ───────────────────────────────────────────────────────────────────
+.fsm-tab-bar {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.fsm-tab-track {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.fsm-tab {
+    position: relative;
+    padding: 0 16px;
+    height: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s;
+
+    &:hover {
+        color: #111;
+    }
+
+    &.active {
+        color: #059669;
+        border-bottom-color: #059669;
+        font-weight: 600;
+    }
+}
+
+// ── More dropdown ─────────────────────────────────────────────────────────────
+.fsm-tab-more {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 4px;
+    border-left: 1px solid #f0f0f0;
+}
+
+.fsm-tab-more-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 0.12s;
+
+    &:hover {
+        background: #f3f4f6;
+        color: #111;
+    }
+
+    &[aria-expanded="true"] {
+        background: #f3f4f6;
+        color: #111;
+    }
+}
+
+.fsm-tab-more-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 1000;
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: none;
+
+    &.show {
+        display: block;
+    }
+
+    button {
+        display: block;
+        width: 100%;
+        padding: 8px 14px;
+        font-size: 13px;
+        text-align: left;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #212529;
+        transition: background 0.1s;
+
+        &:hover {
+            background: #f9fafb;
+        }
+
+        &.active {
+            background: rgba(5,150,105,0.08);
+            color: #059669;
+            font-weight: 500;
+        }
+    }
+}
+
+// ── Tab panels ────────────────────────────────────────────────────────────────
+.fsm-tab-content {
+    position: relative;
+}
+
+.fsm-tab-panel {
+    display: none;
+    padding: 16px;
+
+    &.active {
+        display: block;
+    }
+}
+
+
+
+
+.fsm-tab-bar-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border-right: 1px solid #e5e7eb;
+    background: #fff;
+    overflow: hidden;
+    flex-shrink: 0;
+    width: 200px;
+    height: 100%;
+    min-height: 0; // ← add
+    border-radius: 0px;
+}
+
+.fsm-tab-track-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0; // already had this — good
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.fsm-tab-vertical {
+    position: relative;
+    padding: 0 16px;
+    height: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.15s, background 0.12s;
+
+    &:hover {
+        color: #111;
+        background: #f9fafb;
+    }
+
+    &.active {
+        color: #059669;
+        border-left-color: #059669;
+        background: rgba(5, 150, 105, 0.06);
+        font-weight: 600;
+    }
+}
+
+// ── More dropdown (vertical) ────────────────────────────────────────────────────
+.fsm-tab-more-vertical {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 4px 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.fsm-tab-more-btn-vertical {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 0px;
+    cursor: pointer;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 0.12s;
+
+    &:hover {
+        background: #f3f4f6;
+        color: #111;
+    }
+
+    &[aria-expanded="true"] {
+        background: #f3f4f6;
+        color: #111;
+    }
+}
+
+.fsm-tab-more-menu-vertical {
+    position: absolute;
+    bottom: 0;
+    left: calc(100% + 4px);
+    z-index: 1000;
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: none;
+
+    &.show {
+        display: block;
+    }
+
+    button {
+        display: block;
+        width: 100%;
+        padding: 8px 14px;
+        font-size: 13px;
+        text-align: left;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #212529;
+        transition: background 0.1s;
+
+        &:hover {
+            background: #f9fafb;
+        }
+
+        &.active {
+            background: rgba(5, 150, 105, 0.08);
+            color: #059669;
+            font-weight: 500;
+        }
+    }
+}
+
+// ── Tab panels (shared — no change needed) ───────────────────────────────────────
+.fsm-tab-content-vertical {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.fsm-tab-panel-vertical {
+    display: none;
+    padding: 16px;
+
+    &.active {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+}

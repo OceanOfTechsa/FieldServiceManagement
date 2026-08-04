@@ -1,7 +1,6 @@
-﻿@using System.Text.RegularExpressions
-@using FieldServiceManagement.Business.URLEncryptionBusiness
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
-
+@using FieldServiceManagement.ViewModels.Shared
 @model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
 
 @{
@@ -10,112 +9,47 @@
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
-        <div class="d-flex gap-2 align-items-center">
-            @* <img src="@(string.IsNullOrWhiteSpace(Model.User.AvatarUrl)
-                  ? $"https://ui-avatars.com/api/?name={Model.User.Name + ' ' + Model.User.Surname}&background=random"
-                  : Model.User.AvatarUrl)"
-                 alt="Avatar"
-                 class="fsm-avatar-lg" /> *@
-
-            <div class="d-flex flex-column">
-                <div class="d-flex align-items-start gap-1">
-                    <a href="@Url.Action("Index", "Users")" class="text-primary">Users</a>
-                    <i class="bi bi-arrow-return-right fs-6"></i>
-                    <span>@Model.User.Name @Model.User.Surname</span>
-                </div>
-
-                <div class="d-flex align-items-center gap-2">
-                    @{
-                        var status = (UserStatus)(Model.User.StatusId ?? (int)UserStatus.InActive);
-
-                        string statusColor = status switch
-                        {
-                            UserStatus.Active   => "fsm-status--active",
-                            UserStatus.Invited  => "fsm-status--invited",
-                            UserStatus.InActive => "fsm-status--inactive",
-                            UserStatus.Deleted  => "fsm-status--deleted",
-                            _                   => "fsm-status--inactive"
-                        };
-
-                        string label = status.ToString();
-
-                        string iconSvg = status switch
-                        {
-                            UserStatus.Active => @"
-                                <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'>
-                                    <polyline points='2 8 6 12 14 4'/>
-                                </svg>",
-                            UserStatus.Invited => @"
-                                <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'>
-                                    <circle cx='8' cy='8' r='6'/>
-                                    <polyline points='8 5 8 8 10.5 8'/>
-                                </svg>",
-                            UserStatus.InActive => @"
-                                <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round'>
-                                    <line x1='4' y1='8' x2='12' y2='8'/>
-                                </svg>",
-                            UserStatus.Deleted => @"
-                                <svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'>
-                                    <polyline points='2 4 4 4 14 4'/>
-                                    <path d='M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1'/>
-                                    <path d='M6 7v5M10 7v5'/>
-                                    <path d='M4 4l1 9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1l1-9'/>
-                                </svg>",
-                            _ => ""
-                        };
-
-                        var roleDisplay = ((UserRole?)Model.User.UserRoleId)?.GetNormalisedDisplayName() ?? "Unknown";
-                    }
-
-                    <div class="fsm-user-meta d-none d-md-inline-flex">
-                        <span class="fsm-meta-item d-none d-md-inline-flex @statusColor">
-                            @Html.Raw(iconSvg)
-                            <span>@label</span>
-                        </span>
-
-                        <span class="fsm-meta-sep d-none d-md-inline-flex" aria-hidden="true"></span>
-
-                        <span class="fsm-meta-item">
-                            <i class="bi bi-envelope"></i>
-                            <span>@Model.User.Email</span>
-                        </span>
-
-                        <span class="fsm-meta-sep d-none d-md-inline-flex" aria-hidden="true"></span>
-
-                        <span class="fsm-meta-item d-none d-md-inline-flex">
-                            <i class="bi bi-person-circle"></i>
-                            <span>@roleDisplay</span>
-                        </span>
-
-                        <span class="fsm-meta-sep" aria-hidden="true"></span>
-
-                        <span class="fsm-meta-item">
-                            <i class="bi bi-telephone"></i>
-                            <span>@Model.User.Phone</span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            Icon = "bi bi-people",
+            Items = new List<BreadcrumbItem>
+            {
+            new() { Label = "Workforce", Url = null},
+            new() { Label = "Users",         Url = "/Workforce/Users" },
+            new() { Label = Model!.User.Name! + " " + Model.User.Surname, Url = null},
+            }
+        })
 
         @if (User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()))
         {
-            <div class="d-flex gap-2 align-items-center">
-                @if(Model.User.StatusId == (int)UserStatus.Invited)
-                {
-                    <button class="btn-sm bg-warning text-white" data-fsm-reinvite-trigger>
-                        <i class="bi bi-alarm"></i> Reminder
-                    </button>
-                }
-                @if (Model.User.StatusId != (int)UserStatus.Deleted && Model.User.UserRoleId != (int)UserRole.Administrator && Model.User.UserRoleId != (int)UserRole.SuperAdmin)
-                {
-                    <button class="btn-sm delete text-white" data-fsm-delete-trigger>
-                        <i class="bi bi-trash"></i> Delete
-                    </button>
-                }
-                <a href="@Url.Action("Edit", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model.User.Id.ToString()) })" class="btn-sm btn-primary">
-                    <i class="bi bi-pencil-square"></i> Edit
+            <div class="fsm-btn-group bg-primary">
+                @* <button class="btn-main">Approve</button> *@
+                <a href="@Url.Action("Edit", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model.User.Id.ToString()) })" class="btn-main">
+                   Edit
                 </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <button class="fsm-btn-group__item" data-fsm-add-to-crew-trigger>
+                        Add to Crew
+                    </button>
+                    @if (Model.User.StatusId == (int)UserStatus.Invited)
+                    {
+                        <button class="fsm-btn-group__item" data-fsm-reinvite-trigger>
+                             Reminder
+                        </button>
+                    }
+                    @if (Model.User.StatusId != (int)UserStatus.Deleted && Model.User.UserRoleId != (int)UserRole.Administrator && Model.User.UserRoleId != (int)UserRole.SuperAdmin)
+                    {
+                        <button class="fsm-btn-group__item" data-fsm-delete-trigger>
+                             Delete
+                        </button>
+                    }         
+                </div>
             </div>
         }
     </div>
@@ -324,6 +258,82 @@
                 Send Reminder
             </button>
         </div>
+    </div>
+</div>
+
+<div id="fsm-add-to-crew-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="add-to-crew-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+
+        <p id="add-to-crew-title" class="dialog-title">Add User to Crew</p>
+
+        <div class="dialog-info">
+            <div class="warn-icon">
+                <i class="bi bi-people"></i>
+            </div>
+
+            <div class="warn-text">
+                <p>Crew Assignment</p>
+
+                <p class="warn-sub">
+                    Select a crew to add
+                    <strong>@Model.User.Name @Model.User.Surname</strong>
+                    to.
+                </p>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column align-items-start mb-2 mx-2">
+            <span class="d-flex align-items-center mt-2 gap-2">Crew <span class="text-danger">*</span></span>
+
+            <select class="dialog-select w-100" id="crew-select">
+                <option value="">Search for a crew...</option>
+            </select>
+
+            <div class="mt-1 d-none" id="no-crews-found">
+                <span class="small text-muted">No crews found.</span>
+                <a href="/Workforce/Crew/Create" class="small text-decoration-none">
+                    <i class="bi bi-plus-circle-dotted"></i> Create a new crew
+                </a>
+            </div>
+        </div>
+
+         <div class="bd-callout bd-callout-info my-0 p-1 bg-opacity-10 mb-3 mt-2 mx-2">
+            <span class="smaller">
+                <i class="bi bi-info-circle fw-semibold ms-1"></i>  Type <strong>All</strong> to display all crews.
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mx-2 mb-2">
+            <label for="is-lead-toggle" class="mb-0">Assign as crew lead?</label>
+            <input id="is-lead-toggle"
+                   type="checkbox"
+                   data-toggle="switch"
+                   data-size="mini"
+                   data-handle-width="2"
+                   data-on-text="Yes"
+                   data-off-text="No" />
+        </div>
+
+        <div class="dialog-body">
+            Select <strong>Add to Crew</strong> to continue, or
+            <strong>Cancel</strong> to close this dialog without making any changes.
+        </div>
+
+        <div class="bg-primary-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="fsm-add-to-crew-results">
+            <i class="bi bi-check-circle-fill text-primary d-none" id="success-icn"></i>
+            <i class="bi bi-exclamation-circle-fill text-danger d-none" id="error-icn"></i>
+            <span id="fsm-add-to-crew-results"></span>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-add-to-crew-cancel>
+                Cancel
+            </button>
+
+            <button class="btn-confirm" type="button" id="fsm-add-to-crew-confirm" data-loading-text="Adding to crew">
+                Add to Crew
+            </button>
+        </div>
 
     </div>
 </div>
@@ -411,111 +421,6 @@
             });
         });
 
-        // ── User profile tabs ─────────────────────────────────────────────────────
-        (function () {
-            const track    = document.getElementById('fsm-tab-track');
-            const moreWrap = document.getElementById('fsm-tab-more');
-            const moreBtn  = document.getElementById('fsm-tab-more-btn');
-            const moreMenu = document.getElementById('fsm-tab-more-menu');
-            const tabs     = Array.from(track?.querySelectorAll('.fsm-tab') ?? []);
-            const panels   = Array.from(document.querySelectorAll('.fsm-tab-panel'));
-
-            if (!track || !tabs.length) return;
-
-            // ── Activate ──────────────────────────────────────────────────
-            function activate(tabName) {
-                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
-                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
-                moreMenu?.querySelectorAll('button').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.tab === tabName);
-                });
-            }
-
-            tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.tab)));
-
-            // ── Overflow calculation ──────────────────────────────────────
-            function recalc() {
-                if (!moreWrap) return;
-
-                tabs.forEach(t => { t.style.display = ''; });
-                moreWrap.style.display    = 'none';
-                moreWrap.style.visibility = 'hidden';
-                moreMenu.innerHTML        = '';
-
-                requestAnimationFrame(() => {
-                    const barWidth   = track.parentElement.offsetWidth;
-                    const moreBtnW   = 44;
-                    let   used       = 0;
-                    const overflowed = [];
-
-                    tabs.forEach(tab => {
-                        used += tab.getBoundingClientRect().width;
-                        if (used > barWidth - moreBtnW) {
-                            tab.style.display = 'none';
-                            overflowed.push(tab);
-                        }
-                    });
-
-                    if (overflowed.length === 0) {
-                        moreWrap.style.display    = 'none';
-                        moreWrap.style.visibility = '';
-                        return;
-                    }
-
-                    moreWrap.style.display    = '';
-                    moreWrap.style.visibility = '';
-
-                    overflowed.forEach(tab => {
-                        const btn       = document.createElement('button');
-                        btn.type        = 'button';
-                        btn.role        = 'menuitem';
-                        btn.dataset.tab = tab.dataset.tab;
-                        btn.textContent = tab.textContent.trim();
-                        btn.className   = 'dropdown-item' + (tab.classList.contains('active') ? ' active' : '');
-                        btn.addEventListener('click', () => {
-                            activate(tab.dataset.tab);
-                            moreMenu.classList.remove('show');
-                            moreBtn.setAttribute('aria-expanded', 'false');
-                        });
-                        moreMenu.appendChild(btn);
-                    });
-                });
-            }
-
-            // ── More button toggle ────────────────────────────────────────
-            moreBtn?.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log("clicked")
-                const isOpen = moreMenu.classList.contains('show');
-                console.log(isOpen)
-                document.querySelectorAll('.fsm-dropdown-menu.show').forEach(m => {
-                    console.log(m)
-                    m.classList.remove('show');
-                    m.closest('.fsm-dropdown')
-                     ?.querySelector('[aria-expanded]')
-                     ?.setAttribute('aria-expanded', 'false');
-                });
-
-                if (!isOpen) {
-                    moreMenu.classList.add('show');
-                    console.log(moreMenu);
-                    moreBtn.setAttribute('aria-expanded', 'true');
-                }
-            });
-
-            moreMenu?.addEventListener('click', (e) => e.stopPropagation());
-
-            document.addEventListener('click', () => {
-                moreMenu?.classList.remove('show');
-                moreBtn?.setAttribute('aria-expanded', 'false');
-            });
-
-            // ── Init ──────────────────────────────────────────────────────
-            requestAnimationFrame(() => requestAnimationFrame(recalc));
-            window.addEventListener('resize', recalc);
-        })();
-
-
         document.addEventListener("DOMContentLoaded", function () {
 
             document.querySelectorAll(".copy-btn").forEach(btn => {
@@ -573,6 +478,164 @@
 
             });
 
+        });
+    </script>
+
+    <script>
+        const addToCrewDialog = document.getElementById('fsm-add-to-crew-dialog');
+        const addToCrewTriggers = document.querySelectorAll('[data-fsm-add-to-crew-trigger]');
+        const addToCrewCancels = document.querySelectorAll('[data-fsm-add-to-crew-cancel]');
+
+        addToCrewTriggers.forEach(btn => btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            addToCrewDialog?.classList.add('show');
+        }));
+
+        addToCrewCancels.forEach(btn => btn.addEventListener('click', () => {
+            addToCrewDialog?.classList.remove('show');
+        }));
+
+        $(document).ready(function() {
+            $('#is-lead-toggle').bootstrapSwitch();
+        });
+
+        const crewChoices = new Choices('#crew-select', {
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search crews...',
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true,
+            noResultsText: 'No crews found',
+            noChoicesText: 'Type to search crews',
+            loadingText: 'Loading...',
+        });
+
+        let crewSearchTimeout;
+        document.querySelector('#crew-select').addEventListener('search', function(e) {
+            clearTimeout(crewSearchTimeout);
+            const term = e.detail.value;
+
+            crewSearchTimeout = setTimeout(async () => {
+                if (!term || term.length < 2) return;
+
+                try {
+                    const res = await fetch(`/Search/GetCrew?term=${encodeURIComponent(term)}`);
+                    const crews = await res.json();
+
+                    crewChoices.clearChoices();
+
+                    if (!crews.length) {
+                        document.getElementById('no-crews-found').classList.remove('d-none');
+                        return;
+                    }
+
+                    document.getElementById('no-crews-found').classList.add('d-none');
+
+                    crewChoices.setChoices(
+                        crews.map(c => ({ value: c.id, label: c.name })),
+                        'value',
+                        'label',
+                        true
+                    );
+                } catch (err) {
+                    console.error('Crew search failed:', err);
+                }
+            }, 300);
+        });
+
+        document.getElementById('fsm-add-to-crew-confirm').addEventListener('click', async function() {
+            const crewId = document.getElementById('crew-select')?.value;
+            const isLead = $('#is-lead-toggle').bootstrapSwitch('state');
+            const userId = '@Model.User.Id';
+
+            const resultsBox = document.getElementById('fsm-add-to-crew-results');
+            const successIcn = document.getElementById('success-icn');
+            const errorIcn = document.getElementById('error-icn');
+            const resultMessage = document.getElementById('fsm-add-to-crew-results');
+            const btn = this;
+
+            // Reset UI
+            resultsBox?.classList.add('d-none');
+            resultsBox?.classList.remove('bg-success', 'bg-danger', 'bg-success-subtle', 'bg-danger-subtle');
+            successIcn?.classList.add('d-none');
+            errorIcn?.classList.add('d-none');
+            resultMessage.textContent = '';
+
+            // Validation
+            if (!crewId) {
+                showResult(false, 'Please select a crew.');
+                return;
+            }
+
+            // Loading state
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = btn.dataset.loadingText || 'Adding…';
+
+            try {
+                const res = await fetch('/Workforce/Crew/AddMember', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getAntiForgeryToken()
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        crewId: crewId,
+                        isLead: isLead
+                    })
+                });
+
+                // Handle non-JSON / HTTP errors
+                let data;
+                try {
+                    data = await res.json();
+                } catch {
+                    showResult(false, 'Unexpected server response. Please try again.');
+                    return;
+                }
+
+                if (res.ok && data.success) {
+                    showResult(true, data.message || 'User added to crew successfully.');
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    showResult(false, data.errorMessage || data.message || 'Failed to add user to crew.');
+                }
+            } catch (err) {
+                console.error(err);
+                showResult(false, 'Something went wrong. Please check your connection and try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+
+            // Helper to show result
+            function showResult(isSuccess, message) {
+                if (!resultsBox) return;
+
+                resultsBox.classList.remove('d-none');
+
+                if (isSuccess) {
+                    resultsBox.classList.add('bg-success-subtle');
+                    resultsBox.classList.remove('bg-danger-subtle', 'bg-danger');
+                    successIcn?.classList.remove('d-none');
+                    errorIcn?.classList.add('d-none');
+                } else {
+                    resultsBox.classList.add('bg-danger-subtle');
+                    resultsBox.classList.remove('bg-success-subtle', 'bg-success');
+                    errorIcn?.classList.remove('d-none');
+                    successIcn?.classList.add('d-none');
+                }
+                console.log(resultMessage);
+                resultMessage.textContent = message;
+                console.log(resultMessage);
+            }
+
+            function getAntiForgeryToken() {
+                return document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    || document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1]
+                    || '';
+            }
         });
     </script>
 }
