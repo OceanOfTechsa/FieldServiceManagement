@@ -111,8 +111,8 @@
                                     @if (!string.IsNullOrWhiteSpace(item.CompanyName))
                                     {
                                         <a href="/Customers/Companies/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.CompanyId.ToString())"
-                                           class="fsm-meta-text text-decoration-none">
-                                            @item.CompanyName <i class="bi bi-box-arrow-up-right"></i>
+                                           class="full-name-wrapper text-decoration-none d-flex align-items-center">
+                                            <span class="fsm-user-name">@item.CompanyName <i class="bi bi-folder-symlink"></i></span>
                                         </a>
                                     }
                                     else

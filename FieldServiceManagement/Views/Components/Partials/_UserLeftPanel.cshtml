@@ -393,6 +393,7 @@
                         }
                         else
                         {
+                            <div class="my-2">
                                 @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                 {
                                     Id = Model!.CreatedBy!.Id!,
@@ -400,6 +401,7 @@
                                     Surname = Model!.CreatedBy!.Surname!,
                                     AvatarUrl = Model!.CreatedBy!.AvatarUrl!
                                 })
+                            </div>
                         }
 
                         <span class="small text-black mb-2 small">On @Model?.User.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.User.UpdatedAt?.ToString("tt").ToUpper()</span>

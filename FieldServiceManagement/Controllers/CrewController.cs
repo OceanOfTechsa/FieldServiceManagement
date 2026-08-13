@@ -6,7 +6,6 @@ using FieldServiceManagement.ViewModels.Crew;
 using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using X.PagedList.Extensions;
 
 namespace FieldServiceManagement.Controllers
 {
@@ -80,6 +79,7 @@ namespace FieldServiceManagement.Controllers
 
             return View(crew);
         }
+
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
         [HttpPost("AddMember")]
         public async Task<IActionResult> AddMember([FromBody] AddCrewMemberRequest request)
@@ -114,11 +114,89 @@ namespace FieldServiceManagement.Controllers
             }
         }
 
-        public class AddCrewMemberRequest
+        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
+        [HttpPost("ChangeLead")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeLead([FromBody] ChangeCrewLeadRequest request)
         {
-            public Guid UserId { get; set; }
-            public Guid CrewId { get; set; }
-            public bool IsLead { get; set; }
+            if (request is null || !ModelState.IsValid)
+                return Json(new { success = false, errorMessage = "Invalid request." });
+            
+            if (request.CrewId == Guid.Empty || request.UserId == Guid.Empty)
+                return Json(new { success = false, errorMessage = "Please select a user." });
+            
+
+            var organisationId = User.GetOrganisationIdOrThrow();
+            var modifiedBy = User.Identity?.Name
+                ?? throw new InvalidOperationException("Unable to resolve acting user.");
+
+            var result = await new CrewBusiness().ChangeLeadAsync(request.CrewId, request.UserId, organisationId, modifiedBy);
+
+            return Json(new { success = result, errorMessage = result.Message  ?? "Something went wrong. Please try again."});
+        }
+
+        // -----------------------------------------------------------------
+        // Edit crew details
+        // -----------------------------------------------------------------
+        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
+        [HttpPost("Edit")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(CrewFullProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(kvp => kvp.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+                return Json(new
+                {
+                    success = false,
+                    errorMessage = "Please fix the errors below.",
+                    errors
+                });
+            }
+
+            var organisationId = User.GetOrganisationIdOrThrow();
+            var result = await new CrewBusiness().UpdateCrewAsync(model, organisationId, User.Identity?.Name!);
+
+            return Json(new { success = result.Success, errorMessage = result.Message });
+        }
+
+        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
+        [HttpPost("RemoveMember")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveMember([FromBody] RemoveCrewMemberRequest request)
+        {
+            if (request is null || !ModelState.IsValid)
+                return Json(new { success = false, errorMessage = "Invalid request." });
+
+            if (request.CrewId == Guid.Empty || request.UserId == Guid.Empty)
+                return Json(new { success = false, errorMessage = "Invalid crew or user." });
+            
+            var organisationId = User.GetOrganisationIdOrThrow();
+            var result = await new CrewBusiness().RemoveMemberAsync(
+                request.CrewId, request.UserId, organisationId, User.Identity?.Name!);
+
+            return Json(new { success = result.Success, errorMessage = result.Message });
+        }
+
+        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
+        [HttpPost("Delete")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete([FromBody] DeleteCrewRequest request)
+        {
+            if (request is null || !ModelState.IsValid)
+                return Json(new { success = false, errorMessage = "Invalid request." });
+
+            if (request.CrewId == Guid.Empty)
+                return Json(new { success = false, errorMessage = "Invalid crew." });
+            
+            var organisationId = User.GetOrganisationIdOrThrow();
+            var result = await new CrewBusiness().DeleteCrewAsync(request.CrewId, organisationId);
+            return Json(new { success = result.Success, errorMessage = result.Message ?? "Something went wrong, please try again." });
         }
     }
 }

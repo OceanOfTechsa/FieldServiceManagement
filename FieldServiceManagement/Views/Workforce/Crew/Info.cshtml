@@ -14,7 +14,7 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-1">
         @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
            new BreadcrumbViewModel
            {
@@ -50,7 +50,7 @@ rounded-2">
                     <div class="fsm-tab-track" id="fsm-crew-tab-track">
                         <button class="fsm-tab active" data-tab="members" data-index="0"><i class="bi bi-people"></i> Members</button>
                         <button class="fsm-tab" data-tab="timeline" data-index="1"><i class="bi bi-bezier2"></i> Timeline</button>
-                        @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString())) && Model.IsDeleted == false)
+                        @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString())))
                         {
                             <button class="fsm-tab" data-tab="settings" data-index="2"><i class="bi bi-gear"></i> Settings</button>
                         }
@@ -82,7 +82,27 @@ rounded-2">
                                     <i class="bi bi-search position-absolute" style="left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:#9ca3af;"></i>
                                     <input type="text" id="members-search" class="form-control form-control-sm ps-4" placeholder="Search members..." />
                                 </div>
-                                <span class="text-muted small" id="members-count-label">@Model.Members.Count() member@(Model.Members.Count() == 1 ? "" : "s")</span>
+                                @{
+                                    var crewMemberCount = Model.Members.Count();
+                                    var crewSize = Model.CrewSize.GetValueOrDefault();
+
+                                    var calloutColorClass = "bd-callout-success";
+                                    if (crewSize > 0)
+                                    {
+                                        var halfCrewSize = crewSize / 2.0;
+                                        if (crewMemberCount >= crewSize)
+                                        {
+                                            calloutColorClass = "bd-callout-danger";
+                                        }
+                                        else if (crewMemberCount > halfCrewSize)
+                                        {
+                                            calloutColorClass = "bd-callout-warning";
+                                        }
+                                    }
+                                }
+                                <span class="small my-0 p-1 bd-callout @calloutColorClass" id="members-count-label">
+                                    @crewMemberCount/@crewSize Member@(crewMemberCount == 1 ? "" : "s")
+                                </span>
                             </div>
 
                             <div class="d-flex align-items-center gap-2">
@@ -259,7 +279,7 @@ rounded-2">
                             <p class="text-muted small mb-0">Try a different search term.</p>
                         </div>
                     </div>
-                     @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString())) && Model.IsDeleted == false)
+                     @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.Dispatcher.ToString())))
                      {
                         <div class="fsm-tab-panel p-0 h-100" data-panel="settings">
                             <div class="flex-grow-1 h-100 w-100 bg-white rounded-2 overflow-hidden d-flex">
@@ -299,7 +319,12 @@ rounded-2">
 
                                                 @if (!ViewData.ModelState.IsValid)
                                                     @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
-                    
+
+                                                <div class="small p-1 px-2 d-flex align-items-center gap-2 d-none mb-2" id="edit-crew-alert">
+                                                    <i class="bi bi-exclamation-circle-fill text-danger d-none" id="edit-crew-alert-error-icn"></i>
+                                                    <i class="bi bi-check-circle-fill text-primary d-none" id="edit-crew-alert-success-icn"></i>
+                                                    <span id="edit-crew-alert-text"></span>
+                                                </div>
 
                                                 <div class="row g-3">
                                                     <!-- Name -->
@@ -342,7 +367,7 @@ rounded-2">
                                                                     data_size = "mini",
                                                                     data_handle_width = "2",
                                                                     data_on_text = "Yes",
-                                                                    data_off_text = "No"
+                                                                    data_off_text = "Not"
                                                                 })
                                                             </div>
                                                         </div>
@@ -391,8 +416,8 @@ rounded-2">
                                                 }
                                                 else
                                                 {
-                                                    <div class="d-flex flex-column align-items-start mb-2 mx-2">
-                                                        <span class="mt-2 text-muted small">No lead assigned yet.</span>
+                                                    <div class="my-0 p-1 bg-opacity-10 mb-3 mt-2 mx-2 px-2 bd-callout bd-callout-warning">
+                                                        <span class="small"><i class="bi bi-exclamation-circle me-2"></i> No lead assigned yet.</span>
                                                     </div>
                                                 }
 
@@ -409,9 +434,15 @@ rounded-2">
                                                 </div>
 
                                                 <div class="bd-callout bd-callout-info my-0 p-1 bg-opacity-10 mb-3 mt-2 mx-2">
-                                                    <span class="smaller">
+                                                    <span class="small">
                                                         <i class="bi bi-info-circle fw-semibold ms-1"></i> Type <strong>All</strong> to display all users.
                                                     </span>
+                                                </div>
+
+                                                <div class="small bd-callout bd-callout-danger p-1 px-2 mx-2 d-flex align-items-center gap-2 d-none" id="change-lead-alert">
+                                                    <i class="bi bi-exclamation-circle-fill text-danger d-none" id="change-lead-alert-error-icn"></i>
+                                                    <i class="bi bi-check-circle-fill text-primary d-none" id="change-lead-alert-success-icn"></i>
+                                                    <span id="change-lead-alert-text"></span>
                                                 </div>
 
                                             </div>
@@ -491,16 +522,10 @@ rounded-2">
             Select <strong>Remove</strong> to remove this user, or Select <strong>Cancel</strong> to exist with no changes.
         </div>
 
-        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="fsm-remove-member-error">
             <i class="bi bi-exclamation-circle-fill text-danger"></i>
-            Failed to delete this user, Please try again. <button class="read-more-btn text-black small">Read more</button>
+            <span id="fsm-remove-member-error-text">Failed to remove this user. Please try again.</span>
         </div>
-
-        <!--
-            NOTE: this previously posted to asp-controller="Settings" asp-action="Delete", which does not
-            belong to crew-member management. Pointed it at Crew/RemoveMember — confirm this matches the
-            actual action name/route on CrewController before shipping.
-        -->
         <form id="fsm-delete-form" asp-controller="Crew" asp-action="RemoveMember" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="userId" id="fsm-delete-user-id">
@@ -508,7 +533,7 @@ rounded-2">
 
             <div class="dialog-footer">
                 <button type="button" class="btn-cancel" data-member-remove-cancel>Cancel</button>
-                <button type="submit" class="btn btn-danger btn-sm mt-1" id="fsm-remove-confirm">
+                <button type="submit" class="btn btn-danger btn-sm mt-1" id="fsm-remove-confirm" data-loading-text="Removing">
                     Remove
                 </button>
             </div>
@@ -549,17 +574,15 @@ rounded-2">
             This deletion is <strong>irreversible</strong>. Please select <strong>Delete Crew</strong> to proceed, or <strong>Cancel</strong> to return without making any changes.
         </div>
 
-        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="fsm-delete-crew-error">
-            <i class="bi bi-exclamation-circle-fill text-danger"></i>
-            <span id="fsm-delete-crew-error-text">Failed to delete this crew. Please try again.</span>
+        <div class="small bd-callout bd-callout-danger mb-0 p-1 px-2 d-flex align-items-center gap-2 d-none" id="fsm-delete-crew-alert">
+            <i class="bi bi-exclamation-circle-fill text-danger d-none" id="fsm-delete-crew-alert-error-icn"></i>
+            <i class="bi bi-check-circle-fill text-primary d-none" id="fsm-delete-crew-alert-success-icn"></i>
+            <span id="fsm-delete-crew-alert-text"></span>
         </div>
 
-        <div class="dialog-footer">
+
+        <div class="dialog-footer mt-0">
             <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
-            <!--
-                NOTE: this button previously had no click handler at all — "Delete Crew" was a dead button.
-                Wired it to a fetch POST below. Confirm "/Workforce/Crew/Delete" is the real route/action.
-            -->
             <button class="btn-confirm" id="fsm-delete-confirm" data-loading-text="Deleting">
                 Delete Crew
             </button>
@@ -614,7 +637,7 @@ rounded-2">
                    data-size="mini"
                    data-handle-width="2"
                    data-on-text="Yes"
-                   data-off-text="No" />
+                   data-off-text="Not" />
         </div>
 
         <div class="bd-callout bd-callout-warning my-0 p-1 bg-opacity-10 mb-2 mx-2 d-none" id="lead-override-note">
@@ -642,7 +665,7 @@ rounded-2">
 
             <button class="btn-confirm" type="button" id="fsm-add-member-confirm" data-loading-text="Adding to crew">
                 <span class="spinner-border spinner-border-sm text-light d-none" aria-hidden="true" id="loader"></span>
-                <span role="status" id="loading-text" class="d-none">Adding to crew...</span>    
+                <span role="status" id="loading-text" class="d-none">Adding to crew...</span>
                 <span class="btn-text" id="btn-text">Add to Crew</span>
             </button>
         </div>
@@ -835,18 +858,80 @@ rounded-2">
             }));
 
             // ---------------------------------------------------------------
+            // Shared AJAX helpers
+            // ---------------------------------------------------------------
+
+            // ASP.NET Core's antiforgery cookie is separate from the token value
+            // itself — for fetch/JSON requests the token has to be sent explicitly,
+            // either as a header or as a field in the JSON/form body (the server
+            // reads whichever your [ValidateAntiForgeryToken] setup is configured
+            // to accept). This reads the hidden field @Html.AntiForgeryToken()
+            // already renders inside each form.
+            function getAntiForgeryToken(form) {
+                return form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            }
+
+            // Toggles an alert box built from three elements: a wrapper (d-none
+            // toggle), a text span, and optional success/error icons.
+            function setAlert(prefix, kind, message) {
+                const box = document.getElementById(`${prefix}-alert`) || document.getElementById(prefix);
+                const text = document.getElementById(`${prefix}-alert-text`) || document.getElementById(`${prefix}-text`);
+                const errorIcn = document.getElementById(`${prefix}-alert-error-icn`);
+                const successIcn = document.getElementById(`${prefix}-alert-success-icn`);
+
+                if (!box) return;
+
+                if (text) text.textContent = message;
+                errorIcn?.classList.toggle('d-none', kind !== 'error');
+                successIcn?.classList.toggle('d-none', kind !== 'success');
+                box.classList.remove('d-none');
+            }
+
+            function clearAlert(prefix) {
+                const box = document.getElementById(`${prefix}-alert`) || document.getElementById(prefix);
+                box?.classList.add('d-none');
+            }
+
+            // Applies field-level validation errors returned as { FieldName: ["msg", ...] }
+            // onto the existing asp-validation-for spans MVC already renders
+            // (they carry a data-valmsg-for="FieldName" attribute).
+            function applyFieldErrors(form, errors) {
+                if (!errors) return;
+                Object.entries(errors).forEach(([field, messages]) => {
+                    const span = form.querySelector(`[data-valmsg-for="${field}"]`);
+                    if (span && messages?.length) {
+                        span.textContent = messages[0];
+                        span.classList.add('field-validation-error');
+                    }
+                });
+            }
+
+            function clearFieldErrors(form) {
+                form.querySelectorAll('[data-valmsg-for]').forEach(span => {
+                    span.textContent = '';
+                    span.classList.remove('field-validation-error');
+                });
+            }
+
+            function setButtonLoading(btn, loading) {
+                if (!btn) return;
+                btn.disabled = loading;
+                if (loading) {
+                    btn.dataset.originalText = btn.dataset.originalText ?? btn.textContent;
+                    btn.textContent = btn.dataset.loadingText || 'Please wait...';
+                } else {
+                    btn.textContent = btn.dataset.originalText ?? btn.textContent;
+                }
+            }
+
+            // ---------------------------------------------------------------
             // Delete crew: this button previously had NO handler at all.
             // ---------------------------------------------------------------
             const deleteConfirmBtn = document.getElementById('fsm-delete-confirm');
-            const deleteErrorBox = document.getElementById('fsm-delete-crew-error');
-            const deleteErrorText = document.getElementById('fsm-delete-crew-error-text');
 
             deleteConfirmBtn?.addEventListener('click', async function () {
-                const btn = this;
-                const originalText = btn.textContent;
-                btn.disabled = true;
-                btn.textContent = btn.dataset.loadingText || 'Deleting...';
-                deleteErrorBox?.classList.add('d-none');
+                setButtonLoading(this, true);
+                clearAlert('fsm-delete-crew');
 
                 try {
                     const res = await fetch('/Workforce/Crew/Delete', {
@@ -861,18 +946,138 @@ rounded-2">
                         return;
                     }
 
-                    if (deleteErrorText) {
-                        deleteErrorText.textContent = data.errorMessage || 'Failed to delete this crew. Please try again.';
-                    }
-                    deleteErrorBox?.classList.remove('d-none');
+                    setAlert('fsm-delete-crew', 'error', data.errorMessage || 'Failed to delete this crew. Please try again.');
                 } catch (err) {
-                    if (deleteErrorText) {
-                        deleteErrorText.textContent = 'Something went wrong. Please try again.';
-                    }
-                    deleteErrorBox?.classList.remove('d-none');
+                    setAlert('fsm-delete-crew', 'error', 'Something went wrong. Please try again.');
                 } finally {
-                    btn.disabled = false;
-                    btn.textContent = originalText;
+                    setButtonLoading(this, false);
+                }
+            });
+
+            // ---------------------------------------------------------------
+            // Edit crew details — AJAX form post. Kept as multipart FormData
+            // (not reconstructed into a JSON object) because @Html.CheckBoxFor
+            // renders a checkbox + a same-named hidden fallback field for
+            // IsActive; MVC's model binder relies on both fields being posted
+            // as-is to correctly resolve unchecked boxes to false. Flattening
+            // that into a plain object via Object.fromEntries would silently
+            // drop or overwrite the real value.
+            // ---------------------------------------------------------------
+            const editCrewForm = document.getElementById('edit-crew-form');
+            editCrewForm?.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const form = this;
+                const submitBtn = document.getElementById('save-crew-details-btn');
+
+                setButtonLoading(submitBtn, true);
+                clearAlert('edit-crew');
+                clearFieldErrors(form);
+
+                try {
+                    const res = await fetch(form.action || '@Url.Action("Edit", "Crew")', {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': getAntiForgeryToken(form) },
+                        body: new FormData(form)
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        setAlert('edit-crew', 'success', 'Crew details saved.');
+                    } else {
+                        setAlert('edit-crew', 'error', data.errorMessage || 'Failed to save crew details.');
+                        applyFieldErrors(form, data.errors);
+                    }
+                } catch (err) {
+                    setAlert('edit-crew', 'error', 'Something went wrong. Please try again.');
+                } finally {
+                    setButtonLoading(submitBtn, false);
+                }
+            });
+
+            // ---------------------------------------------------------------
+            // Change lead — AJAX form post with a plain JSON body (safe here:
+            // only scalar fields, no checkbox-binding gotcha).
+            // ---------------------------------------------------------------
+            const changeLeadForm = document.getElementById('change-lead-form');
+            changeLeadForm?.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const form = this;
+                const submitBtn = document.getElementById('save-crew-lead-btn');
+                const userId = document.getElementById('user-select').value;
+
+                clearAlert('change-lead');
+
+                if (!userId) {
+                    setAlert('change-lead', 'error', 'Please select a user.');
+                    return;
+                }
+
+                setButtonLoading(submitBtn, true);
+
+                try {
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken(form)
+                        },
+                        body: JSON.stringify({ crewId: '@Model.Id', userId })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        setAlert('change-lead', 'success', 'Crew lead updated.');
+                        setTimeout(() => location.reload(), 900);
+                    } else {
+                        setAlert('change-lead', 'error', data.errorMessage || 'Failed to change crew lead.');
+                    }
+                } catch (err) {
+                    setAlert('change-lead', 'error', 'Something went wrong. Please try again.');
+                } finally {
+                    setButtonLoading(submitBtn, false);
+                }
+            });
+
+            // ---------------------------------------------------------------
+            // Remove member — AJAX form post with a plain JSON body.
+            // ---------------------------------------------------------------
+            const removeMemberForm = document.getElementById('fsm-delete-form');
+            removeMemberForm?.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const form = this;
+                const submitBtn = document.getElementById('fsm-remove-confirm');
+                const userId = document.getElementById('fsm-delete-user-id').value;
+                const crewId = '@Model.Id';
+
+                document.getElementById('fsm-remove-member-error')?.classList.add('d-none');
+                setButtonLoading(submitBtn, true);
+
+                try {
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken(form)
+                        },
+                        body: JSON.stringify({ userId, crewId })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        memberRemoveDialog?.classList.remove('show');
+                        location.reload();
+                        return;
+                    }
+
+                    const errorText = document.getElementById('fsm-remove-member-error-text');
+                    if (errorText) errorText.textContent = data.errorMessage || 'Failed to remove this user. Please try again.';
+                    document.getElementById('fsm-remove-member-error')?.classList.remove('d-none');
+                } catch (err) {
+                    const errorText = document.getElementById('fsm-remove-member-error-text');
+                    if (errorText) errorText.textContent = 'Something went wrong. Please try again.';
+                    document.getElementById('fsm-remove-member-error')?.classList.remove('d-none');
+                } finally {
+                    setButtonLoading(submitBtn, false);
                 }
             });
 
@@ -965,13 +1170,23 @@ rounded-2">
                 const loader = document.getElementById('loader');
                 const loadingText = document.getElementById('loading-text');
                 const btnText = document.getElementById('btn-text');
+                const btn = this;
 
-                function showError(message) {
+                // NOTE: this previously did `const originalText = btn.textContent;`
+                // then `btn.textContent = originalText;` in `finally`. Once the
+                // button's label moved into its own <span id="btn-text">, that left
+                // `originalText` undefined, which threw a ReferenceError inside
+                // `finally` on every submit — meaning `btn.disabled = false` (the
+                // line before it) never got a chance to run and the button stayed
+                // permanently disabled after the first use. Toggling the loader/
+                // label spans directly (like the rest of this dialog already does)
+                // avoids touching textContent at all.
+                function showResult(kind, message) {
                     resultsBox.classList.remove('d-none');
-                    errorIcn.classList.remove('d-none');
-                    successIcn.classList.add('d-none');
-                    resultsBox.classList.remove('bg-primary-subtle');
-                    resultsBox.classList.add('bg-danger-subtle');
+                    errorIcn.classList.toggle('d-none', kind !== 'error');
+                    successIcn.classList.toggle('d-none', kind !== 'success');
+                    resultsBox.classList.toggle('bg-danger-subtle', kind === 'error');
+                    resultsBox.classList.toggle('bg-primary-subtle', kind === 'success');
                     resultMessage.textContent = message;
                     loader.classList.add('d-none');
                     loadingText.classList.add('d-none');
@@ -979,11 +1194,10 @@ rounded-2">
                 }
 
                 if (!userId) {
-                    showError('Please select a user.');
+                    showResult('error', 'Please select a user.');
                     return;
                 }
 
-                const btn = this;
                 btn.disabled = true;
                 loader.classList.remove('d-none');
                 loadingText.classList.remove('d-none');
@@ -999,21 +1213,16 @@ rounded-2">
                     const data = await res.json();
 
                     if (data.success) {
-                        resultsBox.classList.remove('d-none');
-                        successIcn.classList.remove('d-none');
-                        errorIcn.classList.add('d-none');
-                        loader.classList.add('d-none');
-                        loadingText.classList.add('d-none');
-                        resultMessage.textContent = 'User added to crew successfully.';
+                        showResult('success', 'User added to crew successfully.');
                         setTimeout(() => location.reload(), 1200);
-                    } else {
-                        showError(data.errorMessage || 'Failed to add user to crew.');
+                        return; // leave it disabled — page is about to reload anyway
                     }
+
+                    showResult('error', data.errorMessage || 'Failed to add user to crew.');
                 } catch (err) {
-                    showError('Something went wrong. Please try again.');
+                    showResult('error', 'Something went wrong. Please try again.');
                 } finally {
                     btn.disabled = false;
-                    btn.textContent = originalText;
                 }
             });
         })();

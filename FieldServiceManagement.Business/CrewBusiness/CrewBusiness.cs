@@ -69,6 +69,38 @@ namespace FieldServiceManagement.Business.CrewBusiness
             return repoResult.Success ? BusinessResult.Ok() : BusinessResult.Fail("Failed to add crew member.");
         }
 
+        public async Task<BusinessResult> ChangeLeadAsync(Guid CrewId, Guid UserId, Guid organisationId, string modifiedBy)
+        {
+            var result = await new CrewRepository().ChangeCrewLeadAsync(CrewId, UserId, organisationId, modifiedBy);
+            if (!result.Success)
+                return BusinessResult.Fail("Something went wrong while changing the crew lead, please try again.");
+            return BusinessResult.Ok();
+        }
+
+        public async Task<BusinessResult> DeleteCrewAsync(Guid CrewId, Guid OrgId)
+        {
+            var result = await new CrewRepository().DeleteCrewAsync(CrewId, OrgId);
+            if (!result.Success)
+                return BusinessResult.Fail("Something went wrong while deleting the crew, please try again.");
+            return BusinessResult.Ok();
+        }
+
+        public async Task<BusinessResult> RemoveMemberAsync(Guid CrewId, Guid UserId, Guid OrgId, string Email)
+        {
+            var result = await new CrewRepository().RemoveCrewMemberAsync(CrewId, UserId, OrgId, Email);
+            if (!result.Success)
+                return BusinessResult.Fail("Failed to remember crew member.");
+            return BusinessResult.Ok();
+        }
+
+        public async Task<BusinessResult> UpdateCrewAsync(CrewFullProfileViewModel Model, Guid OrgId, string Email)
+        {
+            var result = await new CrewRepository().UpdateCrewAsync(Model.Id, Model.Name, Model.CrewSize, Model.Description, Model.IsActive, OrgId, Email);
+            if (!result.Success)
+                return BusinessResult.Fail("Failed to update crew");
+            return BusinessResult.Ok();
+        }
+
         #region PRIVATE METHODS
         private CreateCrew BuildCreateCrewModel(CreateCrewViewModel model, AppUserProfileViewModel currentUser)
         {

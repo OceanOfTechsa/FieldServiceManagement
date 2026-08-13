@@ -34,19 +34,19 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-2">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-1">
         <div class="d-flex gap-2 align-items-center">
             @* <img src="@($"https://ui-avatars.com/api/?name={company?.Name}&background=random")"
                  alt="Avatar"
                  class="fsm-avatar-lg" /> *@
 
             <div class="d-flex flex-column">
-                <div class="d-flex align-items-start gap-1">
+                <div class="d-flex align-items-start gap-1 my-1">
                     <a href="/Customers/Companies" class="text-primary">Companies</a>
                     <i class="bi bi-arrow-return-right fs-6"></i>
                     <span>@company?.Name</span>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+                @* <div class="d-flex align-items-center gap-2">
                     @{
                         var (statusLabel, statusCss) = company!.IsDeleted
                             ? ("Deleted", "bg-danger")
@@ -63,38 +63,42 @@
                         <i class="bi bi-person-circle"></i>
                         <span>@company.CreatedByName @company.CreatedBySurname</span>
                     </span>
-                </div>
+                </div> *@
             </div>
         </div>
 
         @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.CallCenterAgent.ToString())) && company.IsDeleted == false)
         {
-            <div class="d-flex gap-2 align-items-center">
-                <button class="btn-sm bg-warning text-white"
+            <div class="fsm-btn-group bg-primary">
+                <a href="/Customers/Companies/Edit?Id=@UrlEncryptionBusiness.EncryptParam(company.Id.ToString())" class="btn-main"
+                   data-bs-toggle="tooltip" data-bs-title="Edit"
+                   data-bs-placement="bottom"
+                   data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                >
+                     Edit
+                </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <button class="fsm-btn-group__item"
                         data-bs-toggle="tooltip" data-bs-title="Change Owner"
                         data-bs-placement="bottom"
                         data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
-                        data-fsm-transfer-trigger>
-                    <i class="bi bi-person-gear"></i>
-                    <span class="d-none d-md-inline"> Change Owner</span>
-                </button>
+                        data-fsm-transfer-trigger
+                    >
+                            Change Owner
+                    </button>
 
-                <button class="btn-sm delete text-white"
+                    <button class="fsm-btn-group__item"
                         data-bs-toggle="tooltip" data-bs-title="Delete"
                         data-bs-placement="bottom"
                         data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
-                        data-fsm-delete-trigger>
-                    <i class="bi bi-trash"></i>
-                    <span class="d-none d-md-inline"> Delete</span>
-                </button>
-
-                <a href="/Customers/Companies/Edit?Id=@UrlEncryptionBusiness.EncryptParam(company.Id.ToString())" class="btn-sm btn-primary"
-                   data-bs-toggle="tooltip" data-bs-title="Edit"
-                   data-bs-placement="bottom"
-                   data-bs-custom-class="fsm-tooltip mobile-only-tooltip">
-                    <i class="bi bi-pencil-square"></i>
-                    <span class="d-none d-md-inline"> Edit</span>
-                </a>
+                        data-fsm-delete-trigger
+                    >
+                     Delete
+                    </button>       
+                </div>
             </div>
         }
     </div>

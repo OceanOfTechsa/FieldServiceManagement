@@ -54,6 +54,19 @@ namespace FieldServiceManagement.Models
                 new() { Label = "Create Crew", Url="/Workforce/Crew/Create", Icon = "bi-people-fill" }
             ]
         };
+
+        public static PageEmptyStateViewModel Equipment => new()
+        {
+            PageTitle = "Equipment",
+            PageContent = "The Equipment Module helps manage and schedule tools, machinery, and company assets, ensuring efficient use and maintenance. It streamlines resource allocation, tracks availability, and improves overall operational efficiency.",
+            HelpEnum = PublicHelpEnum.Equipment,
+            ImageUrl = "/Assets/Images/Application/equipment.svg",
+            Actions =
+            [
+                new() { Label = "Create Equipment", Url="/Workforce/Equipment/Create" }
+            ]
+        };
+
         // Add more pages here following the same pattern...
     }
 }

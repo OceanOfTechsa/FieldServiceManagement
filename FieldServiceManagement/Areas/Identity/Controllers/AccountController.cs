@@ -217,11 +217,11 @@ public class AccountController : Controller
                 Request.Scheme);
         }
 
-        if (_env.IsDevelopment())
-        {
-            ViewBag.DevResetLink = resetLink ?? "User not found (hidden in production)";
-            return View(model); 
-        }
+        //if (_env.IsDevelopment())
+        //{
+        //    ViewBag.DevResetLink = resetLink ?? "User not found (hidden in production)";
+        //    return View(model); 
+        //}
 
         return RedirectToAction(nameof(ForgotPasswordConfirmation));
     }

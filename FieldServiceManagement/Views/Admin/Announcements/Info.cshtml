@@ -28,20 +28,24 @@
 
         @if (User.IsInRole("SuperAdmin") && Model?.IsDeleted == false)
         {
-            <div class="d-flex gap-2 align-items-center">
-                <button class="btn-sm bg-danger text-white" data-fsm-delete-trigger>
-                    <i class="bi bi-trash"></i> Delete
-                </button>
-                @if (Model.StatusId != (int)AnnouncementStatus.AnnouncementArchived)
-                {
-                        <button class="btn-sm bg-warning text-white" data-fsm-archive-trigger>
-                        <i class="bi bi-archive"></i> Archive
-                    </button>
-                }
-                <a href="/Admin/Announcements/Edit?Id=@UrlEncryptionBusiness.EncryptParam(Model.Id.ToString())"
-                   class="btn-sm btn-primary">
-                    <i class="bi bi-pencil-square"></i> Edit
+            <div class="fsm-btn-group bg-primary">
+                <a href="/Admin/Announcements/Edit?Id=@UrlEncryptionBusiness.EncryptParam(Model.Id.ToString())" class="btn-main">
+                  Edit
                 </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <button class="fsm-btn-group__item" data-fsm-delete-trigger>
+                     Delete
+                    </button>
+                    @if (Model.StatusId != (int)AnnouncementStatus.AnnouncementArchived)
+                    {
+                        <button  class="fsm-btn-group__item" data-fsm-archive-trigger>
+                             Archive
+                        </button>
+                    }       
+                </div>
             </div>
         }
     </div>
