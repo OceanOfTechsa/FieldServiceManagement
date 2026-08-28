@@ -1,0 +1,285 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
+
+@model FieldServiceManagement.ViewModels.Equipment.EquipmentDetailsViewModel
+
+
+@{
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
+}
+
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="equipmentInfoAccordion">
+    @if (Model?.IsDeleted == true)
+    {
+        <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
+            <h2 class="accordion-header px-2">
+                <button class="accordion-button bg-danger-subtle text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        aria-expanded="true"
+                        aria-controls="equipmentDeletionCollapse">
+                    <div>Deletion Details</div>
+
+                    <div data-toggle="tooltip" class="ms-2" title="This equipment has been permanently deleted from the system.">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show">
+                <div class="accordion-body px-2 pt-1 mt-0">
+
+
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus-fill"></i>
+                            <div class="d-flex flex-column">
+                                <span class="text-black fw-bold">Status</span>
+                                <span class="text-black"><span class="fsm-pill bg-danger text-white me-2">Deleted</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Equipment Information -->
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#equipmentInfoCollapse"
+                    aria-expanded="true"
+                    aria-controls="equipmentInfoCollapse">
+                Equipment Information
+            </button>
+        </h2>
+        <div id="equipmentInfoCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#equipmentInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-tools"></i>
+                        <span class="text-muted">Name</span>
+                        <span class="text-black">@Model?.Name</span>
+                    </div>
+
+                    <!--
+                        NOTE: "Model number" was asked for but EquipmentDetailsViewModel
+                        has no ModelNumber/Model property — only Name, Description,
+                        SerialNumber, etc. Not fabricating a field that isn't there;
+                        add it to the view model and GetEquipmentById if it's needed.
+                    -->
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-bookmarks"></i>
+                        <span class="text-muted">Type</span>
+                        <span class="text-black">
+                            @{
+                                var type = (EquipmentType)Model?.Type!;
+                            }
+                            @type.GetNormalisedDisplayName()
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-upc-scan"></i>
+                        <span class="text-muted">Serial Number</span>
+                        <span class="text-black">
+                            @(string.IsNullOrWhiteSpace(Model?.SerialNumber) ? EmptyFieldReplacer : Model?.SerialNumber)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @{
+                            var (statusLabel, statusCss) = Model!.IsDeleted
+                                ? ("Deleted", "bg-danger")
+                                : Model.IsActive
+                                    ? ("Active", "bg-success")
+                                    : ("Inactive", "bg-secondary");
+                        }
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus"></i>
+                            <span class="text-muted">Status</span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="fsm-status-dot @statusCss"></span>
+                                <span class="text-black ms-1">@statusLabel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Information -->
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#equipmentOtherInfoCollapse"
+                    aria-expanded="true"
+                    aria-controls="equipmentOtherInfoCollapse">
+                Other Information
+            </button>
+        </h2>
+        <div id="equipmentOtherInfoCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#equipmentInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-shield-check"></i>
+                        <span class="text-muted">Warranty Status</span>
+
+                        <span class="text-black">
+                            @{
+                                var status = (EquipmentWarrantyStatus)Model?.WarrantyStatus!;
+                            }
+                            @status.GetNormalisedDisplayName()
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-calendar-x"></i>
+                        <span class="text-muted">Warranty Expiry Date</span>
+                        @{
+                            var warrantyExpired = Model?.WarrantyExpiryDate.HasValue == true
+                                && Model.WarrantyExpiryDate.Value.Date < DateTime.UtcNow.Date;
+                        }
+                        <span class="text-black @(warrantyExpired ? "text-danger" : "")">
+                            @(Model?.WarrantyExpiryDate.HasValue == true ? Model.WarrantyExpiryDate.Value.ToString("MMM dd, yyyy") : EmptyFieldReplacer)
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-calendar-check"></i>
+                        <span class="text-muted">Purchase Date</span>
+                        <span class="text-black">
+                            @(Model?.PurchaseDate.HasValue == true ? Model.PurchaseDate.Value.ToString("MMM dd, yyyy") : EmptyFieldReplacer)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <div class="accordion-body px-2">
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-person-circle"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Owner</span>
+
+                        @{
+                            var owner = Model?.Owner_Name + " " + Model?.Owner_Surname ?? "-";
+                            var isSystemOwner = owner.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var ownerLabel = isSystemOwner ? "System" : owner;
+                        }
+                        @if (isSystemOwner)
+                        {
+                            <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                  title="This account was self-registered">
+                                @ownerLabel
+                                <span class="fsm-tag fsm-tag--bubble fsm-tag--starter">Self-registered</span>
+                            </span>
+                        }
+                        else
+                        {
+                            <div class="my-2">
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = Model!.Owner_Id! ?? Guid.Empty,
+                                    Name = Model!.Owner_Name!,
+                                    Surname = Model!.Owner_Surname!,
+                                    AvatarUrl = Model!.Owner_AvatarUrl!
+                                })
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <div class="gap-1">
+                        <span class="small text-black">Created By</span>
+
+                        @{
+                            var createdBy = Model?.CB_Name + " " + Model?.CB_Surname ?? "-";
+                            var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            var createdByLabel = isSystemCreated ? "" : createdBy;
+                        }
+
+                        @if (isSystemCreated)
+                        {
+                            <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                  title="This account was self-registered">
+                                @createdByLabel
+                                <span class="fsm-tag fsm-tag--bubble fsm-tag--starter">Self-registered</span>
+                            </span>
+                        }
+                        else
+                        {
+                            <div class="my-2">
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = Model!.CB_Id! ?? Guid.Empty,
+                                    Name = Model!.CB_Name!,
+                                    Surname = Model!.CB_Surname!,
+                                    AvatarUrl = Model!.CB_AvatarUrl!
+                                })
+                            </div>
+                        }
+
+                        <span class="small text-black mb-2 small">On @Model?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.CreatedAt.ToString("tt").ToUpper()</span>
+                    </div>
+                </div>
+
+                @if (Model!.UpdatedBy.HasValue)
+                {
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-file-earmark-plus"></i>
+                        <div class="gap-1">
+                            <span class="small text-black">Created By</span>
+
+                            @{
+                                var updatedBy = Model?.UB_Name + " " + Model?.UB_Surname ?? "-";
+                                var isSystemUpdated = updatedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                                var updatedByLabel = isSystemUpdated ? "" : updatedBy;
+                            }
+
+                            @if (isSystemUpdated)
+                            {
+                                <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                      title="This account was self-registered">
+                                    @updatedByLabel
+                                    <span class="fsm-tag fsm-tag--bubble fsm-tag--starter">Self-registered</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <div class="my-2">
+                                    @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                    {
+                                        Id = Model!.UB_Id! ?? Guid.Empty,
+                                        Name = Model!.UB_Name!,
+                                        Surname = Model!.UB_Surname!,
+                                        AvatarUrl = Model!.UB_AvatarUrl!
+                                    })
+                                </div>
+                            }
+
+                            <span class="small text-black mb-2 small">On @Model?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.UpdatedAt?.ToString("tt").ToUpper()</span>
+                        </div>
+                    </div>
+
+                }
+            </div>
+        </div>
+    </div>
+</div>

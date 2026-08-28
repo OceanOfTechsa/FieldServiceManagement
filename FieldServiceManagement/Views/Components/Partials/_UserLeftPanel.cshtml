@@ -1,5 +1,4 @@
-﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
-@using FieldServiceManagement.Enum
+﻿@using FieldServiceManagement.Enum
 @using FieldServiceManagement.ViewModels.Shared
 @model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
 
@@ -345,7 +344,7 @@
                         @{
                             var createdBy = Model?.CreatedBy?.Name + " " + Model?.CreatedBy?.Surname ?? "-";
                             var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
-                            var createdByLabel = isSystemCreated ? "System" : createdBy;
+                            var createdByLabel = isSystemCreated ? "" : createdBy;
                         }
 
                         @if (isSystemCreated)
@@ -353,7 +352,7 @@
                             <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
                                   title="This account was self-registered">
                                 @createdByLabel
-                                <span class="fsm-pill fsm-pill bg-info-subtle text-black">Self-registered</span>
+                                <span class="fsm-tag fsm-tag--bubble fsm-tag--starter">Self-registered</span>
                             </span>
                         }
                         else
@@ -380,7 +379,7 @@
                         @{
                             var modifiedBy = Model?.CreatedBy?.Name + " " + Model?.CreatedBy?.Surname ?? "-";
                             var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
-                            var modifiedByLabel = iSystemModified ? "System" : modifiedBy;
+                            var modifiedByLabel = iSystemModified ? "" : modifiedBy;
                         }
 
                         @if (iSystemModified)
@@ -388,7 +387,7 @@
                             <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
                                   title="This account was self-registered">
                                 @modifiedByLabel
-                                <span class="fsm-pill fsm-pill bg-info-subtle text-black">Self-registered</span>
+                                <span class="fsm-tag fsm-tag--bubble fsm-tag--starter">Self-registered</span>
                             </span>
                         }
                         else

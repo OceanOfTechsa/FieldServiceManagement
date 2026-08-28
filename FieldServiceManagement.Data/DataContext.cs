@@ -48,6 +48,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using FieldServiceManagement.Models;
 
 namespace FieldServiceManagement.Data
 {
@@ -112,6 +113,7 @@ namespace FieldServiceManagement.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Crew> Crews { get; set; }
         public DbSet<CrewMember> CrewMembers { get; set; }
+        public DbSet<Equipment> Equipments { get; set; }
         #endregion
 
         #region Error

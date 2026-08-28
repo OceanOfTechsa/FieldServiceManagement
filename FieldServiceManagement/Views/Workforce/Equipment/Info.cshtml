@@ -1,0 +1,320 @@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.ViewModels.Audit
+@using X.PagedList
+@model IPagedList<FieldServiceManagement.ViewModels.Equipment.EquipmentDetailsViewModel>
+
+@{
+    var equipment = Model.FirstOrDefault();
+    ViewData["Title"] = equipment?.Name ?? "Equipment Details";
+
+    var auditLogs = Model
+        .Where(m => m.AuditLogId.HasValue)
+        .Select(m => new AuditLogViewModel
+        {
+            Id = m.AuditLogId ?? Guid.Empty,
+            EntityName = m.AuditLogEntityName,
+            EntityId = m.AuditLogEntityId,
+            Action = m.AuditLogAction,
+            FieldName = m.AuditLogFieldName,
+            OldValue = m.AuditLogOldValue,
+            NewValue = m.AuditLogNewValue,
+            Comment = m.AuditLogComment,
+            PerformedByUserId = m.AuditLogPerformedByUserId ?? Guid.Empty,
+            PerformedByName = m.AuditLogPerformedByName,
+            IpAddress = m.AuditLogIpAddress,
+            OrganisationId = m.AuditLogOrganisationId ?? Guid.Empty,
+            CreatedAt = m.AuditLogCreatedAt ?? DateTime.MinValue,
+            ShowEntityType = false,
+            ShowComment = m.AuditLogShowComment,
+            VisibleTo = m.AuditLogVisibleTo
+        })
+        .ToList();
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-1">
+        <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex flex-column">
+                <div class="d-flex align-items-start gap-1 my-1">
+                    <a href="/Workforce/Equipment" class="text-primary">Equipment</a>
+                    <i class="bi bi-arrow-return-right fs-6"></i>
+                    <span>@equipment?.Name</span>
+                </div>
+            </div>
+        </div>
+
+        @if (equipment?.IsDeleted == false)
+        {
+            <div class="fsm-btn-group bg-primary">
+                <a href="/Workforce/Equipment/Edit?Id=@UrlEncryptionBusiness.EncryptParam(equipment.Id.ToString())" class="btn-main"
+                   data-bs-toggle="tooltip" data-bs-title="Edit"
+                   data-bs-placement="bottom"
+                   data-bs-custom-class="fsm-tooltip mobile-only-tooltip">
+                    Edit
+                </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <!--
+                        NOTE: Company's equivalent menu also has a "Change Owner"
+                        action here — there's no ownership-transfer concept for
+                        Equipment (only CreatedBy/UpdatedBy), so it's omitted
+                        rather than wired up to nothing.
+                    -->
+                    <button class="fsm-btn-group__item"
+                            data-bs-toggle="tooltip" data-bs-title="Delete"
+                            data-bs-placement="bottom"
+                            data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                            data-fsm-delete-trigger>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel rounded-2">
+                @await Html.PartialAsync("~/Views/Components/Partials/_EquipmentLeftPanel.cshtml", equipment)
+            </div>
+
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
+            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+                <div class="fsm-tab-bar" id="fsm-equipment-tab-bar">
+                    <div class="fsm-tab-track" id="fsm-tab-track">
+                        <button class="fsm-tab active" data-tab="timeline" data-index="0">Timeline</button>
+                        <!--
+                            NOTE: Company's tab bar also has Contacts, Addresses,
+                            Notes, Attachments, Billing, and Related List — none of
+                            those map to Equipment. Only Timeline is wired up and
+                            working here rather than shipping dead placeholder tabs;
+                            add real ones (e.g. "Maintenance History", "Assigned To")
+                            if/when there's an actual panel to back them.
+                        -->
+                    </div>
+
+                    <div class="fsm-tab-more fsm-dropdown" id="fsm-tab-more" style="display:none;">
+                        <button class="fsm-tab-more-btn nav-dropdown-toggle"
+                                id="fsm-tab-more-btn"
+                                type="button"
+                                aria-expanded="false"
+                                aria-label="More tabs">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="fsm-dropdown-menu fsm-tab-more-menu show"
+                             id="fsm-tab-more-menu"
+                             role="menu">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fsm-tab-content flex-grow-1 overflow-auto">
+                    <div class="fsm-tab-panel active" data-panel="timeline">
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">Equipment Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 overflow-y-auto">
+        @await Html.PartialAsync("~/Views/Components/Partials/_EquipmentLeftPanel.cshtml", equipment)
+    </div>
+</div>
+
+<div id="fsm-delete-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="delete-title" class="dialog-title">Delete Equipment</p>
+
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Delete Confirmation Required</p>
+                <p class="warn-sub">Are you sure you want to permanently delete <strong>@equipment?.Name</strong>?</p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            This deletion is <strong>irreversible</strong>. Please select <strong>Delete Equipment</strong> to proceed, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none" id="fsm-delete-equipment-error">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            <span id="fsm-delete-equipment-error-text">Failed to delete this equipment. Please try again.</span>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+            <button class="btn-confirm" id="fsm-delete-confirm" data-loading-text="Deleting">
+                Delete Equipment
+            </button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript" nonce="@(Context.Items.TryGetValue("csp-nonce", out var n) ? n?.ToString() : null)">
+        (function() {
+            'use strict';
+
+            // ── Delete dialog ─────────────────────────────────────────
+            const deleteDialog = document.getElementById('fsm-delete-dialog');
+            document.querySelectorAll('[data-fsm-delete-trigger]').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteDialog?.classList.add('show');
+            }));
+            document.querySelectorAll('[data-fsm-delete-cancel]').forEach(btn => btn.addEventListener('click', () => {
+                deleteDialog?.classList.remove('show');
+            }));
+
+            const deleteConfirmBtn = document.getElementById('fsm-delete-confirm');
+            const deleteErrorBox = document.getElementById('fsm-delete-equipment-error');
+            const deleteErrorText = document.getElementById('fsm-delete-equipment-error-text');
+
+            deleteConfirmBtn?.addEventListener('click', async function() {
+                const btn = this;
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = btn.dataset.loadingText || 'Deleting...';
+                deleteErrorBox?.classList.add('d-none');
+
+                try {
+                    const res = await fetch('/Workforce/Equipment/Delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ equipmentId: '@equipment?.Id' })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        window.location.href = '/Workforce/Equipment';
+                        return;
+                    }
+
+                    if (deleteErrorText) deleteErrorText.textContent = data.errorMessage || 'Failed to delete this equipment. Please try again.';
+                    deleteErrorBox?.classList.remove('d-none');
+                } catch (err) {
+                    if (deleteErrorText) deleteErrorText.textContent = 'Something went wrong. Please try again.';
+                    deleteErrorBox?.classList.remove('d-none');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            });
+
+            // ── Tab bar overflow handling (single tab today, but kept in
+            //    case more tabs get added later) ─────────────────────
+            const track = document.getElementById('fsm-tab-track');
+            const moreWrap = document.getElementById('fsm-tab-more');
+            const moreBtn = document.getElementById('fsm-tab-more-btn');
+            const moreMenu = document.getElementById('fsm-tab-more-menu');
+            const tabs = Array.from(track?.querySelectorAll('.fsm-tab') ?? []);
+            const panels = Array.from(document.querySelectorAll('.fsm-tab-panel'));
+
+            if (!track || !tabs.length) return;
+
+            function activate(tabName) {
+                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
+                moreMenu?.querySelectorAll('button').forEach(b => {
+                    b.classList.toggle('active', b.dataset.tab === tabName);
+                });
+            }
+
+            tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.tab)));
+
+            function recalc() {
+                if (!moreWrap) return;
+
+                tabs.forEach(t => { t.style.display = ''; });
+                moreWrap.style.display = 'none';
+                moreWrap.style.visibility = 'hidden';
+                moreMenu.innerHTML = '';
+
+                requestAnimationFrame(() => {
+                    const barWidth = track.parentElement.offsetWidth;
+                    const moreBtnW = 44;
+                    let used = 0;
+                    const overflowed = [];
+
+                    tabs.forEach(tab => {
+                        used += tab.getBoundingClientRect().width;
+                        if (used > barWidth - moreBtnW) {
+                            tab.style.display = 'none';
+                            overflowed.push(tab);
+                        }
+                    });
+
+                    if (overflowed.length === 0) {
+                        moreWrap.style.display = 'none';
+                        moreWrap.style.visibility = '';
+                        return;
+                    }
+
+                    moreWrap.style.display = '';
+                    moreWrap.style.visibility = '';
+
+                    overflowed.forEach(tab => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.role = 'menuitem';
+                        btn.dataset.tab = tab.dataset.tab;
+                        btn.textContent = tab.textContent.trim();
+                        btn.className = 'dropdown-item' + (tab.classList.contains('active') ? ' active' : '');
+                        btn.addEventListener('click', () => {
+                            activate(tab.dataset.tab);
+                            moreMenu.classList.remove('show');
+                            moreBtn.setAttribute('aria-expanded', 'false');
+                        });
+                        moreMenu.appendChild(btn);
+                    });
+                });
+            }
+
+            moreBtn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = moreMenu.classList.contains('show');
+                document.querySelectorAll('.fsm-dropdown-menu.show').forEach(m => {
+                    m.classList.remove('show');
+                    m.closest('.fsm-dropdown')?.querySelector('[aria-expanded]')?.setAttribute('aria-expanded', 'false');
+                });
+                if (!isOpen) {
+                    moreMenu.classList.add('show');
+                    moreBtn.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            moreMenu?.addEventListener('click', (e) => e.stopPropagation());
+            document.addEventListener('click', () => {
+                moreMenu?.classList.remove('show');
+                moreBtn?.setAttribute('aria-expanded', 'false');
+            });
+
+            requestAnimationFrame(() => requestAnimationFrame(recalc));
+            window.addEventListener('resize', recalc);
+        })();
+    </script>
+}

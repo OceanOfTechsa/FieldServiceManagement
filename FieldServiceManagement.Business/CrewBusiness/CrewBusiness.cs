@@ -1,6 +1,5 @@
 ﻿using FieldServiceManagement.Business.MappingBusiness;
 using FieldServiceManagement.Data.DataModels.Crew;
-using FieldServiceManagement.Data.DataModels.Organisation;
 using FieldServiceManagement.Data.DataModels.Shared;
 using FieldServiceManagement.Enum;
 using FieldServiceManagement.Repository.Repositories;
