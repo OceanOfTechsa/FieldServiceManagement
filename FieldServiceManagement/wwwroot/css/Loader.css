@@ -1,5 +1,4 @@
-﻿
-.fsm-loader-backdrop {
+﻿.fsm-loader-backdrop {
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -13,13 +12,17 @@
     gap: 0;
     opacity: 1;
     transition: opacity 0.35s ease, visibility 0.35s ease;
-}
 
-    .fsm-loader-backdrop.fsm-loader-hidden {
+    &.fsm-loader-hidden {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
     }
+
+    [data-bs-theme="dark"] & {
+        background: rgba(27, 30, 33, 0.9);
+    }
+}
 
 .fsm-loader-content {
     display: flex;
@@ -35,6 +38,11 @@
     border-top-color: #0cbc87;
     border-radius: 50%;
     animation: fsm-spin 0.75s linear infinite;
+
+    [data-bs-theme="dark"] & {
+        border-color: rgba(255, 255, 255, 0.1);
+        border-top-color: #10b981;
+    }
 }
 
 .fsm-loader-text {
@@ -43,12 +51,20 @@
     color: #1a1a1a;
     margin: 0;
     letter-spacing: 0.01em;
+
+    [data-bs-theme="dark"] & {
+        color: #f1f5f9;
+    }
 }
 
 .fsm-loader-sub {
     font-size: 12px;
     color: #6c757d;
     margin: 0;
+
+    [data-bs-theme="dark"] & {
+        color: #9ca3af;
+    }
 }
 
 @keyframes fsm-spin {
@@ -56,8 +72,6 @@
         transform: rotate(360deg);
     }
 }
-
-
 
 
 /*

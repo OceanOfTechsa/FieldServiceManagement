@@ -12,7 +12,7 @@
 
     Func<string, string, string> navClass = (currentController, currentAction) =>
         isAction(currentController, currentAction)
-            ? "text-primary fw-semibold"
+            ? "text-muted fw-bold"
             : "text-muted";
 
     bool profileOpen = isController("Manage");
@@ -31,21 +31,14 @@
     bool settingsOpen = isController("Settings");
 }
 
-<style>
-    .accordion-button.text-primary,
-    .accordion-button.text-primary strong,
-    .accordion-button.text-primary i {
-        color: var(--bs-primary) !important;
-    }
-</style>
 
 <div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="account">
 
     <!-- PROFILE -->
 
-    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+    <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white rounded-2 shadow-none @(profileOpen ? "text-primary" : "text-dark collapsed")"
+            <button class="accordion-button rounded-2 shadow-none @(profileOpen ? "text-primary" : "collapsed")"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#profileInfoCollapse"
@@ -87,9 +80,9 @@
 
     <!-- SECURITY -->
 
-    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+    <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white rounded-2 shadow-none @(securityOpen ? "text-primary" : "text-dark collapsed")"
+            <button class="accordion-button rounded-2 shadow-none @(securityOpen ? "text-primary" : "collapsed")"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#securityInfoCollapse"
@@ -122,9 +115,9 @@
 
     <!-- MFA -->
 
-    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+    <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white rounded-2 shadow-none @(mfaOpen ? "text-primary" : "text-dark collapsed")"
+            <button class="accordion-button rounded-2 shadow-none @(mfaOpen ? "text-primary" : "collapsed")"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#mfaInfoCollapse"
@@ -164,9 +157,9 @@
 
     <!-- SETTINGS -->
 
-    <div class="accordion-item border-0 rounded-2 mb-2 bg-white">
+    <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white rounded-2 shadow-none @(settingsOpen ? "text-primary" : "text-dark collapsed")"
+            <button class="accordion-button rounded-2 shadow-none @(settingsOpen ? "text-primary" : "collapsed")"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#settingsInfoCollapse"

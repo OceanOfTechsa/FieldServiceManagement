@@ -1,5 +1,4 @@
 ﻿using FieldServiceManagement.Business.Configuration;
-using FieldServiceManagement.Business.EmailBusiness;
 using FieldServiceManagement.Business.MappingBusiness;
 using FieldServiceManagement.Business.NotificationBusiness;
 using FieldServiceManagement.Business.NotificationBusiness.Notifications;
@@ -91,9 +90,9 @@ namespace FieldServiceManagement.Business.AnnouncementBusiness
                 : null;
 
             existing.Title = Model.Title;
-            existing.Description = Model.Description;
-            existing.Notes = Model.Notes;
-            existing.AnnouncementDate = Model.AnnouncementDate;
+            existing.Description = Model?.Description!;
+            existing.Notes = Model?.Notes;
+            existing.AnnouncementDate = Model!.AnnouncementDate;
             existing.StatusId = Model.StatusId;
             existing.VisibleToRoleIds = visibleToRoleIds;
             existing.IsActive = Model.IsActive;

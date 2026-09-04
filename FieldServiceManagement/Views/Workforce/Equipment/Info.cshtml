@@ -1,47 +1,28 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
-@using FieldServiceManagement.ViewModels.Audit
-@using X.PagedList
-@model IPagedList<FieldServiceManagement.ViewModels.Equipment.EquipmentDetailsViewModel>
+@using FieldServiceManagement.ViewModels.Shared
+@model FieldServiceManagement.ViewModels.Equipment.EquipmentDetailsViewModel
 
 @{
-    var equipment = Model.FirstOrDefault();
+    var equipment = Model.Equipment;
     ViewData["Title"] = equipment?.Name ?? "Equipment Details";
-
-    var auditLogs = Model
-        .Where(m => m.AuditLogId.HasValue)
-        .Select(m => new AuditLogViewModel
-        {
-            Id = m.AuditLogId ?? Guid.Empty,
-            EntityName = m.AuditLogEntityName,
-            EntityId = m.AuditLogEntityId,
-            Action = m.AuditLogAction,
-            FieldName = m.AuditLogFieldName,
-            OldValue = m.AuditLogOldValue,
-            NewValue = m.AuditLogNewValue,
-            Comment = m.AuditLogComment,
-            PerformedByUserId = m.AuditLogPerformedByUserId ?? Guid.Empty,
-            PerformedByName = m.AuditLogPerformedByName,
-            IpAddress = m.AuditLogIpAddress,
-            OrganisationId = m.AuditLogOrganisationId ?? Guid.Empty,
-            CreatedAt = m.AuditLogCreatedAt ?? DateTime.MinValue,
-            ShowEntityType = false,
-            ShowComment = m.AuditLogShowComment,
-            VisibleTo = m.AuditLogVisibleTo
-        })
-        .ToList();
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-1">
-        <div class="d-flex gap-2 align-items-center">
-            <div class="d-flex flex-column">
-                <div class="d-flex align-items-start gap-1 my-1">
-                    <a href="/Workforce/Equipment" class="text-primary">Equipment</a>
-                    <i class="bi bi-arrow-return-right fs-6"></i>
-                    <span>@equipment?.Name</span>
-                </div>
-            </div>
-        </div>
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3 py-1">
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            ShowHistory = true,
+            Icon = "bi bi-truck",
+            Items = new List<BreadcrumbItem>
+            {
+                new() { Label = "Workforce", Url = null},
+                new() { Label = "Equipement",Url = "/Workforce/Equipment" },
+                new() { Label = Model?.Equipment?.Name!, Url = null},
+            }
+        })
 
         @if (equipment?.IsDeleted == false)
         {
@@ -56,17 +37,20 @@
                     <i class="bi bi-chevron-down"></i>
                 </button>
                 <div class="fsm-btn-group__menu">
-                    <!--
-                        NOTE: Company's equivalent menu also has a "Change Owner"
-                        action here — there's no ownership-transfer concept for
-                        Equipment (only CreatedBy/UpdatedBy), so it's omitted
-                        rather than wired up to nothing.
-                    -->
                     <button class="fsm-btn-group__item"
                             data-bs-toggle="tooltip" data-bs-title="Delete"
                             data-bs-placement="bottom"
                             data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
                             data-fsm-delete-trigger>
+                        <i class="bi bi-person-gear me-2"></i>
+                        Change Owner
+                    </button>
+                    <button class="fsm-btn-group__item"
+                            data-bs-toggle="tooltip" data-bs-title="Delete"
+                            data-bs-placement="bottom"
+                            data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                            data-fsm-delete-trigger>
+                        <i class="bi bi-trash me-2"></i>
                         Delete
                     </button>
                 </div>
@@ -77,7 +61,7 @@
     <div class="fsm-fixed-view-wrapper">
         <div class="d-flex gap-2 w-100 h-100">
             <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel rounded-2">
-                @await Html.PartialAsync("~/Views/Components/Partials/_EquipmentLeftPanel.cshtml", equipment)
+                @await Html.PartialAsync("~/Views/Components/Partials/_EquipmentLeftPanel.cshtml", Model)
             </div>
 
             <button class="btn fsm-panel-fab d-lg-none"
@@ -88,18 +72,13 @@
                 <i class="bi bi-layout-sidebar"></i>
             </button>
 
-            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+            <div class="flex-grow-1 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
                 <div class="fsm-tab-bar" id="fsm-equipment-tab-bar">
                     <div class="fsm-tab-track" id="fsm-tab-track">
                         <button class="fsm-tab active" data-tab="timeline" data-index="0">Timeline</button>
-                        <!--
-                            NOTE: Company's tab bar also has Contacts, Addresses,
-                            Notes, Attachments, Billing, and Related List — none of
-                            those map to Equipment. Only Timeline is wired up and
-                            working here rather than shipping dead placeholder tabs;
-                            add real ones (e.g. "Maintenance History", "Assigned To")
-                            if/when there's an actual panel to back them.
-                        -->
+                        <button class="fsm-tab" data-tab="service-appointments" data-index="2">Service Appointments</button>
+                        <button class="fsm-tab" data-tab="crew" data-index="1">Crew</button>
+                        <button class="fsm-tab" data-tab="notes" data-index="3">Notes</button>
                     </div>
 
                     <div class="fsm-tab-more fsm-dropdown" id="fsm-tab-more" style="display:none;">
@@ -119,7 +98,16 @@
 
                 <div class="fsm-tab-content flex-grow-1 overflow-auto">
                     <div class="fsm-tab-panel active" data-panel="timeline">
-                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", Model?.AuditLogs)
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="service-appointments">
+                        <h3>Service Appointments</h3>
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="crew">
+                       <h3>Crew</h3>
+                    </div>
+                    <div class="fsm-tab-panel" data-panel="notes">
+                        <h3>Notes</h3>
                     </div>
                 </div>
             </div>
@@ -136,7 +124,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body p-0 overflow-y-auto">
-        @await Html.PartialAsync("~/Views/Components/Partials/_EquipmentLeftPanel.cshtml", equipment)
+        @await Html.PartialAsync("~/Views/Components/Partials/_EquipmentLeftPanel.cshtml", Model)
     </div>
 </div>
 
@@ -166,12 +154,18 @@
             <span id="fsm-delete-equipment-error-text">Failed to delete this equipment. Please try again.</span>
         </div>
 
-        <div class="dialog-footer">
-            <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
-            <button class="btn-confirm" id="fsm-delete-confirm" data-loading-text="Deleting">
-                Delete Equipment
-            </button>
-        </div>
+         <form id="fsm-delete-form" asp-controller="Equipmenet" asp-action="delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="EquipmentId" value="@Model?.Equipment?.Id">
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+                <button type="submit" class="btn-confirm" id="fsm-delete-confirm" data-loading-text="Deleting">
+                    Delete Equipment
+                </button>
+            </div>
+        </form>
+        
     </div>
 </div>
 
@@ -225,8 +219,6 @@
                 }
             });
 
-            // ── Tab bar overflow handling (single tab today, but kept in
-            //    case more tabs get added later) ─────────────────────
             const track = document.getElementById('fsm-tab-track');
             const moreWrap = document.getElementById('fsm-tab-more');
             const moreBtn = document.getElementById('fsm-tab-more-btn');

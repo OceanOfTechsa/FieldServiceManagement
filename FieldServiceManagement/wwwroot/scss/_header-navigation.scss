@@ -969,6 +969,10 @@ $nav-height:      44px;
     transform: translateY(8px) scale(0.97);
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
     width: min(480px, 90vw);
+
+    [data-bs-theme="dark"] & {
+        background: #1b1e21;
+    }
     /* Width Modifiers */
     &.fsm-dialog-sm {
         width: min(380px, 90vw);
@@ -994,7 +998,6 @@ $nav-height:      44px;
         width: min(1090px, 95vw);
     }
 
-
     .fsm-dialog-backdrop.show & {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -1007,12 +1010,21 @@ $nav-height:      44px;
         color: #111;
         margin: 0;
         border-bottom: 1px solid #f3f4f6;
+
+        [data-bs-theme="dark"] & {
+            color: #f1f5f9;
+            border-bottom-color: #2d3238;
+        }
     }
 
     .dialog-body {
         padding: 12px;
         font-size: 13px;
         color: #606261;
+
+        [data-bs-theme="dark"] & {
+            color: #9ca3af;
+        }
     }
 
     .dialog-footer {
@@ -1022,6 +1034,10 @@ $nav-height:      44px;
         gap: 8px;
         padding: 10px 12px;
         border-top: 1px solid #e5e7eb;
+
+        [data-bs-theme="dark"] & {
+            border-top-color: #2d3238;
+        }
     }
     /* ====================== ALERT / MESSAGE VARIANTS ====================== */
     .dialog-warning,
@@ -1039,21 +1055,37 @@ $nav-height:      44px;
     .dialog-warning {
         border-color: rgba(245, 158, 11, 0.4);
         background: #fffaf0;
+
+        [data-bs-theme="dark"] & {
+            background: rgba(245, 158, 11, 0.08);
+        }
     }
 
     .dialog-info {
         border-color: rgba(59, 130, 246, 0.4);
         background: #f0f9ff;
+
+        [data-bs-theme="dark"] & {
+            background: rgba(59, 130, 246, 0.08);
+        }
     }
 
     .dialog-success {
         border-color: rgba(16, 185, 129, 0.4);
         background: #f0fdf4;
+
+        [data-bs-theme="dark"] & {
+            background: rgba(16, 185, 129, 0.08);
+        }
     }
 
     .dialog-danger {
         border-color: rgba(239, 68, 68, 0.4);
         background: #fffcfc;
+
+        [data-bs-theme="dark"] & {
+            background: rgba(239, 68, 68, 0.08);
+        }
     }
         /* Icon Styling */
         .dialog-warning .warn-icon,
@@ -1101,6 +1133,10 @@ $nav-height:      44px;
             margin: 0;
             font-size: 13px;
             line-height: 1.5;
+
+            [data-bs-theme="dark"] & {
+                color: #e5e7eb;
+            }
         }
 
         .dialog-warning .warn-text .warn-sub,
@@ -1110,6 +1146,10 @@ $nav-height:      44px;
             color: #606261;
             margin-top: 2px;
             font-size: 12.5px;
+
+            [data-bs-theme="dark"] & {
+                color: #9ca3af;
+            }
         }
     /* Buttons */
     .btn-cancel {
@@ -1120,10 +1160,20 @@ $nav-height:      44px;
         font-size: 13px;
         cursor: pointer;
         transition: background 0.12s;
+
+        [data-bs-theme="dark"] & {
+            background: #1b1e21;
+            border-color: #2d3238;
+            color: #f1f5f9;
+        }
     }
 
         .btn-cancel:hover {
             background: #f9fafb;
+
+            [data-bs-theme="dark"] & {
+                background: #24272b;
+            }
         }
 
     .btn-confirm {
@@ -1212,7 +1262,6 @@ $nav-height:      44px;
     //    color: #1e40af;
     //}
 }
-
 // ─── Body offset ─────────────────────────────────────────────────────────────
 body.fsm-app {
     padding-top: $nav-height;
@@ -1246,6 +1295,12 @@ body.fsm-app {
     box-shadow: 0 6px 24px rgba(0,0,0,.12);
     border: 1px solid #eee;
     overflow: hidden;
+
+    [data-bs-theme="dark"] & {
+        background: #1b1e21;
+        border-color: #2d3238;
+        box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    }
 }
 
 /* Search bar flush at the very top, no outer padding, white background */
@@ -1253,6 +1308,11 @@ body.fsm-app {
     padding: 0;
     background: #fff;
     border-bottom: 1px solid #eee;
+
+    [data-bs-theme="dark"] & {
+        background: #1b1e21;
+        border-bottom-color: #2d3238;
+    }
 }
 
 .actions-search-wrap {
@@ -1266,6 +1326,10 @@ body.fsm-app {
     left: 10px;
     color: #adb5bd;
     pointer-events: none;
+
+    [data-bs-theme="dark"] & {
+        color: #6b7280;
+    }
 }
 
 .actions-search-input {
@@ -1275,6 +1339,15 @@ body.fsm-app {
     border: none;
     outline: none;
     background: #fff;
+
+    [data-bs-theme="dark"] & {
+        background: #1b1e21;
+        color: #f1f5f9;
+
+        &::placeholder {
+            color: #6b7280;
+        }
+    }
 }
 
 /* Same fixed height + scroll as the notification dropdown */
@@ -1288,18 +1361,32 @@ body.fsm-app {
     color: #6c757d;
     font-size: .78rem;
     font-weight: 600;
+
+    [data-bs-theme="dark"] & {
+        background: #24272b;
+        color: #9ca3af;
+    }
 }
 
 .actions-item.dropdown-item {
     font-size: .85rem;
     color: #212529;
     text-decoration: none;
+
+    [data-bs-theme="dark"] & {
+        color: #f1f5f9;
+    }
 }
 
-.actions-item.dropdown-item:hover {
-    background: rgba(0,153,102,.08);
-    color: #009966;
-}
+    .actions-item.dropdown-item:hover {
+        background: rgba(0,153,102,.08);
+        color: #009966;
+
+        [data-bs-theme="dark"] & {
+            background: rgba(16,185,129,.14);
+            color: #10b981;
+        }
+    }
 
 .actions-btn {
     background: transparent;
@@ -1311,8 +1398,16 @@ body.fsm-app {
     align-items: center;
     justify-content: center;
     color: #495057;
+
+    [data-bs-theme="dark"] & {
+        color: #9ca3af;
+    }
 }
 
-.actions-btn:hover {
-    background: #f1f3f5;
-}
+    .actions-btn:hover {
+        background: #f1f3f5;
+
+        [data-bs-theme="dark"] & {
+            background: #2d3238;
+        }
+    }

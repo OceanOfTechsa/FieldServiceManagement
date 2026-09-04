@@ -1,11 +1,11 @@
-﻿
-document.addEventListener("DOMContentLoaded", function () {
+﻿document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll("form").forEach(form => {
 
         form.addEventListener("submit", function (e) {
-
+            console.log("submitted")
             const button = document.activeElement;
+            console.log(button)
 
             if (!button || button.type !== "submit" || button.disabled) return;
 

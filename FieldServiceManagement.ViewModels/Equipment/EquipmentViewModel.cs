@@ -1,11 +1,10 @@
 ﻿using FieldServiceManagement.Data.DataModels.BaseClass;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FieldServiceManagement.Models
+namespace FieldServiceManagement.ViewModels.Equipment
 {
-    [Table("Equipments")]
-    public class Equipment : BaseGuidPrimaryKey
+    public class EquipmentViewModel : BaseGuidPrimaryKeyViewModel
     {
         [Required]
         [MaxLength(200)]
@@ -13,22 +12,27 @@ namespace FieldServiceManagement.Models
 
         public string? Description { get; set; }
 
+        [DisplayName("Status")]
         public int? StatusId { get; set; }
 
         public int? Type { get; set; }
 
+        [DisplayName("Serial Number")]
         [MaxLength(200)]
         public string? SerialNumber { get; set; }
 
+        [DisplayName("Warranty Status")]
         public int? WarrantyStatus { get; set; }
 
+        [DisplayName("Warranty Expiry Date")]
         public DateTime? WarrantyExpiryDate { get; set; }
 
+        [DisplayName("Purchase Date")]
         public DateTime? PurchaseDate { get; set; }
 
         public bool IsDeleted { get; set; }
 
-        public bool IsActive { get; set; }
+        public int IsActive { get; set; }
 
         [Required]
         public Guid OrganisationId { get; set; }
@@ -46,6 +50,15 @@ namespace FieldServiceManagement.Models
         [Required]
         public Guid OwnerId { get; set; }
 
+        [DisplayName("Model Number")]
         public string? ModelNumber { get; set; }
     }
+
+
+    public class DeleteEquipmentRequest
+    {
+        [Required]
+        public Guid EquipmentId { get; set; }
+    }
+
 }

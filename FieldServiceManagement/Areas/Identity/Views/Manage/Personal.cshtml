@@ -17,7 +17,7 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-2 px-3">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2  px-3">
         @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
         new BreadcrumbViewModel
         {
@@ -47,7 +47,7 @@
                 <i class="bi bi-layout-sidebar"></i>
             </button>
 
-            <form class="d-flex flex-column flex-grow-1 overflow-hidden" method="post" id = "edit-user-form" action="/Identity/Account/Manage/Edit">
+            <form class="d-flex flex-column flex-grow-1 overflow-hidden" method="post" id="edit-user-form" action="/Identity/Account/Manage/Edit">
 
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(m => m.Id)
@@ -62,7 +62,7 @@
                 @Html.HiddenFor(m => m.StatusId)
                 @Html.HiddenFor(m => m.EmployeeNumber)
 
-                <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+                <div class="flex-grow-1 bg-surface rounded-2 overflow-hidden d-flex flex-column">
                     <div class="p-2 d-flex justify-content-between align-items-center border-bottom">
                         <div class="d-flex justify-content-between align-items-center gap-2">
 
@@ -93,7 +93,7 @@
                                 @{
                                     var salutationDisplay = ((UserSalutation)Model?.SalutationId!).GetNormalisedDisplayName() ?? "Uknown";
                                 }
-                                <span class="fw-semibold text-black">@salutationDisplay. @Model.Name @Model.Surname</span>
+                                <span class="fw-semibold">@salutationDisplay. @Model.Name @Model.Surname</span>
                                 <span class="text-muted">@Model.Email</span>
                             </div>
 
@@ -319,7 +319,7 @@
                             </div>
                         </div>
 
-                        <div class="border-top p-2 d-flex gap-2 justify-content-end flex-shrink-0 bg-white">
+                        <div class="FormFooter">
                             <button class="btn btn-light btn-xs border d-none" id="cancelEdit" type=button>
                                 Cancel
                             </button>

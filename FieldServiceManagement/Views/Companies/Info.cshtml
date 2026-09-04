@@ -1,5 +1,6 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
 @using FieldServiceManagement.ViewModels.Audit
 @using X.PagedList
 @model IPagedList<FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel>
@@ -34,40 +35,22 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-1">
-        <div class="d-flex gap-2 align-items-center">
-            @* <img src="@($"https://ui-avatars.com/api/?name={company?.Name}&background=random")"
-                 alt="Avatar"
-                 class="fsm-avatar-lg" /> *@
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3 py-1">
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            Icon = "bi-stars",
+            Items = new List<BreadcrumbItem>
+            {
+                new() { Label = "Customers",         Url = null },
+                new() { Label = "Companies", Url = "/Customers/Companies" },
+                new() { Label = company?.Name! ,Url = Url.Action("Info", "Equipment", new { Id = UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!) }) },
+            }
+        })
 
-            <div class="d-flex flex-column">
-                <div class="d-flex align-items-start gap-1 my-1">
-                    <a href="/Customers/Companies" class="text-primary">Companies</a>
-                    <i class="bi bi-arrow-return-right fs-6"></i>
-                    <span>@company?.Name</span>
-                </div>
-                @* <div class="d-flex align-items-center gap-2">
-                    @{
-                        var (statusLabel, statusCss) = company!.IsDeleted
-                            ? ("Deleted", "bg-danger")
-                            : company.IsActive
-                                ? ("Active", "bg-success")
-                                : ("Inactive", "bg-secondary");
-                    }
-                    <span class="d-inline-flex align-items-center gap-2 fsm-meta-item">
-                        <span class="fsm-status-dot @statusCss"></span>
-                        <span>@statusLabel</span>
-                    </span>
-
-                    <span class="fsm-meta-item">
-                        <i class="bi bi-person-circle"></i>
-                        <span>@company.CreatedByName @company.CreatedBySurname</span>
-                    </span>
-                </div> *@
-            </div>
-        </div>
-
-        @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.CallCenterAgent.ToString())) && company.IsDeleted == false)
+        @if ((User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.SuperAdmin.ToString()) || User.IsInRole(UserRole.CallCenterAgent.ToString())) && company?.IsDeleted == false)
         {
             <div class="fsm-btn-group bg-primary">
                 <a href="/Customers/Companies/Edit?Id=@UrlEncryptionBusiness.EncryptParam(company.Id.ToString())" class="btn-main"
@@ -118,7 +101,7 @@
                 <i class="bi bi-layout-sidebar"></i>
             </button>
 
-            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+            <div class="flex-grow-1 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
                 <div class="fsm-tab-bar" id="fsm-user-tab-bar">
                     <div class="fsm-tab-track" id="fsm-tab-track">
                         <button class="fsm-tab active" data-tab="timeline" data-index="0">Timeline</button>

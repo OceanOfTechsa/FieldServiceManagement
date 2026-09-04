@@ -1,7 +1,5 @@
 @using FieldServiceManagement.ViewModels.Audit
-
 @model List<AuditLogViewModel>
-
 @{
     var Events = Model ?? new List<AuditLogViewModel>();
     var IconPath = new Dictionary<string, string>
@@ -28,7 +26,6 @@
         ["RoleChanged"] = "<path d='M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z'/><circle cx='16.5' cy='7.5' r='.5'/>",
         ["ProfileDeleted"] = "<polyline points='3 6 5 6 21 6'/><path d='M19 6l-1 14H6L5 6'/><path d='M10 11v6'/><path d='M14 11v6'/><path d='M9 6V4h6v2'/>",
     };
-
     var EventConfig = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
     {
         ["Created"] = ("#ecfdf5", "#a7f3d0", "#059669", "Created"),
@@ -54,12 +51,45 @@
         ["ProfileDeleted"] = ("#fce9e9", "#ee9393", "#dc2626", "Deleted"),
     };
 
+    var EventConfigDark = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
+    {
+        ["Created"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Created"),
+        ["Updated"] = ("rgba(245,158,11,0.12)", "rgba(245,158,11,0.3)", "#f59e0b", "Updated"),
+        ["Deleted"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Deleted"),
+        ["Restored"] = ("rgba(96,165,250,0.12)", "rgba(96,165,250,0.3)", "#60a5fa", "Restored"),
+        ["Viewed"] = ("#24272b", "#2d3238", "#9ca3af", "Viewed"),
+        ["StatusChanged"] = ("rgba(129,140,248,0.12)", "rgba(129,140,248,0.3)", "#818cf8", "Status changed"),
+        ["Assigned"] = ("rgba(74,222,128,0.12)", "rgba(74,222,128,0.3)", "#4ade80", "Assigned"),
+        ["Unassigned"] = ("#24272b", "#2d3238", "#a1a1aa", "Unassigned"),
+        ["Activated"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Activated"),
+        ["Deactivated"] = ("#24272b", "#2d3238", "#a1a1aa", "Deactivated"),
+        ["Exported"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Exported"),
+        ["Imported"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Imported"),
+        ["Commented"] = ("rgba(192,132,252,0.12)", "rgba(192,132,252,0.3)", "#c084fc", "Commented"),
+        ["Approved"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Approved"),
+        ["Rejected"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Rejected"),
+        ["ProfileCreated"] = ("rgba(96,165,250,0.12)", "rgba(96,165,250,0.3)", "#60a5fa", "Profile created"),
+        ["AddedToOrganisation"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Organisation created"),
+        ["ProfileUpdated"] = ("rgba(245,158,11,0.12)", "rgba(245,158,11,0.3)", "#f59e0b", "Profile updated"),
+        ["UserLockedOut"] = ("#24272b", "#2d3238", "#a1a1aa", "Locked out"),
+        ["RoleChanged"] = ("rgba(129,140,248,0.12)", "rgba(129,140,248,0.3)", "#818cf8", "Role changed"),
+        ["ProfileDeleted"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Deleted"),
+    };
+
     string FormatGroup(DateTime d) => d.ToString("dd MMM yyyy");
     string FormatTime(DateTime d) => d.ToString("h:mm tt");
-    bool IsSameDay(DateTime a, DateTime b) => a.Date == b.Date;
-    bool IsToday(DateTime d) => d.ToLocalTime().Date == DateTime.Today;
-    bool ShowEntityType = Events.FirstOrDefault()?.ShowEntityType ?? false;
 
+    bool IsSameDay(DateTime a, DateTime b) => a.Date == b.Date;
+
+    bool IsToday(DateTime d, TimeZoneInfo? tz = null)
+    {
+        tz ??= TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time");
+        var localDate = TimeZoneInfo.ConvertTime(d, tz).Date;
+        var today = TimeZoneInfo.ConvertTime(DateTime.UtcNow, tz).Date;
+        return localDate == today;
+    }
+
+    bool ShowEntityType = Events.FirstOrDefault()?.ShowEntityType ?? false;
     var sortedEvents = Events.OrderByDescending(e => e.CreatedAt).ToList();
 
     var groups = new List<(string Label, DateTime Date, List<AuditLogViewModel> Events)>();
@@ -71,52 +101,84 @@
             groups.Add((FormatGroup(ev.CreatedAt), ev.CreatedAt, new List<AuditLogViewModel> { ev }));
     }
 
-
     string GetIcon(string action) =>
-      IconPath.TryGetValue(action, out var p)
-          ? p
-          : "<circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/>";
+        IconPath.TryGetValue(action, out var p)
+            ? p
+            : "<circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/>";
 
     var entityLabel = Events.FirstOrDefault()?.EntityName;
     entityLabel = string.IsNullOrWhiteSpace(entityLabel) ? "Entity" : entityLabel;
 }
 
-
-  <link rel="stylesheet" href="~/css/FSM/audits.css" asp-append-version="true" />
-
+<link rel="stylesheet" href="~/css/FSM/audits.css" asp-append-version="true" />
+<script type="application/json" id="alGenEventsData">
+    @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+    Events.Select(e => new
+    {
+            id = e.Id,
+            type = e.Action,
+            entityName = e.EntityName,
+            entityId = e.EntityId,
+            actor = e.PerformedByName ?? "System",
+            timestamp = e.CreatedAt.ToString("o"),
+            comment = e.Comment,
+            fieldName = e.FieldName,
+            oldValue = e.OldValue,
+            newValue = e.NewValue,
+            showComment = e.ShowComment
+    })))
+</script>
 
 <div class="al-root" id="auditLogGeneric">
-    <div class="al-header sticky-top bg-white z-10">
+    <div class="al-header sticky-top bg-surface z-10">
         <div>
-            <p class="al-subtitle">All actions and events related to this <strong>@entityLabel</strong> are recorded in chronological order.</p>
+            <p class="al-subtitle">
+                All actions and events related to this <strong>@entityLabel</strong> are recorded in chronological order.
+            </p>
         </div>
+
         <div class="al-filter-wrap">
-            <button class="al-filter-btn" id="alGenFilterBtn" onclick="alGenToggle()" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button class="al-filter-btn" id="alGenFilterBtn"
+                    type="button"
+                    aria-expanded="false"
+                    aria-haspopup="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                     <line x1="16" y1="2" x2="16" y2="6" />
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 <span id="alGenFilterLabel">All time</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
                     <path d="m7 15 5 5 5-5" />
                     <path d="m7 9 5-5 5 5" />
                 </svg>
             </button>
 
             <div class="al-dropdown" id="alGenDropdown">
-                @foreach (var (val, lbl) in new[] { ("all", "All time"), ("7d", "Last 7 days"), ("30d", "Last 30 days"), ("4m", "Last 4 months"), ("12m", "Last 12 months"), ("custom", "Custom range") })
+                @foreach (var (val, lbl) in new[] {
+                    ("all", "All time"),
+                    ("7d", "Last 7 days"),
+                    ("30d", "Last 30 days"),
+                    ("4m", "Last 4 months"),
+                    ("12m", "Last 12 months"),
+                    ("custom", "Custom range")
+                })
                 {
                     <div class="al-dropdown-item @(val == "all" ? "active" : "")"
                          data-value="@val" data-label="@lbl"
                          onclick="alGenSelectRange(this)">
                         @lbl
-                        <svg class="al-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="al-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
                 }
+
                 <div class="al-custom-range p-2 gap-1 align-items-center" id="alGenCustomRange" style="display:none">
                     <input class="border-fsm form-control date-input" type="date" id="alGenFrom" onchange="alGenFilterCustom()" />
                     <span>to</span>
@@ -126,23 +188,7 @@
         </div>
     </div>
 
-    <div class="al-body" id="alGenBody"
-         data-events='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-            Events.Select(e => new
-            {
-                id = e.Id,
-                type = e.Action,
-                entityName = e.EntityName,
-                entityId = e.EntityId,
-                actor = e.PerformedByName ?? "System",
-                timestamp = e.CreatedAt.ToString("o"),
-                comment = e.Comment,
-                fieldName = e.FieldName,
-                oldValue = e.OldValue,
-                newValue = e.NewValue
-            })
-         ))'>
-
+    <div class="al-body" id="alGenBody">
         @if (!groups.Any())
         {
             <div class="fsm-empty-state">
@@ -174,14 +220,13 @@
                         var cfg = EventConfig.TryGetValue(ev.Action, out var c) ? c : ("#f8fafc", "#e2e8f0", "#64748b", ev.Action);
                         var iconData = GetIcon(ev.Action);
                         var actor = string.IsNullOrWhiteSpace(ev.PerformedByName) ? "System (Automated)" : ev.PerformedByName;
-                        var canView = true;
 
+                        var canView = true;
                         if (!string.IsNullOrWhiteSpace(ev.VisibleTo))
                         {
                             var allowedRoles = ev.VisibleTo
                                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                 .Select(r => r.Trim());
-
                             canView = allowedRoles.Any(role => User!.IsInRole(role));
                         }
 
@@ -196,40 +241,35 @@
                                         </svg>
                                     </div>
 
-                                    @if (!isLast)
-                                    {
-                                        <div class="al-line @(isLastInGroup ? "al-line-solid" : "al-line-dashed")"></div>
-                                    }
+                                    <div class="al-line @(isLast ? "al-line-dashed" : (isLastInGroup ? "al-line-solid" : "al-line-dashed"))"></div>
                                 </div>
 
                                 <div class="al-content">
                                     <p class="al-action">
                                         <span>@cfg.Item4</span>
-
-                                        @if (ShowEntityType)
+                                        @* @if (ShowEntityType)
                                         {
                                             <span class="al-entity-pill">@ev.EntityName</span>
-                                        }
+                                        } *@
                                     </p>
-
                                     <p class="al-meta">
                                         @FormatTime(ev.CreatedAt) <i class="bi bi-dot"></i>
-                                        <span class="al-actor">@actor</span> 
-                                        @if(ev.createdByEmail == User?.Identity?.Name)
+                                        <span class="al-actor">@actor</span>
+                                        @if (ev.createdByEmail == User?.Identity?.Name)
                                         {
                                             <span class="small">(You)</span>
                                         }
                                     </p>
 
-                                    @if (!string.IsNullOrWhiteSpace(ev.Comment) || 
-                                         !string.IsNullOrWhiteSpace(ev.FieldName) || 
-                                         !string.IsNullOrWhiteSpace(ev.NewValue) || ev.ShowComment)
+                                    @if (!string.IsNullOrWhiteSpace(ev.Comment) ||
+                                         !string.IsNullOrWhiteSpace(ev.FieldName) ||
+                                         !string.IsNullOrWhiteSpace(ev.NewValue) ||
+                                         ev.ShowComment)
                                     {
                                         <div class="al-details-box mb-2">
                                             @if (!string.IsNullOrWhiteSpace(ev.FieldName))
                                             {
                                                 <strong>@ev.FieldName</strong>
-
                                                 @if (!string.IsNullOrWhiteSpace(ev.OldValue) &&
                                                      !string.IsNullOrWhiteSpace(ev.NewValue))
                                                 {
@@ -244,12 +284,9 @@
                                                     <strong>@ev.NewValue</strong>
                                                 }
                                             }
-
                                             @if (!string.IsNullOrWhiteSpace(ev.Comment) && ev.ShowComment == true)
                                             {
-                                                <div style="opacity:0.9;">
-                                                    @ev.Comment
-                                                </div>
+                                                <div style="opacity:0.9;">@ev.Comment</div>
                                             }
                                         </div>
                                     }
@@ -263,60 +300,36 @@
         }
     </div>
 </div>
-
 <script>
-    (function () {
+    (function() {
+        // ---------- Config ----------
         const EVENT_CONFIG = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-            EventConfig.ToDictionary(kv => kv.Key, kv => new
-            {
-                    bg = kv.Value.Bg,
-                    border = kv.Value.Border,
-                    iconColor = kv.Value.IconColor,
-                    label = kv.Value.Label,
-                    iconPath = IconPath.TryGetValue(kv.Key, out var p) ? p : ""
-            })
+        EventConfig.ToDictionary(kv => kv.Key, kv => new
+        {
+            bg = kv.Value.Bg,
+                border = kv.Value.Border,
+                iconColor = kv.Value.IconColor,
+                label = kv.Value.Label,
+                iconPath = IconPath.TryGetValue(kv.Key, out var p) ? p : ""
+        })
         ));
 
         let currentRange = 'all';
-        let customFrom   = null;
-        let customTo     = null;
+        let customFrom = null;
+        let customTo = null;
 
-        const bodyEl  = document.getElementById('alGenBody');
-        const allEvts = JSON.parse(bodyEl.dataset.events || '[]').map(e => ({ ...e, timestamp: new Date(e.timestamp) }));
+        const bodyEl = document.getElementById('alGenBody');
+        if (!bodyEl) return;
 
-        window.alGenToggle = function () {
-            const dd   = document.getElementById('alGenDropdown');
-            const open = dd.classList.toggle('open');
-            document.getElementById('alGenFilterBtn').setAttribute('aria-expanded', String(open));
-        };
+        const dataEl = document.getElementById('alGenEventsData');
+        const allEvts = dataEl
+            ? JSON.parse(dataEl.textContent || '[]').map(e => ({
+                ...e,
+                timestamp: new Date(e.timestamp)
+            }))
+            : [];
 
-        document.addEventListener('click', e => {
-            if (!document.querySelector('#auditLogGeneric .al-filter-wrap').contains(e.target))
-                document.getElementById('alGenDropdown').classList.remove('open');
-        });
-
-        window.alGenSelectRange = function (el) {
-            currentRange = el.dataset.value;
-            document.querySelectorAll('#alGenDropdown .al-dropdown-item').forEach(item =>
-                item.classList.toggle('active', item.dataset.value === currentRange)
-            );
-            document.getElementById('alGenFilterLabel').textContent = el.dataset.label;
-
-            const customPanel = document.getElementById('alGenCustomRange');
-            if (currentRange === 'custom') { customPanel.style.display = 'flex'; return; }
-            customPanel.style.display = 'none';
-            customFrom = customTo = null;
-            render();
-        };
-
-        window.alGenFilterCustom = function () {
-            const f = document.getElementById('alGenFrom').value;
-            const t = document.getElementById('alGenTo').value;
-            customFrom = f ? new Date(f) : null;
-            customTo   = t ? new Date(t) : null;
-            if (customFrom && customTo) render();
-        };
-
+        // ---------- Helpers ----------
         function getCutoff(range) {
             const days = { '7d': 7, '30d': 30, '4m': 120, '12m': 365 };
             if (!days[range]) return null;
@@ -337,12 +350,12 @@
         }
 
         const dateGroupFmt = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        const timeFmt      = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const timeFmt = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
         function sameDay(a, b) {
             return a.getFullYear() === b.getFullYear() &&
-                   a.getMonth()    === b.getMonth()    &&
-                   a.getDate()     === b.getDate();
+                a.getMonth() === b.getMonth() &&
+                a.getDate() === b.getDate();
         }
 
         function groupByDay(evts) {
@@ -350,15 +363,22 @@
             const groups = [];
             for (const ev of sorted) {
                 const last = groups[groups.length - 1];
-                if (last && sameDay(last.date, ev.timestamp)) last.events.push(ev);
-                else groups.push({ label: dateGroupFmt.format(ev.timestamp), date: ev.timestamp, events: [ev] });
+                if (last && sameDay(last.date, ev.timestamp)) {
+                    last.events.push(ev);
+                } else {
+                    groups.push({
+                        label: dateGroupFmt.format(ev.timestamp),
+                        date: ev.timestamp,
+                        events: [ev]
+                    });
+                }
             }
             return groups;
         }
 
         function render() {
             const filtered = filterEvents();
-            const groups   = groupByDay(filtered);
+            const groups = groupByDay(filtered);
 
             if (!groups.length) {
                 bodyEl.innerHTML = `
@@ -374,40 +394,50 @@
             const total = filtered.length;
 
             for (const group of groups) {
-                const gd      = new Date(group.date);
-                const today   = new Date();
-                const isToday = gd.getFullYear() === today.getFullYear() &&
-                                gd.getMonth()    === today.getMonth()    &&
-                                gd.getDate()     === today.getDate();
+                const gd = new Date(group.date);
+                const isToday = gd.toDateString() === new Date().toDateString();
 
                 html += `
-                    <div class="al-group" data-date="${gd.toISOString().slice(0,10)}">
+                    <div class="al-group" data-date="${gd.toISOString().slice(0, 10)}">
                         <div class="al-day-divider">
                             <span class="al-day-label">${group.label}</span>
                             ${isToday ? '<span class="fsm-pill bg-warning-subtle">Today</span>' : ''}
                         </div>`;
 
                 group.events.forEach((ev, i) => {
-                    const isLast        = globalIdx === total - 1;
+                    const isLast = globalIdx === total - 1;
                     const isLastInGroup = i === group.events.length - 1;
-                    const cfg           = EVENT_CONFIG[ev.type] || { bg:'#f8fafc', border:'#e2e8f0', iconColor:'#64748b', label: ev.type, iconPath:'' };
-                    const actor         = !ev.actor || ev.actor.trim() === ''
-                                            ? 'System (Automated)'
-                                            : ev.actor.toLowerCase().includes('system')
-                                                ? 'System (Automated)'
-                                                : ev.actor;
+                    const cfg = EVENT_CONFIG[ev.type] || {
+                        bg: '#f8fafc', border: '#e2e8f0', iconColor: '#64748b',
+                        label: ev.type, iconPath: ''
+                    };
+
+                    const actor = !ev.actor || ev.actor.trim() === ''
+                        ? 'System (Automated)'
+                        : ev.actor.toLowerCase().includes('system')
+                            ? 'System (Automated)'
+                            : ev.actor;
 
                     let detailsHTML = '';
-                    if (ev.comment || ev.fieldName || ev.newValue || ev.ShowComment) {
-                        detailsHTML = `<div class="al-details-box mb-2" style="${cfg.bg ? `background:${cfg.Bg};border-color:${cfg.border};color:${cfg.iconColor};` : ''}">`;
-                        if (ev.fieldName) 
-                            detailsHTML += `<strong >${ev.fieldName}</strong>`;
-                            if (ev.oldValue && ev.newValue)
-                                detailsHTML += ` changed from <strong class="text-decoration-underline">${ev.oldValue}</strong> to <strong class="text-decoration-underline">${ev.newValue}</strong>`;
-                            else if (ev.newValue)
+
+                    if (ev.fieldName || (ev.comment && ev.showComment) || ev.newValue) {
+                        detailsHTML = `<div class="al-details-box mb-2">`;
+
+                        if (ev.fieldName) {
+                            detailsHTML += `<strong>${ev.fieldName}</strong>`;
+
+                            if (ev.oldValue && ev.newValue) {
+                                detailsHTML += ` changed from <strong class="text-decoration-underline">${ev.oldValue}</strong>
+                                 to <strong class="text-decoration-underline">${ev.newValue}</strong>`;
+                            } else if (ev.newValue) {
                                 detailsHTML += `: <strong>${ev.newValue}</strong>`;
+                            }
                         }
-                        if (ev.comment) detailsHTML += `<div style="margin-top:5px;opacity:0.9;"><strong>${ev.comment}</strong></div>`;
+
+                        if (ev.comment && ev.showComment) {
+                            detailsHTML += `<div style="margin-top:5px;opacity:0.9;">${ev.comment}</div>`;
+                        }
+
                         detailsHTML += `</div>`;
                     }
 
@@ -420,15 +450,15 @@
                                         ${cfg.iconPath}
                                     </svg>
                                 </div>
-                                ${!isLast ? `<div class="al-line ${isLastInGroup ? 'al-line-solid' : 'al-line-dashed'}"></div>` : ''}
+                                ${`<div class="al-line ${isLast ? 'al-line-dashed' : (isLastInGroup ? 'al-line-solid' : 'al-line-dashed')  }"></div>`}
                             </div>
                             <div class="al-content">
                                 <p class="al-action">
                                     <span>${cfg.label}</span>
-                                    <span class="al-entity-pill">${ev.entityName}</span>
+                                  
                                 </p>
                                 <p class="al-meta">
-                                    ${timeFmt.format(ev.timestamp)} &nbsp;·&nbsp;
+                                        ${timeFmt.format(ev.timestamp)} &nbsp;•&nbsp;
                                     <span class="al-actor">${actor}</span>
                                 </p>
                                 ${detailsHTML}
@@ -443,6 +473,66 @@
             bodyEl.innerHTML = html;
         }
 
+        // ---------- Event listeners (no more inline onclick) ----------
+        const filterBtn = document.getElementById('alGenFilterBtn');
+        const dropdown = document.getElementById('alGenDropdown');
+        const customPanel = document.getElementById('alGenCustomRange');
+        const fromInput = document.getElementById('alGenFrom');
+        const toInput = document.getElementById('alGenTo');
+
+        if (filterBtn && dropdown) {
+            filterBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const open = dropdown.classList.toggle('open');
+                filterBtn.setAttribute('aria-expanded', String(open));
+            });
+        }
+
+        // Outside click
+        document.addEventListener('click', function(e) {
+            const wrap = document.querySelector('#auditLogGeneric .al-filter-wrap');
+            if (!wrap || !dropdown) return;
+
+            if (!wrap.contains(e.target)) {
+                dropdown.classList.remove('open');
+                filterBtn?.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Range items
+        document.querySelectorAll('#alGenDropdown .al-dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                currentRange = this.dataset.value;
+
+                document.querySelectorAll('#alGenDropdown .al-dropdown-item').forEach(el =>
+                    el.classList.toggle('active', el.dataset.value === currentRange)
+                );
+
+                document.getElementById('alGenFilterLabel').textContent = this.dataset.label;
+
+                if (currentRange === 'custom') {
+                    customPanel.style.display = 'flex';
+                    return;
+                }
+
+                customPanel.style.display = 'none';
+                customFrom = customTo = null;
+                render();
+            });
+        });
+
+        // Custom date inputs
+        if (fromInput) fromInput.addEventListener('change', function() {
+            customFrom = this.value ? new Date(this.value) : null;
+            if (customFrom && customTo) render();
+        });
+
+        if (toInput) toInput.addEventListener('change', function() {
+            customTo = this.value ? new Date(this.value) : null;
+            if (customFrom && customTo) render();
+        });
+
+        // Initial render
         render();
     })();
 </script>

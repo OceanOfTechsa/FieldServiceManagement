@@ -39,7 +39,7 @@ namespace FieldServiceManagement.Models
             ImageUrl = "/Assets/Images/Application/work-orders.svg",
             Actions =
             [
-                new() { Label = "Create Work Order", Url="/WorkOrderManagement/Create", Icon = "ti ti-clipboard-plus" }
+                new() { Label = "Create Work Order", Url="/WorkOrderManagement/Create" }
             ]
         };
 
@@ -51,7 +51,7 @@ namespace FieldServiceManagement.Models
             ImageUrl = "/Assets/Images/Application/crews.svg",
             Actions =
             [
-                new() { Label = "Create Crew", Url="/Workforce/Crew/Create", Icon = "bi-people-fill" }
+                new() { Label = "Create Crew", Url="/Workforce/Crew/Create"}
             ]
         };
 

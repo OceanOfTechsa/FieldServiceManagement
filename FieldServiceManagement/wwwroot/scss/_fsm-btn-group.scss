@@ -59,6 +59,10 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             filter: brightness(0.9);
         }
+
+        [data-bs-theme="dark"] & {
+            border-left-color: rgba(255, 255, 255, 0.12);
+        }
     }
 
         .btn-main:hover,
@@ -81,6 +85,12 @@
 
         &.show {
             display: block;
+        }
+
+        [data-bs-theme="dark"] & {
+            background: #1b1e21;
+            border-color: #2d3238;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
     }
 
@@ -107,6 +117,23 @@
         &:hover {
             background: rgba(0, 0, 0, 0.05);
         }
+
+        [data-bs-theme="dark"] & {
+            color: #f1f5f9;
+            border-bottom-color: #2d3238;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+
+    [data-bs-theme="dark"] & {
+        background: #1b1e21;
     }
 }
 

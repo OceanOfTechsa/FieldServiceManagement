@@ -35,8 +35,8 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3">
-        <div class="d-flex gap-1 align-items-center text-black">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex gap-1 align-items-center">
             <i class="bi bi-funnel"></i>
             <div id="app" class="mt-2">
                 <enum-dropdown :options="statusOptions"
@@ -76,8 +76,8 @@
 
     <!-- Users Table -->
     <div class="border-0 rounded-2 overflow-hidden mx-2">
-        <div class="table-responsive fsm-table-wrapper">
-            <table class="table align-middle mb-0 fsm-table">
+        <div class="table-responsive fsm-table-wrapper bg-surface">
+            <table class="table align-middle mb-0 fsm-table bg-surface">
                 <thead>
                     <tr>
                         <th class="fsm-sortable" data-sort="name">
@@ -299,7 +299,7 @@
             },
             template: `
                 <div style="position:relative;display:inline-block;" v-click-outside="close">
-                    <button class="btn btn-sm border-0 bg-transparent text-black px-2" type="button" @@click="toggle">
+                    <button class="btn btn-sm border-0 bg-transparent px-2" type="button" @@click="toggle">
                         {{ display }}<span v-if="suffix"> {{ suffix }}</span>
                         <i class="bi bi-chevron-down" style="font-size:10px;"></i>
                     </button>

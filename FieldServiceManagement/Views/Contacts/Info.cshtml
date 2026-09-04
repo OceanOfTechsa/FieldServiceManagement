@@ -35,7 +35,7 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
         @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
         new BreadcrumbViewModel
         {
@@ -52,7 +52,7 @@
     </div>
 
     <div class="fsm-fixed-view-wrapper-forms">
-        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+        <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
             @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
         </div>
     </div>

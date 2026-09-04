@@ -1,7 +1,4 @@
-﻿/* fsm-breadcrumb.css */
-/* Modern rewrite — retains .fsm-breadcrumb-* class names */
-
-:root {
+﻿:root {
     --bc-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --bc-active-bg: #f97316;
     --bc-active-text: #ffffff;
@@ -17,6 +14,20 @@
     --bc-arrow: 13px;
     --bc-gap: 2px;
     --bc-h: 40px;
+}
+
+[data-bs-theme="dark"] {
+    --bc-active-bg: #f97316;
+    --bc-active-text: #ffffff;
+    --bc-done-bg: rgba(249, 115, 22, 0.16);
+    --bc-done-text: #fdba74;
+    --bc-done-badge-bg: #f97316;
+    --bc-done-badge-text: #ffffff;
+    --bc-pending-bg: #1b1e21;
+    --bc-pending-text: #6b7280;
+    --bc-pending-badge-bg: #24272b;
+    --bc-pending-badge-text: #9ca3af;
+    --bc-shadow: 0 1px 3px rgba(0,0,0,.4);
 }
 
 /* ── Container ─────────────────────────────────────────────── */

@@ -1,12 +1,19 @@
 ﻿// ─── Variables ────────────────────────────────────────────────────────────────
 $footer-height: 30px;
 $footer-bg: #ffffff;
+$footer-bg-dark: #1b1e21;
 $footer-border: #e5e7eb;
+$footer-border-dark: #2d3238;
 $accent-green: #0B9944;
 $accent-green-h: #09b850;
+$accent-green-dark: #10b981;
+$accent-green-h-dark: #34d399;
 $text-muted: #6b7280;
+$text-muted-dark: #9ca3af;
 $text-danger: #ef4444;
+$text-danger-dark: #f87171;
 $text-issue: #dc2626;
+$text-issue-dark: #f87171;
 
 // ─── Base ─────────────────────────────────────────────────────────────────────
 .fsm-footer {
@@ -24,6 +31,12 @@ $text-issue: #dc2626;
     gap: 0;
     color: $text-muted;
     padding-top: 1px;
+
+    [data-bs-theme="dark"] & {
+        background: $footer-bg-dark;
+        border-top-color: $footer-border-dark;
+        color: $text-muted-dark;
+    }
 }
 
 // ─── Shared icon-button ───────────────────────────────────────────────────────
@@ -43,10 +56,18 @@ $text-issue: #dc2626;
 
     &:hover {
         color: $accent-green;
+
+        [data-bs-theme="dark"] & {
+            color: $accent-green-dark;
+        }
     }
 
     svg, img {
         display: block;
+    }
+
+    [data-bs-theme="dark"] & {
+        color: $text-muted-dark;
     }
 }
 
@@ -65,23 +86,43 @@ $text-issue: #dc2626;
         width: auto;
         flex: 1;
     }
+
+    [data-bs-theme="dark"] & {
+        border-right-color: $footer-border-dark;
+    }
     // ── States ──────────────────────────────────────────────────────────────────
     &[data-status="loading"] .status-content {
         color: $accent-green;
+
+        [data-bs-theme="dark"] & {
+            color: $accent-green-dark;
+        }
     }
 
     &[data-status="offline"] .status-content {
         color: $text-danger;
+
+        [data-bs-theme="dark"] & {
+            color: $text-danger-dark;
+        }
     }
 
     &[data-status="issue"] .status-content {
         color: $text-issue;
         font-weight: 500;
+
+        [data-bs-theme="dark"] & {
+            color: $text-issue-dark;
+        }
     }
 
     &[data-status="announcement"] .status-content {
         color: $accent-green;
         font-weight: 500;
+
+        [data-bs-theme="dark"] & {
+            color: $accent-green-dark;
+        }
     }
 
     &[data-status="online"] {
@@ -111,6 +152,10 @@ $text-issue: #dc2626;
 
         &:hover {
             color: $accent-green-h;
+
+            [data-bs-theme="dark"] & {
+                color: $accent-green-h-dark;
+            }
         }
 
         &:disabled {
@@ -120,6 +165,10 @@ $text-issue: #dc2626;
 
         &.spinning svg {
             animation: footer-spin 0.8s linear infinite;
+        }
+
+        [data-bs-theme="dark"] & {
+            color: $accent-green-dark;
         }
     }
     // Online: Chats + Contacts side-by-side
@@ -146,6 +195,14 @@ $text-issue: #dc2626;
 
             &:hover {
                 color: $accent-green;
+
+                [data-bs-theme="dark"] & {
+                    color: $accent-green-dark;
+                }
+            }
+
+            [data-bs-theme="dark"] & {
+                color: $text-muted-dark;
             }
         }
     }
@@ -181,10 +238,19 @@ $text-issue: #dc2626;
         &.border-x {
             border-left: 1px solid $footer-border;
             border-right: 1px solid $footer-border;
+
+            [data-bs-theme="dark"] & {
+                border-left-color: $footer-border-dark;
+                border-right-color: $footer-border-dark;
+            }
         }
 
         &.border-e {
             border-right: 1px solid $footer-border;
+
+            [data-bs-theme="dark"] & {
+                border-right-color: $footer-border-dark;
+            }
         }
     }
     // Hint area
@@ -208,6 +274,10 @@ $text-issue: #dc2626;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+
+            [data-bs-theme="dark"] & {
+                color: #6b7280;
+            }
         }
 
         .hint-powered {
@@ -222,11 +292,23 @@ $text-issue: #dc2626;
 
                 &:hover {
                     color: $accent-green-h;
+
+                    [data-bs-theme="dark"] & {
+                        color: $accent-green-h-dark;
+                    }
+                }
+
+                [data-bs-theme="dark"] & {
+                    color: $accent-green-dark;
                 }
             }
 
             .hint-year {
                 color: #9ca3af;
+
+                [data-bs-theme="dark"] & {
+                    color: #6b7280;
+                }
             }
         }
     }
@@ -240,6 +322,10 @@ $text-issue: #dc2626;
 
     .fsm-footer-btn {
         border-left: 1px solid $footer-border;
+
+        [data-bs-theme="dark"] & {
+            border-left-color: $footer-border-dark;
+        }
     }
 }
 

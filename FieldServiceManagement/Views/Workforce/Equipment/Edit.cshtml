@@ -1,5 +1,211 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.ViewModels.Shared
+@using FieldServiceManagement.Enum
+@model FieldServiceManagement.ViewModels.Equipment.EquipmentViewModel
+
 @{
+    ViewData["Title"] = "Edit "+ Model?.Name + " Details";
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = true,
+            ShowHome = true,
+            Icon = "bi-tools",
+            Items = new List<BreadcrumbItem>
+            {
+                new() { Label = "Workforce",         Url = null },
+                new() { Label = "Equipment", Url = "/Workforce/Equipment" },
+                new() { Label = Model?.Name! ,Url = Url.Action("Info", "Equipment", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.Id.ToString()!) }) },
+                new() { Label = "Edit", Url = null },
+            }
+        })
+    </div>
+
+    <div class="fsm-fixed-view-wrapper-forms">
+        <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
+            @using (Html.BeginForm("Edit", "Equipment", new { area = "" }, FormMethod.Post, null, new { id = "edit-equipment-form", style = "display:flex;flex-direction:column;flex:1;overflow:hidden;" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.CreatedAt)
+                @Html.HiddenFor(m => m.CreatedBy)
+                @Html.HiddenFor(m => m.UpdatedAt)
+                @Html.HiddenFor(m => m.UpdatedBy)
+                @Html.HiddenFor(m => m.OwnerId)
+                @Html.HiddenFor(m => m.OrganisationId)
+
+                <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="mt-3 pb-3">
+
+                    @if (!ViewData.ModelState.IsValid)
+                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    
+
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-12 col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Generator Unit 4", @autocomplete = "off" })
+                                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Serial Number -->
+                        <div class="col-12 col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SerialNumber, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.SerialNumber, new { @class = "form-control", @placeholder = "SN-00123", @autocomplete = "off", @name = "SerialNumber" })
+                                @Html.ValidationMessageFor(m => m.SerialNumber, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Model Number -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.ModelNumber, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.ModelNumber, new { @class = "form-control", @placeholder = "M-00123", @autocomplete = "off", @name = "ModelNumber" })
+                                @Html.ValidationMessageFor(m => m.ModelNumber, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.StatusId, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                <select id="status" name="StatusId" class="form-select">
+                                    <option value="">Select Equipment Status</option>
+                                    @foreach (EquipmentStatus status in Enum.GetValues(typeof(EquipmentStatus)))
+                                    {
+                                        <option value="@((int)status)" selected="@(Model?.StatusId == (int)status ? "selected" : null)">@status.GetNormalisedDisplayName()</option>
+                                    }
+                                </select>
+                                @Html.ValidationMessageFor(m => m.StatusId, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Type -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Type, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                <select id="type" name="Type" class="form-select">
+                                    <option value="">Select Equipment Type</option>
+                                    @foreach (EquipmentType type in Enum.GetValues(typeof(EquipmentType)))
+                                    {
+                                        <option value="@((int)type)" selected="@(Model?.Type == (int)type ? "selected" : null)">@type.GetNormalisedDisplayName()</option>
+                                    }
+                                </select>
+                                @Html.ValidationMessageFor(m => m.Type, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Warranty Status -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.WarrantyStatus, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                <select id="warrantyStatus" name="WarrantyStatus" class="form-select">
+                                    <option value="">Select Warranty Status</option>
+                                    @foreach (EquipmentWarrantyStatus status in Enum.GetValues(typeof(EquipmentWarrantyStatus)))
+                                    {
+                                        <option value="@((int)status)" selected="@(Model?.WarrantyStatus == (int)status ? "selected" : null)">@status.GetNormalisedDisplayName()</option>
+                                    }
+                                </select>
+                                @Html.ValidationMessageFor(m => m.WarrantyStatus, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Warranty Expiry Date -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.WarrantyExpiryDate, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.WarrantyExpiryDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @name = "WarrantyExpiryDate" })
+                                @Html.ValidationMessageFor(m => m.WarrantyExpiryDate, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Purchase Date -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseDate, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.PurchaseDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @name = "PurchaseDate" })
+                                @Html.ValidationMessageFor(m => m.PurchaseDate, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Description, new { @class = "form-label" })
+                                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "6", @placeholder = "Backup generator for the north warehouse" })
+                                @Html.ValidationMessageFor(m => m.Description, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Active -->
+                        <div class="col-12">
+                            <div class="form-group d-flex align-items-center gap-2">
+                                @Html.Label("IsActive", "Active", new { @class = "form-label mb-0" })
+                                <input type="checkbox"
+                                       id="IsActive"
+                                       name="IsActive"
+                                       value="1"
+                                       checked="@(Model?.IsActive == 1 ? "checked" : null)"
+                                       data-toggle="switch"
+                                       data-size="mini"
+                                       data-handle-width="2"
+                                       data-on-text="Yes"
+                                       data-off-text="Not" />
+                                <input type="hidden" name="IsActive" value="0" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="FormFooter">
+                    @* <a href=`/Workforce/Equipment/Id = UrlEncryptionBusiness.EncryptParam(Model?.Id.ToString()!) ` type="button" data-fsm-new-user-close class="btn btn-light btn-xs border">
+                        Cancel
+                    </a> *@
+                    <button type="submit" id="save-equipment-btn" class="btn btn-primary btn-xs" data-loading-text="Creating Equipment" data-spinner-size="spinner-xs">
+                        Save
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $('#IsActive').bootstrapSwitch();
+
+        new Choices('#status', {
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search...',
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true,
+        });
+
+        new Choices('#type', {
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search...',
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true,
+        });
+        new Choices('#warrantyStatus', {
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search...',
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true,
+        });
+    </script>
 }

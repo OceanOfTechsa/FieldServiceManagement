@@ -127,7 +127,7 @@ namespace FieldServiceManagement.Business.UserBusiness
                 Model.Invitation = await new UserInvitationBusiness().GetUserInvitationByEmail(user.Email);
             }
             var entiityName = "Profile";
-            Model.ProfileAudits = await new AuditLogBusiness().GetByEntityAsync(entiityName, Model.User);
+            Model.ProfileAudits = await new AuditLogBusiness().GetByEntityAsync(entiityName, Model.User.Id, Model.User.OrganisationId);
             Model.CreatedBy = await GetUserDetailsByIdAsync(Model.User.CreatedById);
             return Model;
         }

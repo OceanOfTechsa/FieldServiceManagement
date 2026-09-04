@@ -15,21 +15,33 @@
                     <i class="bi bi-arrow-left-circle fs-6"></i>
                 </span>
             }
+            @if (Model.ShowHistory)
+            {
+                <div class="dropdown fsm-nav-history">
+                    <span role="button"
+                          class="fsm-breadcrumb__history-toggle"
+                          id="fsm-nav-history-toggle"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          aria-label="Recently visited pages">
+                        <i class="bi bi-chevron-down"></i>
+                    </span>
 
-            <div class="dropdown fsm-nav-history">
-                <span role="button"
-                      class="fsm-breadcrumb__history-toggle"
-                      id="fsm-nav-history-toggle"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                      aria-label="Recently visited pages">
-                    <i class="bi bi-chevron-down"></i>
-                </span>
+                    <ul class="dropdown-menu fsm-nav-history__menu" aria-labelledby="fsm-nav-history-toggle" id="fsm-nav-history-list">
+                        <li class="fsm-nav-history__empty">No recent pages</li>
+                    </ul>
+                </div>
+            }
 
-                <ul class="dropdown-menu fsm-nav-history__menu" aria-labelledby="fsm-nav-history-toggle" id="fsm-nav-history-list">
-                    <li class="fsm-nav-history__empty">No recent pages</li>
-                </ul>
-            </div>
+            @if (Model.ShowBack)
+            {
+                <div role="button"
+                      class="fsm-breadcrumb__forward"
+                      id="fsm-nav-forward-btn"
+                      aria-label="Go Forward">
+                    <i class="bi bi-arrow-right-circle fs-6"></i>
+                </div>
+            }
         </div>
 
         @* Home — optional *@

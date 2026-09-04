@@ -11,7 +11,7 @@
     {
         <div class="accordion-item rounded-2 mb-2 border border-warning">
             <h2 class="accordion-header px-2">
-                <button class="accordion-button text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                <button class="accordion-button  rounded-2 shadow-none d-flex justify-content-between align-items-center"
                         type="button"
                         data-bs-toggle="collapse"
                        
@@ -40,7 +40,7 @@
                             <div class="d-flex flex-column">
                                 <div class="d-flex gap-2">
                                     <span class="text-muted">Mail Status</span>
-                                    <span class="text-black">
+                                    <span class="">
                                         @if (isExpired)
                                         {
                                             <span class="fsm-tag fsm-tag--bubble fsm-tag--free">Expired</span>
@@ -52,7 +52,7 @@
                                     </span>
                                 </div>
 
-                                <span class="text-black">
+                                <span class="">
                                     @(isExpired ? "Expired" : "Expires")
                                     @expiresAt?.ToString("MMM dd, yyyy hh:mm")
                                     @expiresAt?.ToString("tt").ToUpper()
@@ -64,7 +64,7 @@
                             <i class="bi bi-envelope-arrow-up"></i>
                             <div class="d-flex flex-column">
                                 <span class="text-muted">Sent to</span>
-                                <span class="text-black">@Model?.Invitation?.Email</span>
+                                <span class="">@Model?.Invitation?.Email</span>
                             </div>
                         </div>
 
@@ -73,7 +73,7 @@
                             <div class="d-flex flex-column">
                                 <span class="text-muted">Subject</span>
                                 <div class="d-inline-flex gap-2 align-items-center copy-wrapper">
-                                    <span class="text-black col-6 text-truncate copy-text">
+                                    <span class=" col-6 text-truncate copy-text">
                                         You are invited to join @Model?.Organisation?.Name on OOT FSM
                                     </span>
 
@@ -87,7 +87,7 @@
                             <i class="bi bi-calendar2-date"></i>
                             <div class="d-flex flex-column">
                                 <span class="text-muted">Invited On</span>
-                                <span class="text-black">
+                                <span class="">
                                     @Model?.Invitation?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.Invitation?.CreatedAt.ToString("tt").ToUpper()
                                 </span>
                             </div>
@@ -102,7 +102,7 @@
     {
         <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
             <h2 class="accordion-header px-2">
-                <button class="accordion-button bg-danger-subtle" text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                <button class="accordion-button bg-danger-subtle"  rounded-2 shadow-none d-flex justify-content-between align-items-center"
                         type="button"
                         data-bs-toggle="collapse"
                         aria-expanded="true"
@@ -126,16 +126,16 @@
                         <div class="d-flex align-items-start gap-2">
                             <i class="bi bi-node-minus-fill"></i>
                             <div class="d-flex flex-column">
-                                <span class="text-black fw-bold">User Status</span>
-                                <span class="text-black"><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
+                                <span class=" fw-bold">User Status</span>
+                                <span class=""><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
                             </div>
                         </div>
 
                         <div class="d-flex align-items-start gap-2">
                             <i class="bi bi-person-circle"></i>
                             <div class="d-flex flex-column">
-                                <span class="text-black fw-bold">Deleted By</span>
-                                <span class="text-black">Deleted by name</span>
+                                <span class=" fw-bold">Deleted By</span>
+                                <span class="">Deleted by name</span>
                             </div>
                         </div>
                     </div>
@@ -146,7 +146,7 @@
 
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button   rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#userInfoCollapse"
@@ -167,37 +167,37 @@
                             var salutaion = ((UserSalutation)Model?.User.SalutationId!).GetNormalisedDisplayName() ?? "Uknown";
                             var roleDisplay = ((UserRole?)Model.User.UserRoleId)?.GetNormalisedDisplayName() ?? "Unknown";
                         }
-                        <span class="text-black">@salutaion</span>
+                        <span class="">@salutaion</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-vcard"></i>
                         <span class="text-muted">First Name</span>
-                        <span class="text-black">@Model?.User.Name</span>
+                        <span class="">@Model?.User.Name</span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-vcard"></i>
                         <span class="text-muted">Last Name</span>
-                        <span class="text-black">@Model?.User.Surname</span>
+                        <span class="">@Model?.User.Surname</span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-envelope"></i>
                         <span class="text-muted">Email</span>
-                        <span class="text-black">@Model?.User.Email</span>
+                        <span class="">@Model?.User.Email</span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-circle"></i>
                         <span class="text-muted">Role</span>
-                        <span class="text-black">@roleDisplay</span>
+                        <span class="">@roleDisplay</span>
                     </div>
 
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-vcard"></i>
                         <span class="text-muted">Employee Id</span>
-                        <span class="text-black">
+                        <span class="">
                             @(string.IsNullOrWhiteSpace(Model?.User.EmployeeNumber)
                                            ? @EmptyFieldReplacer
                                            : Model?.User.EmployeeNumber)
@@ -208,7 +208,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-telephone"></i>
                         <span class="text-muted">Phone</span>
-                        <span class="text-black">
+                        <span class="">
                             @(string.IsNullOrWhiteSpace(Model?.User.Phone)
                                            ? @EmptyFieldReplacer
                                            : Model?.User.Phone)
@@ -218,13 +218,13 @@
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-telephone"></i>
                         <span class="text-muted">Mobile</span>
-                        <span class="text-black">@EmptyFieldReplacer</span>
+                        <span class="">@EmptyFieldReplacer</span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-mic"></i>
                         <span class="text-muted">Language</span>
-                        <span class="text-black">English - United States</span>
+                        <span class="">English - United States</span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
@@ -240,7 +240,7 @@
                             <span class="text-muted">Status</span>
                             <div class="d-flex align-items-center gap-1">
                                 <span class="fsm-status-dot @statusCss"></span>
-                                <span class="text-black ms-1">@statusLabel</span>
+                                <span class=" ms-1">@statusLabel</span>
                             </div>
                         </div>
                     </div>
@@ -251,7 +251,7 @@
 
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button   rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#userAddressCollapse"
@@ -268,9 +268,9 @@
                                     <div class="d-flex gap-2 align-items-start">
                                         <i class="bi bi-geo-alt"></i>
                                         <div class="d-flex flex-column gap-1">
-                                            <span class="small text-black">@Model</span>
-                                            <span class="small text-black">Start Date: @Model.UserCreatedAt.ToString("MMM dd, yyyy")</span>
-                                            <span class="small text-black">End Date: -</span>
+                                            <span class="small ">@Model</span>
+                                            <span class="small ">Start Date: @Model.UserCreatedAt.ToString("MMM dd, yyyy")</span>
+                                            <span class="small ">End Date: -</span>
                                         </div>
                                     </div>
                                 </div> *@
@@ -284,7 +284,7 @@
 
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button   rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#userTerritoriesCollapse"
@@ -301,9 +301,9 @@
                     <div class="d-flex gap-2 align-items-start">
                         <i class="bi bi-globe"></i>
                         <div class="d-flex flex-column gap-1">
-                            <span class="small text-black">@Model?.Organisation?.Name</span>
-                            <span class="small text-black">Start Date: @Model?.User.CreatedAt.ToString("MMM dd, yyyy")</span>
-                            <span class="small text-black">End Date: -</span>
+                            <span class="small ">@Model?.Organisation?.Name</span>
+                            <span class="small ">Start Date: @Model?.User.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            <span class="small ">End Date: -</span>
                         </div>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
 
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button   rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#userCrewCollapse"
@@ -339,7 +339,7 @@
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-file-earmark-plus"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Created By</span>
+                        <span class="small ">Created By</span>
 
                         @{
                             var createdBy = Model?.CreatedBy?.Name + " " + Model?.CreatedBy?.Surname ?? "-";
@@ -368,14 +368,14 @@
                             </div>
                         }
 
-                        <span class="small text-black mb-2 small">On @Model?.User.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.User.CreatedAt.ToString("tt").ToUpper()</span>
+                        <span class="small  mb-2 small">On @Model?.User.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.User.CreatedAt.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
 
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-file-earmark-arrow-up"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Modified By</span>
+                        <span class="small ">Modified By</span>
                         @{
                             var modifiedBy = Model?.CreatedBy?.Name + " " + Model?.CreatedBy?.Surname ?? "-";
                             var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
@@ -403,7 +403,7 @@
                             </div>
                         }
 
-                        <span class="small text-black mb-2 small">On @Model?.User.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.User.UpdatedAt?.ToString("tt").ToUpper()</span>
+                        <span class="small  mb-2 small">On @Model?.User.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.User.UpdatedAt?.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
             </div>

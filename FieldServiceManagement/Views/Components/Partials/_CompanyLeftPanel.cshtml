@@ -7,36 +7,29 @@
     @if (Model?.IsDeleted == true)
     {
         <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
-            <h2 class="accordion-header px-2">
-                <button class="accordion-button bg-danger-subtle text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        aria-expanded="true"
-                        aria-controls="userInfoCollapse">
+            <div class="accordion-header d-flex gap-1 my-2 fw-semibold align-items-center px-2">
+                
                     <div>Deletion  Details</div>
 
                     <div data-toggle="tooltip" class="ms-2" title="This company has been permanently deleted from the system.">
                         <i class="bi bi-info-circle"></i>
                     </div>
-                </button>
-            </h2>
-            <div class="accordion-collapse collapse show">
-                <div class="accordion-body px-2 pt-1 mt-0">
-                    <div class="d-flex flex-column gap-2">
-                        <div class="d-flex align-items-start gap-2">
-                            <i class="bi bi-node-minus-fill"></i>
-                            <div class="d-flex flex-column">
-                                <span class="text-black fw-bold">Status</span>
-                                <span class="text-black"><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
-                            </div>
+            </div>
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-node-minus-fill"></i>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">Status</span>
+                            <span><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
                         </div>
+                    </div>
 
-                        <div class="d-flex align-items-start gap-2">
-                            <i class="bi bi-person-circle"></i>
-                            <div class="d-flex flex-column">
-                                <span class="text-black fw-bold">Deleted By</span>
-                                <span class="text-black">Deleted by name</span>
-                            </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-person-circle"></i>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">Deleted By</span>
+                            <span>Deleted by name</span>
                         </div>
                     </div>
                 </div>
@@ -44,9 +37,9 @@
         </div>
     }
 
-    <div class="accordion-item border-0 rounded-2 mb-2">
+    <div class="accordion-item  border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#companyInfoCollapse"
@@ -63,13 +56,13 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-buildings"></i>
                         <span class="text-muted">Name</span>
-                        <span class="text-black">@Model?.Name</span>
+                        <span>@Model?.Name</span>
                     </div>
 
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-globe"></i>
                         <span class="text-muted">Website</span>
-                        <span class="text-black">
+                        <span>
                             @(string.IsNullOrWhiteSpace(Model?.Website) ? "--" : Model?.Website)
                         </span>
                     </div>
@@ -77,7 +70,7 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-bookmarks"></i>
                         <span class="text-muted">Type</span>
-                        <span class="text-black">
+                        <span>
                             @{
                                 var type = ((CompanyType?)Model?.Type)?.GetNormalisedDisplayName() ?? "Unknown";
                             }
@@ -88,7 +81,7 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-telephone"></i>
                         <span class="text-muted">Phone</span>
-                        <span class="text-black">
+                        <span>
                             @(string.IsNullOrWhiteSpace(Model?.Phone) ? "--" : Model?.Phone)
                         </span>
                     </div>
@@ -96,7 +89,7 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-phone"></i>
                         <span class="text-muted">Mobile</span>
-                        <span class="text-black">
+                        <span>
                             @(string.IsNullOrWhiteSpace(Model?.Mobile) ? "--" : Model?.Mobile)
                         </span>
                     </div>
@@ -104,7 +97,7 @@
                     <div class="d-flex align-items-start gap-2">
                        <i class="bi bi-envelope"></i>
                         <span class="text-muted">Email</span>
-                        <span class="text-black">
+                        <span>
                             @(string.IsNullOrWhiteSpace(Model?.Email) ? "--" : Model?.Email)
                         </span>
                     </div>
@@ -122,7 +115,7 @@
                             <span class="text-muted">Status</span>
                             <div class="d-flex align-items-center gap-1">
                                 <span class="fsm-status-dot @statusCss"></span>
-                                <span class="text-black ms-1">@statusLabel</span>
+                                <span class="ms-1">@statusLabel</span>
                             </div>
                         </div>
                     </div>
@@ -133,7 +126,7 @@
 
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#companyAddressCollapse"
@@ -150,7 +143,7 @@
                     <i class="bi bi-gear-wide-connected"></i>
                     <div class="d-flex flex-column gap-1">
                         <span class="mb-1">Service Address</span>
-                        <span class="text-black">
+                        <span>
                             @Html.Raw(
                                 Model?.ServiceAddressName?
                                     .Replace(",", ",<br />")
@@ -164,7 +157,7 @@
                     <i class="bi bi-receipt"></i>
                     <div class="d-flex flex-column gap-1">
                         <span class="mb-1">Billing Address</span>
-                        <span class="text-black">
+                        <span>
                             @Html.Raw(
                                 Model?.BillingAddressName?
                                     .Replace(",", ",<br />")
@@ -179,7 +172,7 @@
 
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#invoiceInformationCollapse"
@@ -207,7 +200,7 @@
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-person-circle"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Owner</span>
+                        <span class="small ">Owner</span>
 
                         @{
                             var owner = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
@@ -226,7 +219,7 @@
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-file-earmark-plus"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Created By</span>
+                        <span class="small ">Created By</span>
 
                         @{
                             var createdBy = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
@@ -240,14 +233,14 @@
                             </span>
                         </a>
                         
-                        <span class="small text-black mb-2 small">On @Model?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.CreatedAt.ToString("tt").ToUpper()</span>
+                        <span class="small mb-2 small">On @Model?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.CreatedAt.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
 
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-file-earmark-arrow-up"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Modified By</span>
+                        <span class="small ">Modified By</span>
                         @{
                             var modifiedBy = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
                             var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
@@ -260,7 +253,7 @@
                             </span>
                         </a>
                         
-                        <span class="small text-black mb-2 small">On @Model?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.UpdatedAt?.ToString("tt").ToUpper()</span>
+                        <span class="small mb-2 small">On @Model?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.UpdatedAt?.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
             </div>

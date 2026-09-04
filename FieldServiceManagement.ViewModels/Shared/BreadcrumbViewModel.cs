@@ -6,6 +6,8 @@
         public bool ShowBack { get; set; } = false;
         public bool ShowHome { get; set; } = true;
 
+        public bool ShowHistory { get; set; } = true;
+
         /// <summary>Crumb items after Home. Last item with no Url renders as current page.</summary>
         public List<BreadcrumbItem> Items { get; set; } = new();
         public string Icon { get; set; } = "bi-folder2";

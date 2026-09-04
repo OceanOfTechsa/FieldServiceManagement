@@ -9,7 +9,7 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
         <div class="d-flex gap-1 align-items-center text-black">
             @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
             new BreadcrumbViewModel
@@ -27,7 +27,7 @@
     </div>
 
     <div class="fsm-fixed-view-wrapper-forms" id="fsm-new-user">
-        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+        <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
 
             @using (Html.BeginForm("Edit", "Companies", new { area = "" }, FormMethod.Post, null, new { id = "edit-user-form", style = "display:flex;flex-direction:column;flex:1;overflow:hidden;" }))
             {
@@ -40,25 +40,10 @@
                 @Html.HiddenFor(m => m.UpdatedBy)
 
                 <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="my-3">
-
-                  @*   <div class="bd-callout bd-callout-info my-0 p-2 mb-3 bg-opacity-10">
-                        <span class="small">
-                            • Update the user's personal details and role assignment below.
-                            <br />
-                            • <strong>Email address cannot be changed</strong> here, your administrator to update login credentials.
-                            <br />
-                            • Changing a user's role will immediately affect their permissions and access level within the system.
-                            <br />
-                            • Ensure all information is accurate before saving, as changes take effect immediately.
-                        </span>
-                    </div> *@
-
                     @if (!ViewData.ModelState.IsValid)
-                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
                     
 
-                    
-                    <h6 class="my-4">Company Details</h6>
                     <div class="row g-3">
                         <!-- Name -->
                         <div class="col-12 col-md-6">
@@ -226,7 +211,7 @@
                                         data_size = "mini",
                                         data_handle_width = "2",
                                         data_on_text = "Yes",
-                                        data_off_text = "No"
+                                        data_off_text = "Not"
                                     })
                                 </div>
                             </div>
@@ -234,7 +219,7 @@
                     </div>
                 </div>
 
-                <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
+                <div class="FormFooter">
                     <a href="@Url.Action("Info", "Companies", new { Id = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString()) })" type="button" class="btn btn-light btn-xs border">
                         Cancel
                     </a>

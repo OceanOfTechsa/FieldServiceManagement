@@ -27,8 +27,8 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3">
-        <div class="d-flex gap-1 align-items-center text-black">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex gap-1 align-items-center">
             <i class="bi bi-funnel"></i>
             <div id="app" class="mt-2">
                 <enum-dropdown :options="statusOptions"
@@ -67,8 +67,8 @@
 
     <!-- Equipment Table -->
     <div class="border-0 rounded-2 overflow-hidden mx-2">
-        <div class="table-responsive fsm-table-wrapper">
-            <table class="table align-middle mb-0 fsm-table">
+        <div class="table-responsive fsm-table-wrapper bg-surface">
+            <table class="table align-middle mb-0 fsm-table bg-surface">
                 <thead>
                     <tr>
                         <th class="fsm-sortable" data-sort="name">
@@ -105,8 +105,8 @@
                                     <a href="@($"/Workforce/Equipment/Info?Id={UrlEncryptionBusiness.EncryptParam(item.Id.ToString())}")"
                                        class="d-flex align-items-center gap-2 full-name-wrapper">
 
-                                        <span class="fsm-avatar d-inline-flex align-items-center justify-content-center bg-light text-muted">
-                                            <i class="bi @(item.Type == (int)EquipmentType.Vehicle ? "bi-truck" : "bi-tools")"></i>
+                                        <span class="fsm-avatar d-inline-flex align-items-center justify-content-center bg-body-tertiary text-muted">
+                                            <i class="mt-1 bi @(item.Type == (int)EquipmentType.Vehicle ? "bi-truck" : "bi-tools")"></i>
                                         </span>
 
                                         <span class="fsm-user-name">@item.Name</span>
@@ -184,8 +184,8 @@
                                         @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                         {
                                             Id = item.CreatedById.Value,
-                                            Name = item.CreatedByName,
-                                            AvatarUrl = item.CreatedByAvatar
+                                            Name = item?.CreatedByName!,
+                                            AvatarUrl = item?.CreatedByAvatar!
                                         })
                                     }
                                 </td>
@@ -202,7 +202,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="8">
+                            <td colspan="12">
                                 <div class="fsm-empty-state">
                                     <div class="fsm-empty-icon">
                                         <i class="bi bi-tools"></i>
@@ -223,8 +223,8 @@
                     @if (selectedStatus == "Deleted" && filteredEquipment.Any())
                     {
                         <tr>
-                            <td colspan="8">
-                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                            <td colspan="12">
+                                <div class="bg-warning-subtle small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
                                     <i class="bi bi-exclamation-circle-fill text-warning"></i>
                                     @(filteredEquipment.Count > 1 ? "These items have" : "This item has")
                                     been permanently deleted from the system.
@@ -242,7 +242,7 @@
             <span>
                 Total Equipment : <strong>@filteredEquipment.Count</strong> @if (selectedStatus != "All")
                 {
-                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
+                    <span class="ms-2 smaller fsm-pill bg-warning-subtle">Filtered</span>
                 }
             </span>
             <div class="d-flex align-items-center gap-2">
@@ -262,17 +262,6 @@
 
 @section Scripts {
     <script>
-        // ── Shared enum-dropdown component ───────────────────────────────
-        // NOTE: this registers the same 'enum-dropdown' Vue component the
-        // Crew list page also registers. If both pages' scripts can ever
-        // load into the same document (e.g. via an SPA-style shell or
-        // partial navigation instead of a full page reload per route),
-        // Vue.component() will just re-register/overwrite it harmlessly on
-        // each full page load — but if you ever move to loading multiple
-        // page scripts into one DOM without a full reload, this duplicate
-        // registration should be factored into a single shared file instead
-        // of copy-pasted per view, the same way the styling under fsm- is
-        // centralized rather than duplicated per page.
         Vue.component('enum-dropdown', {
             props: {
                 options: Array,
@@ -311,35 +300,35 @@
                 }
             },
             template: `
-                                <div style="position:relative;display:inline-block;" v-click-outside="close">
-                                    <button class="btn btn-sm border-0 bg-transparent text-black px-2" type="button" @@click="toggle">
-                                        {{ display }}<span v-if="suffix"> {{ suffix }}</span>
-                                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
-                                    </button>
-                                    <div v-if="open" style="position:absolute;top:100%;left:0;z-index:1000;min-width:220px;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;background:#fff;">
-                                        <div class="d-flex align-items-center px-3 py-2" style="border-bottom:1px solid #f0f0f0;gap:8px;">
-                                            <i class="bi bi-search" style="color:#adb5bd;font-size:13px;"></i>
-                                            <input ref="search" v-model="search" type="text" class="border-0 bg-transparent w-100" placeholder="Search" style="outline:none;box-shadow:none;font-size:13px;color:#495057;" />
-                                        </div>
-                                        <ul class="list-unstyled mb-0">
-                                            <li v-if="filtered.length === 0">
-                                                <span class="dropdown-item small gap-2 text-danger">
-                                                    <i class="bi bi-exclamation-circle me-2"></i>No results
-                                                </span>
-                                            </li>
-                                            <li v-for="option in filtered" :key="option">
-                                                <button type="button"
-                                                        class="dropdown-item py-2 px-3 border-0 text-start w-100"
-                                                        @@click="select(option)"
-                                                        style="font-size:13px;color:#212529;"
-                                                        :style="value === option ? 'background:rgba(16,185,129,.10);color:#059669;font-weight:500;' : ''">
-                                                    {{ option }}<span v-if="suffix"> {{ suffix }}</span>
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            `
+                <div style="position:relative;display:inline-block;" v-click-outside="close">
+                    <button class="btn btn-sm border-0 bg-transparent px-2" type="button" @@click="toggle">
+                        {{ display }}<span v-if="suffix"> {{ suffix }}</span>
+                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
+                    </button>
+                    <div v-if="open" style="position:absolute;top:100%;left:0;z-index:1000;min-width:220px;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;background:#fff;">
+                        <div class="d-flex align-items-center px-3 py-2" style="border-bottom:1px solid #f0f0f0;gap:8px;">
+                            <i class="bi bi-search" style="color:#adb5bd;font-size:13px;"></i>
+                            <input ref="search" v-model="search" type="text" class="border-0 bg-transparent w-100" placeholder="Search" style="outline:none;box-shadow:none;font-size:13px;color:#495057;" />
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li v-if="filtered.length === 0">
+                                <span class="dropdown-item small gap-2 text-danger">
+                                    <i class="bi bi-exclamation-circle me-2"></i>No results
+                                </span>
+                            </li>
+                            <li v-for="option in filtered" :key="option">
+                                <button type="button"
+                                        class="dropdown-item py-2 px-3 border-0 text-start w-100"
+                                        @@click="select(option)"
+                                        style="font-size:13px;color:#212529;"
+                                        :style="value === option ? 'background:rgba(16,185,129,.10);color:#059669;font-weight:500;' : ''">
+                                    {{ option }}<span v-if="suffix"> {{ suffix }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `
         });
 
         Vue.directive('click-outside', {

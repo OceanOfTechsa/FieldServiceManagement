@@ -1,18 +1,41 @@
-﻿@{
+﻿@using FieldServiceManagement.ViewModels.Shared
+
+@{
     ViewData["Title"] = "Import Contacts Data";
 }
 <style>
     .al-bg {
         background: #f7fafc;
+
+        [data-bs-theme="dark"] & {
+            background: #1b1e21;
+        }
     }
 
     .al-text {
         color: #374151;
+
+        [data-bs-theme="dark"] & {
+            color: #f1f5f9;
+        }
     }
 </style>
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
-        <h6>Import Data</h6>
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+        @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+        new BreadcrumbViewModel
+        {
+            ShowBack = false,
+            ShowHome = true,
+            ShowHistory = false,
+            Icon = "bi-person-fill-add",
+            Items = new List<BreadcrumbItem>
+            {
+                  new() { Label = "Customers",         Url = null },
+                  new() { Label = "Contacts", Url = "/Customers/Contacts"},
+                  new() { Label = "Import", Url = null }
+            }
+        })
         <div class="mt-1">
             <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>
                 Cancel
@@ -23,7 +46,7 @@
         </div>
     </div>
     <div class="fsm-fixed-view-wrapper-forms">
-        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column p-2">
+        <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column p-2">
             <div class="d-flex align-items-start justify-content-between">
                 <nav class="fsm-breadcrumb-sm" style="--bc-max-width: 20px;">
                     <span class="fsm-breadcrumb-item active">
@@ -42,12 +65,11 @@
                         Completed
                     </span>
                 </nav>
-                <button class="d-md-none btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
-                        style="width: 30px; height: 30px; flex-shrink: 0;"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#infoOffcanvas">
-                    <i class="bi bi-info-lg fs-6"></i>
-                </button>
+                <i class="bi bi-info-circle-fill text-primary fs-5 cursor-pointer d-md-none d-inline-flex"
+                    data-bs-toggle="offcanvas"
+                   data-bs-target="#infoOffcanvas"
+                >
+                </i>
             </div>
 
             <div class="bg-soft text-black mt-3 rounded-2 p-2 d-flex align-items-start gap-2 position-relative overflow-hidden overflow-y-auto"
@@ -55,33 +77,33 @@
                 <div class="flex-grow-1" style="flex-basis: 60%; height: calc(100vh - 210px);">
 
                     <!-- ==================== CONTACTS ==================== -->
-                    <div id="contactsSection" class="bg-white rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
+                    <div id="contactsSection" class="bg-surface rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
                         <div class="fsm-upload-container rounded-2 overflow-hidden">
                             <input type="file" class="d-none" id="contacts" accept=".csv" />
                             <label for="contacts" class="fsm-upload-label w-100 rounded-2" id="fsm-upload-label-contacts">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="text-black fw-semibold">Companies</span>
-                                    <span class="al-text small">Upload the file you wish to import as Contacts</span>
+                                    <span class="fw-semibold">Companies</span>
+                                    <span class="al-text small small">Upload the file you wish to import as Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
                             </label>
 
                             <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-contacts">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="text-black fw-semibold">Companies</span>
+                                    <span class="fw-semibold">Companies</span>
                                     <span class="al-text small">Upload the file you wish to import as Contacts</span>
                                 </span>
                             </span>
 
                             <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 border-start-0 d-none" id="attachmentInfoAccordion">
                                 <div class="accordion-item rounded-2 gap-0">
-                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small text-black">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small ">
                                         Attachment
                                         <i class="bi bi-arrow-down-circle cursor-pointer" data-bs-toggle="collapse" data-bs-target="#attachmentInfoCollapse"></i>
                                     </div>
                                     <div id="attachmentInfoCollapse" class="accordion-collapse collapse show">
                                         <div class="accordion-body al-bg px-2 pt-1">
-                                            <div class="file-preview file-preview-sm bg-white rounded-2 border border-fsm d-flex flex-column">
+                                            <div class="file-preview file-preview-sm bg-surface rounded-2 border border-fsm d-flex flex-column">
                                                 <div class="d-flex align-items-start gap-1 p-2">
                                                     <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
                                                     <div class="flex-grow-1 min-width-0 small gap-0">
@@ -105,7 +127,7 @@
 
                             <!-- Import Options -->
                             <div class="d-flex flex-column mt-2 px-2 d-none" id="howto">
-                                <span class="text-black fw-semibold">How do you want to import records in the file?</span>
+                                <span class="fw-semibold">How do you want to import records in the file?</span>
                                 <!-- Your original options (unchanged) -->
                                 <div class="mt-2 d-flex-column align-items-start gap-1 border-bottom">
                                     <div class="form-check mb-2">
@@ -174,25 +196,25 @@
                     </div>
 
                     <!-- ==================== ADDRESSES ==================== -->
-                    <div id="addressesSection" class="bg-white rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
+                    <div id="addressesSection" class="bg-surface rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
                         <div class="fsm-upload-container rounded-2 overflow-hidden">
                             <input type="file" class="d-none" id="addresses" accept=".csv" />
                             <label for="addresses" class="fsm-upload-label w-100 rounded-2">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="text-black fw-semibold">Addresses</span>
+                                    <span class="fw-semibold">Addresses</span>
                                     <span class="al-text small">Upload the file you wish to import as Addresses for Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
                             </label>
                             <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-addresses">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="text-black fw-semibold">Addresses</span>
+                                    <span class="fw-semibold">Addresses</span>
                                     <span class="al-text small">Upload the file you wish to import as Addresses for Contacts</span>
                                 </span>
                             </span>
                             <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 rounded-bottom border-start-0 d-none" id="addressAttachmentInfoAccordion">
                                 <div class="accordion-item rounded-2 gap-0">
-                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small text-black">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small ">
                                         Attachment
                                         <i class="bi bi-arrow-down-circle cursor-pointer"
                                            data-bs-toggle="collapse"
@@ -204,7 +226,7 @@
                                          data-bs-parent="#addressAttachmentInfoAccordion">
                                         <div class="accordion-body al-bg px-2 pt-1 mt-0 rounded-bottom">
                                             <div class="d-flex flex-column gap-2">
-                                                <div class="file-preview file-preview-sm bg-white rounded-2 border border-fsm d-flex flex-column">
+                                                <div class="file-preview file-preview-sm bg-surface rounded-2 border border-fsm d-flex flex-column">
                                                     <div class="d-flex align-items-start gap-1 p-2">
                                                         <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
                                                         <div class="flex-grow-1 min-width-0 small gap-0">
@@ -242,25 +264,25 @@
                     </div>
 
                     <!-- ==================== NOTES ==================== -->
-                    <div id="notesSection" class="bg-white rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden">
+                    <div id="notesSection" class="bg-surface rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden">
                         <div class="fsm-upload-container rounded-2 overflow-hidden">
                             <input type="file" class="d-none" id="notes" accept=".csv" />
                             <label for="notes" class="fsm-upload-label w-100 rounded-2">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="text-black fw-semibold">Notes</span>
+                                    <span class="fw-semibold">Notes</span>
                                     <span class="al-text small">Upload the file you wish to import as Notes for Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
                             </label>
                             <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-notes">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="text-black fw-semibold">Notes</span>
+                                    <span class="fw-semibold">Notes</span>
                                     <span class="al-text small">Upload the file you wish to import as Notes for Contacts</span>
                                 </span>
                             </span>
                             <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 rounded-bottom border-start-0 d-none" id="notesAttachmentInfoAccordion">
                                 <div class="accordion-item rounded-2 gap-0">
-                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small text-black">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small ">
                                         Attachment
                                         <i class="bi bi-arrow-down-circle cursor-pointer"
                                            data-bs-toggle="collapse"
@@ -272,7 +294,7 @@
                                          data-bs-parent="#notesAttachmentInfoAccordion">
                                         <div class="accordion-body al-bg px-2 pt-1 mt-0 rounded-bottom">
                                             <div class="d-flex flex-column gap-2">
-                                                <div class="file-preview file-preview-sm bg-white rounded-2 border border-fsm d-flex flex-column">
+                                                <div class="file-preview file-preview-sm bg-surface rounded-2 border border-fsm d-flex flex-column">
                                                     <div class="d-flex align-items-start gap-1 p-2">
                                                         <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
                                                         <div class="flex-grow-1 min-width-0 small gap-0">
@@ -311,8 +333,8 @@
 
                 </div>
 
-                <div class="d-none d-md-block bg-white border border-warning rounded-2 p-2 overflow-hidden overflow-y-auto"
-                     style="flex-basis: 40%; height: calc(100vh - 210px);">
+                <div class="d-none d-md-block bg-surface border border-warning rounded-2 mb-2 p-2 overflow-hidden overflow-y-auto position-sticky"
+                     style="flex-basis: 40%; height: calc(100vh - 210px); top: 0; align-self: flex-start;">
                     @await Html.PartialAsync("~/Views/Components/ImportInformation/_ContactsImportInformation.cshtml")
                 </div>
             </div>
@@ -482,7 +504,7 @@
             this.attachmentAccordion?.classList.add("d-none");
             if (this.howto) this.howto.classList.add("d-none");
             this.progressContainer?.classList.add("d-none");
-            if(this.contactsUploader.currentFile == null){
+            if (this.contactsUploader.currentFile == null) {
                 document.getElementById("nextBtn").toggleAttribute("disabled", true);
             }
         }
@@ -493,10 +515,9 @@
     const addressesUploader = new FileUploader('addressesSection', 'addresses');
     const notesUploader = new FileUploader('notesSection', 'notes');
 
-    function enableNextButton(){
+    function enableNextButton() {
         const contactsFile = contactsUploader.currentFile;
-        if(contactsFile)
-        {
+        if (contactsFile) {
             document.getElementById("nextBtn").toggleAttribute("disabled", false);
         }
     };

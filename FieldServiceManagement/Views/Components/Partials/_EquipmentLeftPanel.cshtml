@@ -10,11 +10,11 @@
 }
 
 <div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="equipmentInfoAccordion">
-    @if (Model?.IsDeleted == true)
+    @if (Model?.Equipment?.IsDeleted == true)
     {
         <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
             <h2 class="accordion-header px-2">
-                <button class="accordion-button bg-danger-subtle text-black rounded-2 shadow-none d-flex justify-content-between align-items-center"
+                <button class="accordion-button bg-danger-subtle  rounded-2 shadow-none d-flex justify-content-between align-items-center"
                         type="button"
                         data-bs-toggle="collapse"
                         aria-expanded="true"
@@ -34,8 +34,8 @@
                         <div class="d-flex align-items-start gap-2">
                             <i class="bi bi-node-minus-fill"></i>
                             <div class="d-flex flex-column">
-                                <span class="text-black fw-bold">Status</span>
-                                <span class="text-black"><span class="fsm-pill bg-danger text-white me-2">Deleted</span></span>
+                                <span class=" fw-bold">Status</span>
+                                <span class=""><span class="fsm-pill bg-danger text-white me-2">Deleted</span></span>
                             </div>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
     <!-- Equipment Information -->
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#equipmentInfoCollapse"
@@ -64,7 +64,7 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-tools"></i>
                         <span class="text-muted">Name</span>
-                        <span class="text-black">@Model?.Name</span>
+                        <span class="">@Model?.Equipment?.Name</span>
                     </div>
 
                     <!--
@@ -77,27 +77,35 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-bookmarks"></i>
                         <span class="text-muted">Type</span>
-                        <span class="text-black">
+                        <span class="">
                             @{
-                                var type = (EquipmentType)Model?.Type!;
+                                var type = (EquipmentType)Model?.Equipment?.Type!;
                             }
-                            @type.GetNormalisedDisplayName()
+                            @if(Model.Equipment.Type == (int)EquipmentType.Vehicle)
+                            {
+                                <i class="bi bi-truck"></i>
+                            }else
+                            {
+                                <i class="bi bi-wrench-adjustable-circle"></i>
+                            }
+
+                            @type.GetNormalisedDisplayName() 
                         </span>
                     </div>
 
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-upc-scan"></i>
                         <span class="text-muted">Serial Number</span>
-                        <span class="text-black">
-                            @(string.IsNullOrWhiteSpace(Model?.SerialNumber) ? EmptyFieldReplacer : Model?.SerialNumber)
+                        <span class="">
+                            @(string.IsNullOrWhiteSpace(Model?.Equipment?.SerialNumber) ? EmptyFieldReplacer : Model?.Equipment?.SerialNumber)
                         </span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         @{
-                            var (statusLabel, statusCss) = Model!.IsDeleted
+                            var (statusLabel, statusCss) = Model!.Equipment!.IsDeleted
                                 ? ("Deleted", "bg-danger")
-                                : Model.IsActive
+                                : Model!.Equipment!.IsActive == 1 
                                     ? ("Active", "bg-success")
                                     : ("Inactive", "bg-secondary");
                         }
@@ -106,7 +114,7 @@
                             <span class="text-muted">Status</span>
                             <div class="d-flex align-items-center gap-1">
                                 <span class="fsm-status-dot @statusCss"></span>
-                                <span class="text-black ms-1">@statusLabel</span>
+                                <span class=" ms-1">@statusLabel</span>
                             </div>
                         </div>
                     </div>
@@ -118,7 +126,7 @@
     <!-- Other Information -->
     <div class="accordion-item border-0 rounded-2 mb-2">
         <h2 class="accordion-header px-2">
-            <button class="accordion-button bg-white text-black rounded-2 shadow-none"
+            <button class="accordion-button rounded-2 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#equipmentOtherInfoCollapse"
@@ -136,9 +144,9 @@
                         <i class="bi bi-shield-check"></i>
                         <span class="text-muted">Warranty Status</span>
 
-                        <span class="text-black">
+                        <span class="">
                             @{
-                                var status = (EquipmentWarrantyStatus)Model?.WarrantyStatus!;
+                                var status = (EquipmentWarrantyStatus)Model?.Equipment!.WarrantyStatus!;
                             }
                             @status.GetNormalisedDisplayName()
                         </span>
@@ -148,19 +156,19 @@
                         <i class="bi bi-calendar-x"></i>
                         <span class="text-muted">Warranty Expiry Date</span>
                         @{
-                            var warrantyExpired = Model?.WarrantyExpiryDate.HasValue == true
-                                && Model.WarrantyExpiryDate.Value.Date < DateTime.UtcNow.Date;
+                            var warrantyExpired = Model?.Equipment?.WarrantyExpiryDate.HasValue == true
+                                && Model.Equipment.WarrantyExpiryDate.Value.Date < DateTime.UtcNow.Date;
                         }
-                        <span class="text-black @(warrantyExpired ? "text-danger" : "")">
-                            @(Model?.WarrantyExpiryDate.HasValue == true ? Model.WarrantyExpiryDate.Value.ToString("MMM dd, yyyy") : EmptyFieldReplacer)
+                        <span class=" @(warrantyExpired ? "text-danger" : "")">
+                            @(Model?.Equipment?.WarrantyExpiryDate.HasValue == true ? Model.Equipment.WarrantyExpiryDate.Value.ToString("MMM dd, yyyy") : EmptyFieldReplacer)
                         </span>
                     </div>
 
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-calendar-check"></i>
                         <span class="text-muted">Purchase Date</span>
-                        <span class="text-black">
-                            @(Model?.PurchaseDate.HasValue == true ? Model.PurchaseDate.Value.ToString("MMM dd, yyyy") : EmptyFieldReplacer)
+                        <span class="">
+                            @(Model?.Equipment?.PurchaseDate.HasValue == true ? Model.Equipment.PurchaseDate.Value.ToString("MMM dd, yyyy") : EmptyFieldReplacer)
                         </span>
                     </div>
                 </div>
@@ -174,10 +182,10 @@
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-person-circle"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Owner</span>
+                        <span class="small ">Owner</span>
 
                         @{
-                            var owner = Model?.Owner_Name + " " + Model?.Owner_Surname ?? "-";
+                            var owner = Model?.EquipmentOwner?.User?.Name + " " + Model?.EquipmentOwner?.User?.Surname ?? "-";
                             var isSystemOwner = owner.Contains("System User", StringComparison.OrdinalIgnoreCase);
                             var ownerLabel = isSystemOwner ? "System" : owner;
                         }
@@ -194,10 +202,10 @@
                             <div class="my-2">
                                 @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                 {
-                                    Id = Model!.Owner_Id! ?? Guid.Empty,
-                                    Name = Model!.Owner_Name!,
-                                    Surname = Model!.Owner_Surname!,
-                                    AvatarUrl = Model!.Owner_AvatarUrl!
+                                    Id = Model!.EquipmentOwner?.User?.Id ?? Guid.Empty,
+                                    Name = Model!.EquipmentOwner?.User?.Name!,
+                                    Surname = Model!.EquipmentOwner?.User?.Surname!,
+                                    AvatarUrl = Model!.EquipmentOwner?.User?.AvatarUrl!
                                 })
                             </div>
                         }
@@ -207,10 +215,10 @@
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-file-earmark-plus"></i>
                     <div class="gap-1">
-                        <span class="small text-black">Created By</span>
+                        <span class="small ">Created By</span>
 
                         @{
-                            var createdBy = Model?.CB_Name + " " + Model?.CB_Surname ?? "-";
+                            var createdBy = Model?.CreatedBy?.User?.Name + " " + Model?.CreatedBy?.User?.Surname ?? "-";
                             var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
                             var createdByLabel = isSystemCreated ? "" : createdBy;
                         }
@@ -228,27 +236,27 @@
                             <div class="my-2">
                                 @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                 {
-                                    Id = Model!.CB_Id! ?? Guid.Empty,
-                                    Name = Model!.CB_Name!,
-                                    Surname = Model!.CB_Surname!,
-                                    AvatarUrl = Model!.CB_AvatarUrl!
+                                    Id = Model!.CreatedBy?.User?.Id ?? Guid.Empty,
+                                    Name = Model!.CreatedBy?.User?.Name!,
+                                    Surname = Model!.CreatedBy?.User?.Surname!,
+                                    AvatarUrl = Model!.CreatedBy?.User?.AvatarUrl!
                                 })
                             </div>
                         }
 
-                        <span class="small text-black mb-2 small">On @Model?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.CreatedAt.ToString("tt").ToUpper()</span>
+                        <span class="small  mb-2 small">On @Model?.Equipment?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.Equipment?.CreatedAt.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
 
-                @if (Model!.UpdatedBy.HasValue)
+                @if (Model!.UpdatedBy is not null)
                 {
                     <div class="d-flex gap-2 align-items-start">
-                        <i class="bi bi-file-earmark-plus"></i>
+                        <i class="bi bi-file-earmark-arrow-up"></i>
                         <div class="gap-1">
-                            <span class="small text-black">Created By</span>
+                            <span class="small ">Modified By</span>
 
                             @{
-                                var updatedBy = Model?.UB_Name + " " + Model?.UB_Surname ?? "-";
+                                var updatedBy = Model?.UpdatedBy?.User?.Name + " " + Model?.UpdatedBy?.User?.Surname ?? "-";
                                 var isSystemUpdated = updatedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
                                 var updatedByLabel = isSystemUpdated ? "" : updatedBy;
                             }
@@ -266,15 +274,15 @@
                                 <div class="my-2">
                                     @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
                                     {
-                                        Id = Model!.UB_Id! ?? Guid.Empty,
-                                        Name = Model!.UB_Name!,
-                                        Surname = Model!.UB_Surname!,
-                                        AvatarUrl = Model!.UB_AvatarUrl!
+                                        Id = Model!.UpdatedBy?.User?.Id ?? Guid.Empty,
+                                        Name = Model!.UpdatedBy?.User?.Name!,
+                                        Surname = Model!.UpdatedBy?.User?.Surname!,
+                                        AvatarUrl = Model!.UpdatedBy?.User?.AvatarUrl!
                                     })
                                 </div>
                             }
 
-                            <span class="small text-black mb-2 small">On @Model?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.UpdatedAt?.ToString("tt").ToUpper()</span>
+                            <span class="small  mb-2 small">On @Model?.Equipment?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.Equipment?.UpdatedAt?.ToString("tt").ToUpper()</span>
                         </div>
                     </div>
 

@@ -8,7 +8,7 @@
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 px-3 py-1">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3 py-1">
         @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
         new BreadcrumbViewModel
         {
@@ -37,18 +37,21 @@
                     @if(Model.User.UserRoleId != (int)UserRole.CustomerPortalUser)
                     {
                         <button class="fsm-btn-group__item" data-fsm-add-to-crew-trigger>
+                            <i class="bi bi-person-plus me-2"></i>
                             Add to Crew
                         </button>
                     }
                     @if (Model.User.StatusId == (int)UserStatus.Invited)
                     {
                         <button class="fsm-btn-group__item" data-fsm-reinvite-trigger>
-                             Reminder
+                            <i class="bi bi-clock-history me-2"></i>
+                             Invitation Reminder
                         </button>
                     }
                     @if (Model.User.StatusId != (int)UserStatus.Deleted && Model.User.UserRoleId != (int)UserRole.Administrator && Model.User.UserRoleId != (int)UserRole.SuperAdmin)
                     {
                         <button class="fsm-btn-group__item" data-fsm-delete-trigger>
+                            <i class="bi bi-trash me-2"></i>
                              Delete
                         </button>
                     }         
@@ -71,7 +74,7 @@
                 <i class="bi bi-layout-sidebar"></i>
             </button>
 
-            <div class="flex-grow-1 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
+            <div class="flex-grow-1 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
                 <div class="fsm-tab-bar" id="fsm-user-tab-bar">
                     <div class="fsm-tab-track" id="fsm-tab-track">
                         <button class="fsm-tab" data-tab="calendar" data-index="0">Calendar</button>

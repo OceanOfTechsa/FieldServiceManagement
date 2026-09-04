@@ -6,9 +6,9 @@ namespace FieldServiceManagement.Business.AuditsBusiness
 {
     public class AuditLogBusiness
     {
-        public async Task<List<AuditLogViewModel>> GetByEntityAsync(string EntityName, AppUserViewModel user)
+        public async Task<List<AuditLogViewModel>> GetByEntityAsync(string EntityName, Guid EntityId, Guid OrgId)
         {
-            var result = await new Repository.Repositories.AuditLogRepository().GetByEntityAsync(EntityName, user.Id.ToString(), user.OrganisationId);
+            var result = await new Repository.Repositories.AuditLogRepository().GetByEntityAsync(EntityName, EntityId.ToString(), OrgId);
             return ObjectMapper.Mapper.Map<List<AuditLogViewModel>>(result);
         }
     }
