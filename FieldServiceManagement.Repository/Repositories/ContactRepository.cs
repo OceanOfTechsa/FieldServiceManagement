@@ -57,6 +57,11 @@ namespace FieldServiceManagement.Repository.Repositories
             return await _dbContext.Database.SqlQueryRaw<ContactListItem>("EXEC [dbo].[GetContactsByUserEmail] @Email", param).ToListAsync();
         }
 
+        public async Task<List<Contact>> GetContactsByCompanyId(Guid CompanyId, Guid OrganisationId)
+        {
+            return _repository.Find(c => c.CompanyId == CompanyId && c.OrganisationId == OrganisationId).ToList();
+        }
+
         #region DISPOSE
         public void Dispose()
         {

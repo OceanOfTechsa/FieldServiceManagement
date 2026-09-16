@@ -1,14 +1,12 @@
 ﻿using FieldServiceManagement.Data;
 using FieldServiceManagement.Data.DataModels.Address;
-using FieldServiceManagement.Data.DataModels.Contact;
-using FieldServiceManagement.Data.DataModels.Language;
 using FieldServiceManagement.Data.RepositoryServices;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-namespace FieldServiceManagement.Repository
+namespace FieldServiceManagement.Repository.Repositories
 {
     public class AddressRepository
     {
@@ -25,6 +23,35 @@ namespace FieldServiceManagement.Repository
         public List<Address> GetAllAddressesByOrganisaId(Guid OrganisationId)
         {
             return [.. _repository.Find(x => x.OrganisationId == OrganisationId & x.IsActive == true & x.IsDeleted == false)];
+        }
+
+        public async Task<List<AddressWithUsage>> GetAvailableAddressesForCompanyAsync(Guid organisationId, Guid? currentCompanyId = null)
+        {
+            var parameters = new[]
+            {
+                new SqlParameter("@OrganisationId", organisationId),
+                new SqlParameter("@CurrentCompanyId", currentCompanyId.HasValue ? currentCompanyId.Value : (object)DBNull.Value)
+            };
+
+            return await _dbContext.Set<AddressWithUsage>()
+                .FromSqlRaw("EXEC GetAvailableAddressesForCompany @OrganisationId, @CurrentCompanyId", parameters)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<List<EntityLinkedAddress>> GetEntityLinkedAddressesAsync(int entityTypeId, Guid entityId,Guid organisationId)
+        {
+            var parameters = new[]
+            {
+                new SqlParameter("@EntityTypeId", entityTypeId),
+                new SqlParameter("@EntityId", entityId),
+                new SqlParameter("@OrganisationId", organisationId)
+            };
+
+            return await _dbContext.Set<EntityLinkedAddress>()
+                .FromSqlRaw("EXEC GetEntityLinkedAddresses @EntityTypeId, @EntityId, @OrganisationId", parameters)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public List<Address> GetAddressesBySearchTerm(string SearchTerm, string Email)

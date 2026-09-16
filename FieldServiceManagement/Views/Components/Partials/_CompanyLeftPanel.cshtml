@@ -1,19 +1,27 @@
-﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
-@using FieldServiceManagement.Enum
+﻿@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
 
 @model FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel
+@{
+    var Company = Model.Company;
+    var CreatedBy = Model.CreatedBy;
+    var UpdatedBy = Model.UpdatedBy;
+    var Addresses = Model.LinkedAddresses;
+
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
+}
  
 <div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="companyInfoAccordion">
-    @if (Model?.IsDeleted == true)
+    @if (Company?.IsDeleted == true)
     {
         <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
-            <div class="accordion-header d-flex gap-1 my-2 fw-semibold align-items-center px-2">
+            <div class="accordion-header d-flex gap-1 my-2 fw-semibold align-items-center justify-content-between px-2">
                 
-                    <div>Deletion  Details</div>
+                <div>Deletion  Details</div>
 
-                    <div data-toggle="tooltip" class="ms-2" title="This company has been permanently deleted from the system.">
-                        <i class="bi bi-info-circle"></i>
-                    </div>
+                <div data-toggle="tooltip" class="ms-2" title="This company has been permanently deleted from the system.">
+                    <i class="bi bi-info-circle"></i>
+                </div>
             </div>
             <div class="accordion-body px-2 pt-1 mt-0">
                 <div class="d-flex flex-column gap-2">
@@ -21,7 +29,7 @@
                         <i class="bi bi-node-minus-fill"></i>
                         <div class="d-flex flex-column">
                             <span class="fw-bold">Status</span>
-                            <span><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on May 21, 2026</span>
+                            <span><span class="fsm-pill bg-danger text-white me-2">Deleted</span>Deleted on @Company?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Company?.UpdatedAt?.ToString("tt").ToUpper()</span>
                         </div>
                     </div>
 
@@ -29,7 +37,7 @@
                         <i class="bi bi-person-circle"></i>
                         <div class="d-flex flex-column">
                             <span class="fw-bold">Deleted By</span>
-                            <span>Deleted by name</span>
+                            <span>Deleted by @UpdatedBy?.Name @UpdatedBy?.Surname</span>
                         </div>
                     </div>
                 </div>
@@ -56,14 +64,14 @@
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-buildings"></i>
                         <span class="text-muted">Name</span>
-                        <span>@Model?.Name</span>
+                        <span>@Company?.Name</span>
                     </div>
 
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-globe"></i>
                         <span class="text-muted">Website</span>
                         <span>
-                            @(string.IsNullOrWhiteSpace(Model?.Website) ? "--" : Model?.Website)
+                            @(string.IsNullOrWhiteSpace(Company?.Website) ? EmptyFieldReplacer : Company?.Website)
                         </span>
                     </div>
 
@@ -72,7 +80,7 @@
                         <span class="text-muted">Type</span>
                         <span>
                             @{
-                                var type = ((CompanyType?)Model?.Type)?.GetNormalisedDisplayName() ?? "Unknown";
+                                var type = ((CompanyType?)Company?.Type)?.GetNormalisedDisplayName() ?? "Unknown";
                             }
                             <span>@type</span>
                         </span>
@@ -82,7 +90,7 @@
                         <i class="bi bi-telephone"></i>
                         <span class="text-muted">Phone</span>
                         <span>
-                            @(string.IsNullOrWhiteSpace(Model?.Phone) ? "--" : Model?.Phone)
+                            @(string.IsNullOrWhiteSpace(Company?.Phone) ? EmptyFieldReplacer : Company?.Phone)
                         </span>
                     </div>
 
@@ -90,7 +98,7 @@
                         <i class="bi bi-phone"></i>
                         <span class="text-muted">Mobile</span>
                         <span>
-                            @(string.IsNullOrWhiteSpace(Model?.Mobile) ? "--" : Model?.Mobile)
+                            @(string.IsNullOrWhiteSpace(Company?.Mobile) ? EmptyFieldReplacer : Company?.Mobile)
                         </span>
                     </div>
 
@@ -98,23 +106,23 @@
                        <i class="bi bi-envelope"></i>
                         <span class="text-muted">Email</span>
                         <span>
-                            @(string.IsNullOrWhiteSpace(Model?.Email) ? "--" : Model?.Email)
+                            @(string.IsNullOrWhiteSpace(Company?.Email) ? EmptyFieldReplacer : Company?.Email)
                         </span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         @{
-                            var (statusLabel, statusCss) = Model!.IsDeleted
-                                ? ("Deleted", "bg-danger")
-                                : Model.IsActive
-                                    ? ("Active", "bg-success")
-                                    : ("Inactive", "bg-secondary");
+                            var (statusLabel, iconClass, iconCss) = Company!.IsDeleted
+                                ? ("Deleted", "bi-x-circle-fill", "text-danger")
+                                : Company!.IsActive
+                                    ? ("Active", "bi-check-circle-fill", "text-success")
+                                    : ("Inactive", "bi-x-circle-fill", "text-secondary");
                         }
                         <div class="d-flex align-items-start gap-2">
                             <i class="bi bi-node-minus"></i>
                             <span class="text-muted">Status</span>
                             <div class="d-flex align-items-center gap-1">
-                                <span class="fsm-status-dot @statusCss"></span>
+                                <i class="bi @iconClass @iconCss"></i>
                                 <span class="ms-1">@statusLabel</span>
                             </div>
                         </div>
@@ -137,35 +145,60 @@
         </h2>
         <div id="companyAddressCollapse"
              class="accordion-collapse collapse show"
-             data-bs-parent="#companyAddressAccordion">
+             data-bs-parent="#companyInfoAccordion">
             <div class="accordion-body px-2 pt-1 mt-0">
+
+                @{
+                    // Only active (not soft-deleted) links
+                    var serviceAddress = Addresses?
+                        .FirstOrDefault(a => a.AddressTypeId == (int)AddressTypes.Service
+                                          && !a.IsEntityAddressDeleted);
+
+                    var billingAddress = Addresses?
+                        .FirstOrDefault(a => a.AddressTypeId == (int)AddressTypes.Billing
+                                          && !a.IsEntityAddressDeleted);
+                }
+
+                <!-- Service Address -->
                 <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-gear-wide-connected"></i>
                     <div class="d-flex flex-column gap-1">
                         <span class="mb-1">Service Address</span>
                         <span>
-                            @Html.Raw(
-                                Model?.ServiceAddressName?
+                            @if (serviceAddress != null)
+                            {
+                                @Html.Raw(serviceAddress.DisplayText
                                     .Replace(",", ",<br />")
-                                    .Replace(" ,", ",")
-                            )
+                                    .Replace(" ,", ","))
+                            }
+                            else
+                            {
+                                <span class="text-muted">@EmptyFieldReplacer</span>
+                            }
                         </span>
                     </div>
                 </div>
 
+                <!-- Billing Address -->
                 <div class="d-flex gap-2 align-items-start mt-3">
                     <i class="bi bi-receipt"></i>
                     <div class="d-flex flex-column gap-1">
                         <span class="mb-1">Billing Address</span>
                         <span>
-                            @Html.Raw(
-                                Model?.BillingAddressName?
+                            @if (billingAddress != null)
+                            {
+                                @Html.Raw(billingAddress.DisplayText
                                     .Replace(",", ",<br />")
-                                    .Replace(" ,", ",")
-                            )
+                                    .Replace(" ,", ","))
+                            }
+                            else
+                            {
+                                <span class="text-muted">@EmptyFieldReplacer</span>
+                            }
                         </span>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -186,8 +219,12 @@
              data-bs-parent="#invoiceInformationAccordion">
             <div class="accordion-body px-2 pt-1 mt-0">
                 <div class="d-flex flex-column gap-3">
-                    <span class="small gap-2 text-danger">
-                        <i class="bi bi-exclamation-circle me-2"></i>No Crew Found
+                    <span class="small gap-2 text-muted d-flex align-items-center">
+                        <i class="bi bi-exclamation-circle me-2"></i>Record not synced yet. <i class="bi bi-link-45deg ms-2 fs-5 text-primary cursor-pointer"
+                                                                                               data-bs-toggle="tooltip"
+                                                                                               data-bs-title="Link to Invoices"
+                                                                                               data-bs-placement="bottom"
+                                                                                               data-bs-custom-class="fsm-tooltip"></i>
                     </span>
                 </div>
             </div>
@@ -198,64 +235,73 @@
         <div class="accordion-body px-2">
             <div class="d-flex flex-column gap-3">
                 <div class="d-flex gap-2 align-items-start">
-                    <i class="bi bi-person-circle"></i>
-                    <div class="gap-1">
-                        <span class="small ">Owner</span>
-
-                        @{
-                            var owner = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
-                            var isSystemOwner = owner.Contains("System User", StringComparison.OrdinalIgnoreCase);
-                            var ownerLabel = isSystemOwner ? "System" : owner;
-                        }
-                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedById.ToString()!) })"
-                           class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
-                            <span class="d-flex align-items-center gap-2">
-                                @ownerLabel
-                            </span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2 align-items-start">
                     <i class="bi bi-file-earmark-plus"></i>
                     <div class="gap-1">
                         <span class="small ">Created By</span>
 
                         @{
-                            var createdBy = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
+                            var createdBy = CreatedBy?.Name + " " + CreatedBy?.Surname ?? "-";
                             var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
                             var createdByLabel = isSystemCreated ? "System" : createdBy;
-                        }                        
-                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedById.ToString()!) })"
-                            class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
-                            <span class="d-flex align-items-center gap-2">
+                        }                             @if (isSystemCreated)
+                        {
+                            <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                  title="This account was self-registered">
                                 @createdByLabel
                             </span>
-                        </a>
+                        }
+                        else
+                        {
+                            <div class="my-2">
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = CreatedBy!.Id!,
+                                    Name = CreatedBy!.Name!,
+                                    Surname = CreatedBy!.Surname!,
+                                    AvatarUrl = CreatedBy!.AvatarUrl!
+                                })
+                            </div>
+                        }
                         
-                        <span class="small mb-2 small">On @Model?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Model?.CreatedAt.ToString("tt").ToUpper()</span>
+                        <span class="small mb-2 small">On @Company?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @Company?.CreatedAt.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 align-items-start">
-                    <i class="bi bi-file-earmark-arrow-up"></i>
-                    <div class="gap-1">
-                        <span class="small ">Modified By</span>
-                        @{
-                            var modifiedBy = Model?.CreatedByName + " " + Model?.CreatedBySurname ?? "-";
-                            var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
-                            var modifiedByLabel = iSystemModified ? "System" : modifiedBy;
-                        }
-                        <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.CreatedByCreatedById.ToString()!) })"
-                            class="d-flex align-items-center gap-2 full-name-wrapper mt-1 small">
-                            <span class="d-flex align-items-center gap-2">
-                                @modifiedByLabel
-                            </span>
-                        </a>
-                        
-                        <span class="small mb-2 small">On @Model?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Model?.UpdatedAt?.ToString("tt").ToUpper()</span>
+                @if (Company!.UpdatedBy.HasValue)
+                {
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        <div class="gap-1">
+                            <span class="small ">Modified By</span>
+                            @{
+                                var modifiedBy = UpdatedBy?.Name + " " + UpdatedBy?.Surname ?? " ";
+                                var iSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                                var modifiedByLabel = iSystemModified ? "System" : modifiedBy;
+                            }
+                            @if (iSystemModified)
+                            {
+                                <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                title="This account was self-registered">
+                                    @modifiedByLabel
+                                </span>
+                            }
+                            else
+                            {
+                                <div class="my-2">
+                                    @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                    {
+                                        Id = UpdatedBy!.Id,
+                                        Name = UpdatedBy.Name,
+                                        Surname = UpdatedBy.Surname,
+                                        AvatarUrl = UpdatedBy!.AvatarUrl!
+                                    })
+                                </div>
+                            }
+
+                        <span class="small mb-2 small">On @Company?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @Company?.UpdatedAt?.ToString("tt").ToUpper()</span>
                     </div>
                 </div>
+                }
             </div>
         </div>
     </div>

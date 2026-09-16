@@ -20,6 +20,11 @@ namespace FieldServiceManagement.Repository.Repositories
             _repository = new RepositoryService<Company>(_dbContext);
         }
 
+        public Company? GetById(Guid Id)
+        {
+            return _repository.Find(x => x.Id == Id)?.FirstOrDefault();
+        }
+
         public async Task<Guid?> CreateCompanyAsync(Company Model, string? IpAddress = null)
         {
             var parameters = new[]
@@ -43,22 +48,10 @@ namespace FieldServiceManagement.Repository.Repositories
             return row?.Success == true ? row.Id : null;
         }
 
-        public async Task<List<CompanyDetails>> GetCompanyFullDetailsByIdAsync(Guid Id)
-        {
-            var param = new SqlParameter("@Id", Id);
-            return await _dbContext.Database.SqlQueryRaw<CompanyDetails>("EXEC [dbo].[GetCompanyById] @Id", param).ToListAsync();
-        }
-
         public async Task<List<CompanyResult>> GetCompaniesByUserEmailAsync(string email)
         {
             var param = new SqlParameter("@Email", email);
             return  await _dbContext.Database.SqlQueryRaw<CompanyResult>("EXEC [dbo].[GetCompaniesByUserEmail] @Email", param).ToListAsync();
-        }
-
-        public Task<Company?> GetCompanyByIdAsync(Guid Id)
-        {
-            var entity = _repository.Find(x => x.Id == Id).FirstOrDefault();
-            return Task.FromResult(entity);
         }
 
         public async Task<Guid?> UpdateCompanyAsync(Company Model, string? UpdatedByEmail, string? IpAddress = null)
@@ -83,6 +76,34 @@ namespace FieldServiceManagement.Repository.Repositories
             var result = await _dbContext.Database.SqlQueryRaw<RepoResults>(query, parameters).ToListAsync();
             var row = result.FirstOrDefault();
             return row?.Success == true ? row.Id : null;
+        }
+
+        public async Task<RepoResults> LinkCompanyAddressesAsync(
+          Guid companyId, Guid? serviceAddressId, Guid? billingAddressId, string userEmail)
+        {
+            var results = await _dbContext.Database.SqlQueryRaw<RepoResults>(
+                "EXEC LinkCompanyAddresses @CompanyId, @ServiceAddressId, @BillingAddressId, @UserEmail",
+                new SqlParameter("@CompanyId", companyId),
+                new SqlParameter("@ServiceAddressId", (object?)serviceAddressId ?? DBNull.Value),
+                new SqlParameter("@BillingAddressId", (object?)billingAddressId ?? DBNull.Value),
+                new SqlParameter("@UserEmail", userEmail)
+            ).ToListAsync();
+
+            return results.FirstOrDefault()
+                ?? new RepoResults { Success = false, ErrorMessage = "No result returned." };
+        }
+
+        public async Task<RepoResults> DeleteCompanyAsync(Guid companyId, string userEmail, string? ipAddress = null)
+        {
+            var results = await _dbContext.Database.SqlQueryRaw<RepoResults>(
+                "EXEC DeleteCompany @CompanyId, @UserEmail, @IpAddress",
+                new SqlParameter("@CompanyId", companyId),
+                new SqlParameter("@UserEmail", userEmail),
+                new SqlParameter("@IpAddress", (object?)ipAddress ?? DBNull.Value)
+            ).ToListAsync();
+
+            return results.FirstOrDefault()
+                ?? new RepoResults { Success = false, ErrorMessage = "No result returned." };
         }
 
         #region DISPOSE

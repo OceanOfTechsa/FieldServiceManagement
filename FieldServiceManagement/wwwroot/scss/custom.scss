@@ -1614,6 +1614,15 @@ hr {
     padding: 0px;
     text-align: center;
 }
+.fsm-empty-state-data-table {
+    min-height: 318px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
+    text-align: center;
+}
 
 .fsm-empty-icon {
     width: 58px;
@@ -1626,6 +1635,11 @@ hr {
     font-size: 26px;
     color: #94a3b8;
     margin-bottom: 16px;
+
+    [data-bs-theme="dark"] & {
+        background: #24272b;
+        color: #6b7280;
+    }
 }
 
 .app-body {
@@ -2132,7 +2146,7 @@ select.form-select {
     display: inline-block;
     width: 1px;
     height: 0.75rem;
-    background: var(--fsm-border, #2d3140);
+    background: var(--border, #2d3140);
     opacity: 0.5;
     align-self: center;
 }
@@ -2825,4 +2839,103 @@ select.form-select {
     justify-content: flex-end;
     flex-shrink: 0;
     background: #fff;
+}
+
+
+
+/* Default: all panels hidden */
+.fsm-tab-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+}
+
+    /* Active panel visible */
+    .fsm-tab-panel.active {
+        display: block;
+    }
+
+/* Contacts needs flex layout only when active */
+        .fsm-tab-panel.active[data-panel-controller="all"] {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+
+// _link-address.scss
+
+.fsm-address-type-option {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    border: 1px solid var(--border, #dee2e6);
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+        background-color: rgba(25, 135, 84, 0.08); // light green
+        border-color: rgba(25, 135, 84, 0.35);
+    }
+
+    .fsm-address-type-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .fsm-address-type-desc {
+        font-size: 11px;
+        color: var(--fsm-text-muted, #6c757d);
+        margin-top: 4px;
+        margin-left: 22px; // align under the title, past the checkbox
+    }
+}
+
+#linkAddressPanel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 1050;
+    display: none;
+    min-width: 320px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    &.show {
+        display: block;
+    }
+}
+
+#linkAddressPanel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 1050;
+    display: none;
+    flex-direction: column;   // stack title / body / actions vertically
+    min-width: 320px;
+    max-height: 420px;        // cap so long content scrolls instead of pushing actions off-screen
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    &.show {
+        display: flex;        // flex, not block, so the column layout applies
+    }
+}
+
+// the form/body area grows to fill available space and scrolls if needed,
+// pushing the actions row down to the bottom of the panel
+#linkAddressPanel .notif-filter-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+// pinned to the bottom regardless of how tall the body content is
+#linkAddressPanel .notif-filter-actions {
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--border, #dee2e6);
 }

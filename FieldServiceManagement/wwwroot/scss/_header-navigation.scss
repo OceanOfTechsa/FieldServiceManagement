@@ -1411,3 +1411,75 @@ body.fsm-app {
             background: #2d3238;
         }
     }
+
+
+
+.notif-filter-panel {
+    display: none;
+    flex-direction: column;
+    position: fixed; // escapes .fsm-table-wrapper / .fsm-tab-content clipping
+    z-index: 2000; // sits above the table, sticky header, everything
+    width: 340px;
+    max-width: 90vw;
+    background: var(--fsm-surface-raised, #fff);
+    border: 1px solid var(--fsm-border-subtle, rgba(0, 0, 0, 0.1));
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    padding: 12px;
+
+    &.show {
+        display: flex;
+    }
+}
+
+.notif-filter-title {
+    flex: 0 0 auto;
+}
+
+// Only this inner region scrolls — header and action buttons stay put
+.notif-filter-body,
+.fsm-filter-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 4px;
+}
+
+.notif-filter-actions {
+    flex: 0 0 auto;
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid var(--fsm-border-subtle, rgba(0, 0, 0, 0.08));
+}
+
+.fsm-filter-row {
+    display: grid;
+    grid-template-columns: minmax(88px, 1fr) 128px 110px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+
+    & + .fsm-filter-row {
+        border-top: 1px solid var(--fsm-border-subtle, rgba(0, 0, 0, 0.08));
+    }
+}
+
+.fsm-filter-row-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--fsm-text-muted, #6c757d);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fsm-filter-op,
+.fsm-filter-value {
+    font-size: 12px;
+    height: 30px;
+    padding: 2px 6px;
+    min-width: 0; // lets selects/inputs shrink inside the grid track instead of overflowing
+}

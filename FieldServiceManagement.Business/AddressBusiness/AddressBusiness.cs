@@ -1,6 +1,7 @@
 ﻿using FieldServiceManagement.Business.MappingBusiness;
 using FieldServiceManagement.Data.DataModels.Address;
 using FieldServiceManagement.Data.DataModels.Shared;
+using FieldServiceManagement.Enum;
 using FieldServiceManagement.Repository;
 using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Address;
@@ -15,6 +16,23 @@ namespace FieldServiceManagement.Business.AddressBusiness
             var currentUser = await new UserBusiness.UserBusiness().GetUserDetailsByUserNameAsync(Email);
             var addresses = new AddressRepository().GetAllAddressesByOrganisaId(currentUser.OrganisationId);
             return ObjectMapper.Mapper.Map<List<AddressViewModel>>(addresses);
+        }
+
+        public async Task<List<AddressViewModel>> GetAvailableAddressesForCompanyAsync(string email, Guid? currentCompanyId = null)
+        {
+            var currentUser = await new UserBusiness.UserBusiness()
+                .GetUserDetailsByUserNameAsync(email);
+
+            var addresses = await new AddressRepository()
+                .GetAvailableAddressesForCompanyAsync(currentUser.OrganisationId, currentCompanyId);
+
+            return ObjectMapper.Mapper.Map<List<AddressViewModel>>(addresses);
+        }
+
+        public async Task<List<EntityLinkedAddressViewModel>> GetEntityLinkedAddressesAsync(EntityTypes entityType, Guid entityId, Guid organisationId)
+        {
+            var data = await new AddressRepository().GetEntityLinkedAddressesAsync((int)entityType, entityId, organisationId);
+            return ObjectMapper.Mapper.Map<List<EntityLinkedAddressViewModel>>(data);
         }
 
         public async Task<List<AddressViewModel>> GetAddressBySearchNameAndOrganisationIdAsync(string SearchName, string Email)

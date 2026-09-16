@@ -22,6 +22,13 @@ namespace FieldServiceManagement.Repository.Repositories
             _repository.Insert(model);
         }
 
+
+        public async Task InsertAsync(AuditLog auditLog)
+        {
+            _dbContext.AuditLogs.Add(auditLog);
+            await _dbContext.SaveChangesAsync();
+        }
+
         //public async Task LogManyAsync(IEnumerable<AuditLog> entries)
         //{
         //    _repository.InsertRange(entries);
@@ -34,6 +41,17 @@ namespace FieldServiceManagement.Repository.Repositories
                 .ToList();
         }
 
+        public Task DeleteAuditsByEntityId(Guid EntityId)
+        {
+            var logs = _repository.Find(s => s.EntityId == EntityId.ToString()).ToList();
+
+            foreach (var log in logs)
+            {
+                _repository.Delete(log);
+            }
+
+            return Task.CompletedTask;
+        }
         #region DISPOSE
         public void Dispose()
         {

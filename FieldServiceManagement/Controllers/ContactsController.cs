@@ -29,9 +29,10 @@ namespace FieldServiceManagement.Controllers
 
         [HttpGet("Create")]
         [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
-        public async Task<IActionResult> Create()
+        [MVCDecryptFilter]
+        public async Task<IActionResult> Create(Guid? companyId)
         {
-            var model = new CreateContactViewModel();
+            var model = new CreateContactViewModel { CompanyId = companyId ?? Guid.Empty };
             await PopulateOrganisationAddresses(model);
             model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
             return View(model);

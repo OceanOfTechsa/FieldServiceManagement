@@ -29,5 +29,11 @@ namespace FieldServiceManagement.Business.ContactBusiness
             var results = await new ContactRepository().GetContactsByUserEmailAsync(Email);
             return ObjectMapper.Mapper.Map<List<ContactListItemViewModel>>(results);
         }
+
+        public async Task<List<ContactViewModel>> GetContactsByCompanyId(Guid CompanyId, Guid OrgId)
+        {
+            var dataModel = await new ContactRepository().GetContactsByCompanyId(CompanyId, OrgId);
+            return ObjectMapper.Mapper.Map<List<ContactViewModel>>(dataModel);
+        }
     }
 }

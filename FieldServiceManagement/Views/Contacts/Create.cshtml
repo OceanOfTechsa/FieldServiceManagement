@@ -113,8 +113,10 @@
                         <!-- Company -->
                         <div class="col-12">
                             <div class="form-group">
+
                                 @Html.LabelFor(m => m.CompanyId, new { @class = "form-label" })
                                 <span class="text-danger mt-2">*</span>
+
                                 @if (Model?.Companies == null || !Model.Companies.Any())
                                 {
                                     <select class="form-select" disabled>
@@ -123,25 +125,43 @@
 
                                     <div class="mt-1">
                                         <a href="/Customers/Companies/Create?returnUrl=/Customers/Contacts/Create"
-                                            class="small text-decoration-none">
-                                            <i class="bi bi-plus-circle-dotted"></i> Create a new company
+                                           class="small text-decoration-none">
+                                            <i class="bi bi-plus-circle-dotted"></i>
+                                            Create a new company
                                         </a>
                                     </div>
                                 }
                                 else
                                 {
-                                    <select id="company" name="CompanyId" class="form-select">
+                                    <select id="company"
+                                            name="CompanyId"
+                                            class="form-select"
+                                            disabled="@(Model.CompanyId != Guid.Empty)">
+
                                         <option value="">Select company</option>
 
                                         @foreach (var company in Model.Companies)
                                         {
-                                            <option value="@company.Id" selected="@(company.Id == Model.CompanyId)">
+                                            <option value="@company.Id"
+                                                    selected="@(company.Id == Model.CompanyId)">
                                                 @company.Name
                                             </option>
                                         }
+
                                     </select>
                                 }
-                                @Html.ValidationMessageFor(m => m.Salutation, "", new { @class = "field-error" })
+                                @if (Model?.CompanyId != Guid.Empty)
+                                {
+                                    <input type="hidden"
+                                           name="CompanyId"
+                                           value="@Model?.CompanyId" />
+                                }
+                                @Html.ValidationMessageFor(
+                                    m => m.CompanyId,
+                                    "",
+                                    new { @class = "field-error" }
+                                )
+
                             </div>
                         </div>
                     </div>

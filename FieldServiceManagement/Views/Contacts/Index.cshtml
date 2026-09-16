@@ -1,5 +1,4 @@
-﻿@using System.Text.RegularExpressions
-@using FieldServiceManagement.Business.URLEncryptionBusiness
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
 @using FieldServiceManagement.ViewModels.Contact
 @using FieldServiceManagement.ViewModels.Shared
@@ -65,172 +64,245 @@
     </div>
 
     <!-- Table -->
-    <div class="border-0 rounded-2 overflow-hidden mx-2">
-        <div class="table-responsive fsm-table-wrapper bg-surface">
-            <table class="table align-middle mb-0 fsm-table bg-surface">
-                <thead>
-                    <tr>
-                        <th class="fsm-sortable" data-sort="name">
-                            Contact Name
-                            <span class="fsm-sort-icon">
-                                <i class="bi bi-chevron-expand"></i>
-                            </span>
-                        </th>
-                        <th>Company</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Mobile</th>
-                        <th>Status</th>
-                        <th>Created By</th>
-                        <th>Created At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (filteredContacts.Any())
-                    {
-                        foreach (var item in filteredContacts)
-                        {
-                            var fullName = $"{item.Name} {item.Surname}".Trim();
+    <div class="border-0 rounded-2 overflow-hidden mx-2"
+     data-fsm-table="contacts-list"
+     data-fsm-search-columns="0,1,2,3,4">
 
-                            <tr data-sort-value="@item.Name">
-                                <!-- Contact Name -->
-                                <td>
-                                    <a href="/Customers/Contacts/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())" class="d-flex align-items-center gap-2 full-name-wrapper">
-                                        <img src="@($"https://ui-avatars.com/api/?name={fullName}&background=random")" class="fsm-avatar" alt="@fullName" />
-                                        <span class="fsm-user-name">
-                                            @{
-                                                var salutationDisplay = ((UserSalutation?)@item.Salutation)?.GetNormalisedDisplayName() ?? "Unknown";
-                                            }
-                                            @salutationDisplay. @fullName
-                                        </span>
-                                    </a>
-                                </td>
+    <div class="table-responsive fsm-table-wrapper bg-surface">
+        <table class="table align-middle mb-0 fsm-table bg-surface">
+            <thead>
+                <tr>
+                    <th class="fsm-sortable" data-sort="name">
+                        Contact Name
+                        <span class="fsm-sort-icon">
+                            <i class="bi bi-chevron-expand"></i>
+                        </span>
+                    </th>
+                    <th>Company</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Mobile</th>
+                    <th>Status</th>
+                    <th>Created By</th>
+                    <th>Created At</th>
+                    <th>
+                        <!-- Filter -->
+                        <div class="border-left">
+                            <div type="button"
+                                 class="cursor-pointer"
+                                 data-fsm-filter-toggle="contacts-list"
+                                 aria-label="Filter contacts"
+                                 aria-expanded="false">
+                                <i class="bi bi-funnel"></i>
+                                <span class="notif-filter-badge d-none" data-fsm-filter-badge="contacts-list"></span>
+                            </div>
 
-                                <!-- Company -->
-                                <td>
-                                    @if (!string.IsNullOrWhiteSpace(item.CompanyName))
-                                    {
-                                        <a href="/Customers/Companies/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.CompanyId.ToString())"
-                                           class="full-name-wrapper text-decoration-none d-flex align-items-center">
-                                            <span class="fsm-user-name">@item.CompanyName <i class="bi bi-folder-symlink"></i></span>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <span class="fsm-meta-text">-</span>
-                                    }
-                                </td>
+                            <div class="notif-filter-panel fsm-filter-panel-wide rounded-2" data-fsm-filter-panel="contacts-list">
+                                <span class="fw-semibold small notif-filter-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                    </svg>
+                                    Filters
+                                </span>
 
-                                <!-- Email -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Email) ? @EmptyFieldReplacer : item.Email)</span></td>
+                                <div class="notif-filter-body fsm-filter-scroll" data-fsm-filter-body="contacts-list"></div>
 
-                                <!-- Phone -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? @EmptyFieldReplacer : item.Phone)</span></td>
-
-                                <!-- Mobile -->
-                                <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Mobile) ? @EmptyFieldReplacer : item.Mobile)</span></td>
-                               
-                                <!-- Status -->
-                                <td>
-                                    @{
-                                        var (statusLabel, statusCss) = item.IsDeleted
-                                            ? ("Deleted", "bg-danger")
-                                            : item.IsActive
-                                                ? ("Active", "bg-success")
-                                                : ("Inactive", "bg-secondary");
-                                    }
-                                    <span class="d-inline-flex align-items-center gap-2">
-                                        <span class="fsm-status-dot @statusCss"></span>
-                                        <span>@statusLabel</span>
-                                    </span>
-                                </td>
-
-                                <!-- Created By -->
-                                <td>
-                                    @if (item.CreatedById == null)
-                                    {
-                                        <span class="fsm-meta-text">@EmptyFieldReplacer</span>
-                                    }
-                                    else
-                                    {
-                                        @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
-                                        {
-                                            Id = item.CreatedById ?? Guid.Empty,
-                                            Name = item?.CreatedByName,
-                                            Surname = string.Empty,
-                                            AvatarUrl = item?.CreatedByAvatar
-                                        })
-                                    }
-                                </td>
-
-                                <!-- Created At -->
-                                <td>
-                                    <span class="fsm-meta-text">
-                                        @item.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item.CreatedAt.ToString("tt").ToUpper()
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="8">
-                                <div class="fsm-empty-state">
-                                    <div class="fsm-empty-icon">
-                                        <i class="bi bi-person-lines-fill"></i>
-                                    </div>
-                                    <h6 class="fw-semibold mb-1">No contacts found</h6>
-                                    <p class="text-muted small mb-3">No contacts match the selected filter.</p>
-                                    <a href="/Customers/Contacts/Create" class="btn btn-primary btn-xs">
-                                        <i class="fa-solid fa-plus"></i>
-                                        New Contact
-                                    </a>
+                                <div class="notif-filter-actions d-flex justify-content-between">
+                                    <button type="button" class="notif-filter-clear" data-fsm-filter-clear="contacts-list">
+                                        <i class="bi bi-trash"></i> Clear
+                                    </button>
+                                    <button type="button" class="notif-filter-apply" data-fsm-filter-apply="contacts-list">
+                                        <i class="bi bi-funnel"></i> Apply
+                                    </button>
                                 </div>
-                            </td>
-                        </tr>
-                    }
+                            </div>
 
-                    @if (selectedStatus == "Deleted" && filteredContacts.Any())
-                    {
-                        <tr>
-                            <td colspan="8">
-                                <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
-                                    <i class="bi bi-exclamation-circle-fill text-warning"></i>
-                                    @(filteredContacts.Count > 1 ? "These contacts have" : "This contact has")
-                                    been permanently deleted. All associated data has been archived.
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="fsm-table-footer">
-            <span>
-                Total Contacts: <strong>@filteredContacts.Count</strong>
-                @if (selectedStatus != "All")
+                            <script type="application/json" data-fsm-filter-fields="contacts-list">
+                            [
+                              { "key": "id", "label": "Contact ID", "type": "guid" },
+                              { "key": "salutation", "label": "Salutation", "type": "number" },
+                              { "key": "name", "label": "Name", "type": "string" },
+                              { "key": "surname", "label": "Surname", "type": "string" },
+                              { "key": "email", "label": "Email", "type": "string" },
+                              { "key": "phone", "label": "Phone", "type": "string" },
+                              { "key": "mobile", "label": "Mobile", "type": "string" },
+                              { "key": "companyid", "label": "Company ID", "type": "guid" },
+                              { "key": "companyname", "label": "Company Name", "type": "string" },
+                              { "key": "isactive", "label": "Active", "type": "bool" },
+                              { "key": "isdeleted", "label": "Deleted", "type": "bool" },
+                              { "key": "createdbyid", "label": "Created By ID", "type": "guid" },
+                              { "key": "createdbyname", "label": "Created By", "type": "string" },
+                              { "key": "createdat", "label": "Created At", "type": "date" }
+                            ]
+                            </script>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (filteredContacts.Any())
                 {
-                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
+                    foreach (var item in filteredContacts)
+                    {
+                        var fullName = $"{item.Name} {item.Surname}".Trim();
+
+                        <tr data-sort-value="@item.Name"
+                            data-id="@item.Id"
+                            data-salutation="@item.Salutation"
+                            data-name="@item.Name"
+                            data-surname="@item.Surname"
+                            data-email="@item.Email"
+                            data-phone="@item.Phone"
+                            data-mobile="@item.Mobile"
+                            data-companyid="@item.CompanyId"
+                            data-companyname="@item.CompanyName"
+                            data-isactive="@item.IsActive.ToString().ToLower()"
+                            data-isdeleted="@item.IsDeleted.ToString().ToLower()"
+                            data-createdbyid="@item.CreatedById"
+                            data-createdbyname="@item.CreatedByName"
+                            data-createdat="@item.CreatedAt.ToString("yyyy-MM-dd")">
+                            <!-- Contact Name -->
+                            <td>
+                                <a href="/Customers/Contacts/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())" class="d-flex align-items-center gap-2 full-name-wrapper">
+                                    <img src="@($"https://ui-avatars.com/api/?name={fullName}&background=random")" class="fsm-avatar" alt="@fullName" />
+                                    <span class="fsm-user-name">
+                                        @{
+                                            var salutationDisplay = ((UserSalutation?)@item.Salutation)?.GetNormalisedDisplayName() ?? "Unknown";
+                                        }
+                                        @salutationDisplay. @fullName
+                                    </span>
+                                </a>
+                            </td>
+
+                            <!-- Company -->
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.CompanyName))
+                                {
+                                    <a href="/Customers/Companies/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.CompanyId.ToString())"
+                                       class="full-name-wrapper text-decoration-none d-flex align-items-center">
+                                        <span class="fsm-user-name">@item.CompanyName <i class="bi bi-folder-symlink"></i></span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="fsm-meta-text">-</span>
+                                }
+                            </td>
+
+                            <!-- Email -->
+                            <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Email) ? @EmptyFieldReplacer : item.Email)</span></td>
+
+                            <!-- Phone -->
+                            <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? @EmptyFieldReplacer : item.Phone)</span></td>
+
+                            <!-- Mobile -->
+                            <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Mobile) ? @EmptyFieldReplacer : item.Mobile)</span></td>
+
+                            <!-- Status -->
+                            <td>
+                                @{
+                                    var (statusLabel, statusCss) = item.IsDeleted
+                                        ? ("Deleted", "bg-danger")
+                                        : item.IsActive
+                                            ? ("Active", "bg-success")
+                                            : ("Inactive", "bg-secondary");
+                                }
+                                <span class="d-inline-flex align-items-center gap-2">
+                                    <span class="fsm-status-dot @statusCss"></span>
+                                    <span>@statusLabel</span>
+                                </span>
+                            </td>
+
+                            <!-- Created By -->
+                            <td>
+                                @if (item.CreatedById == null)
+                                {
+                                    <span class="fsm-meta-text">@EmptyFieldReplacer</span>
+                                }
+                                else
+                                {
+                                    @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                    {
+                                        Id = item.CreatedById ?? Guid.Empty,
+                                        Name = item?.CreatedByName,
+                                        Surname = string.Empty,
+                                        AvatarUrl = item?.CreatedByAvatar
+                                    })
+                                }
+                            </td>
+
+                            <!-- Created At -->
+                            <td>
+                                <span class="fsm-meta-text">
+                                    @item.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item.CreatedAt.ToString("tt").ToUpper()
+                                </span>
+                            </td>
+                            <td></td>
+                        </tr>
+                    }
                 }
-            </span>
-            <div class="d-flex align-items-center gap-2">
-                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
-                <span class="fsm-page-current">1</span>
-                <button class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
-                <select class="fsm-per-page">
-                    <option value="10">10 Records per page</option>
-                    <option value="25">25 Records per page</option>
-                    <option value="50">50 Records per page</option>
-                    <option value="100">100 Records per page</option>
-                </select>
-            </div>
+                else
+                {
+                    <tr>
+                        <td colspan="9">
+                            <div class="fsm-empty-state">
+                                <div class="fsm-empty-icon">
+                                    <i class="bi bi-person-lines-fill"></i>
+                                </div>
+                                <h6 class="fw-semibold mb-1">No contacts found</h6>
+                                <p class="text-muted small mb-3">No contacts match the selected filter.</p>
+                                <a href="/Customers/Contacts/Create" class="btn btn-primary btn-xs">
+                                    <i class="fa-solid fa-plus"></i>
+                                    New Contact
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                @if (selectedStatus == "Deleted" && filteredContacts.Any())
+                {
+                    <tr>
+                        <td colspan="9">
+                            <div class="bg-warning-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 border-warning border-start border-2">
+                                <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                @(filteredContacts.Count > 1 ? "These contacts have" : "This contact has")
+                                been permanently deleted. All associated data has been archived.
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="fsm-table-footer">
+        <span>
+            Total Contacts: <strong data-fsm-total-count="contacts-list">@filteredContacts.Count</strong>
+            @if (selectedStatus != "All")
+            {
+                <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
+            }
+        </span>
+        <div class="d-flex align-items-center gap-2">
+            <button class="fsm-page-btn" data-fsm-page-prev disabled><i class="bi bi-chevron-left"></i></button>
+            <span class="fsm-page-current" data-fsm-page-label>1</span>
+            <button class="fsm-page-btn" data-fsm-page-next disabled><i class="bi bi-chevron-right"></i></button>
+            <select class="fsm-per-page" data-fsm-per-page>
+                <option value="10">10 Records per page</option>
+                <option value="25">25 Records per page</option>
+                <option value="50">50 Records per page</option>
+                <option value="100">100 Records per page</option>
+            </select>
         </div>
     </div>
 </div>
+</div>
 
 @section Scripts {
+    <script src="~/js/shared/fsm-data-table.js" nonce="9815422428"></script>
+    <script src="~/js/shared/fsm-table-filters.js" nonce="9815422428"></script>
     <script>
         // ── Shared enum-dropdown component ───────────────────────────────
         Vue.component('enum-dropdown', {

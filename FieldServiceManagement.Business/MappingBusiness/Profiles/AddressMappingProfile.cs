@@ -11,6 +11,8 @@ namespace FieldServiceManagement.Business.MappingBusiness.Profiles
             CreateMap<Address, AddressViewModel>().ReverseMap();
             CreateMap<CreateAddress, CreateAddressViewModel>().ReverseMap();
             CreateMap<AddressListItem, AddressListItemViewModel>().ReverseMap();
+            CreateMap<AddressWithUsage, AddressViewModel>().ReverseMap();
+            CreateMap<EntityLinkedAddress, EntityLinkedAddressViewModel>().ReverseMap();
         }
     }
 }

@@ -1,38 +1,15 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
 @using FieldServiceManagement.ViewModels.Shared
-@using FieldServiceManagement.ViewModels.Audit
-@using X.PagedList
-@model IPagedList<FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel>
+@model FieldServiceManagement.ViewModels.Company.CompanyDetailsViewModel
 
 @{
-    var company = Model.FirstOrDefault();
+    var company = Model.Company;
+    var Contacts = Model.Contacts;
     ViewData["Title"] = company?.Name;
-    var auditLogs = Model
-        .Where(m => m.AuditLogId.HasValue)
-        .Select(m => new AuditLogViewModel
-        {
-            Id = m.AuditLogId ?? Guid.Empty,
-            EntityName = m.AuditLogEntityName,
-            EntityId = m.AuditLogEntityId,
-            Action = m.AuditLogAction,
-            FieldName = m.AuditLogFieldName,
-            OldValue = m.AuditLogOldValue,
-            NewValue = m.AuditLogNewValue,
-            Comment = m.AuditLogComment,
-            PerformedByUserId = m.AuditLogPerformedByUserId ?? Guid.Empty,
-            PerformedByName = m.AuditLogPerformedByName,
-            IpAddress = m.AuditLogIpAddress,
-            OrganisationId = m.AuditLogOrganisationId,
-            CreatedAt = m.AuditLogCreatedAt ?? DateTime.MinValue,
-            ShowEntityType = false,
-            ShowComment = m.AuditLogShowComment,
-            VisibleTo =  m.AuditLogVisibleTo,
-            createdByEmail = m.CreatedByEmail
-            
-        })
-        .ToList();
 }
+
+<link type="text/css" src="~/css/customers/company-info.css" />
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3 py-1">
@@ -64,23 +41,14 @@
                     <i class="bi bi-chevron-down"></i>
                 </button>
                 <div class="fsm-btn-group__menu">
-                    <button class="fsm-btn-group__item"
-                        data-bs-toggle="tooltip" data-bs-title="Change Owner"
-                        data-bs-placement="bottom"
-                        data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
-                        data-fsm-transfer-trigger
-                    >
-                            Change Owner
-                    </button>
-
-                    <button class="fsm-btn-group__item"
+                     <button class="fsm-btn-group__item"
                         data-bs-toggle="tooltip" data-bs-title="Delete"
                         data-bs-placement="bottom"
                         data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
                         data-fsm-delete-trigger
                     >
-                     Delete
-                    </button>       
+                     <i class="bi bi-trash me-1"></i> Delete
+                    </button>        
                 </div>
             </div>
         }
@@ -88,9 +56,8 @@
 
     <div class="fsm-fixed-view-wrapper">
         <div class="d-flex gap-2 w-100 h-100">
-            @* check the height of this *@
             <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel rounded-2">
-                @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", company)
+                @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", Model)
             </div>
 
             <button class="btn fsm-panel-fab d-lg-none"
@@ -113,7 +80,6 @@
                         <button class="fsm-tab" data-tab="relatedList" data-index="6">Related List</button>
                     </div>
 
-           
                     <div class="fsm-tab-more fsm-dropdown" id="fsm-tab-more" style="display:none;">
                         <button class="fsm-tab-more-btn nav-dropdown-toggle"
                                 id="fsm-tab-more-btn"
@@ -128,41 +94,746 @@
                         </div>
                     </div>
                 </div>
-
           
                 <div class="fsm-tab-content flex-grow-1 overflow-auto">
                     <div class="fsm-tab-panel active" data-panel="timeline">
-                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", Model.AuditLogs)
                     </div>
-                    @*<div class="fsm-tab-panel " data-panel="contacts">
-                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
-                    </div>
-                     <div class="fsm-tab-panel" data-panel="appointments">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_ServiceAppointments.cshtml", Model)
-                    </div>
-                    <div class="fsm-tab-panel" data-panel="timesheets">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_TimeSheets.cshtml", Model)
-                    </div>
-                    <div class="fsm-tab-panel" data-panel="territories">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Territories.cshtml", Model)
-                    </div>
-                    <div class="fsm-tab-panel" data-panel="crew">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Crew.cshtml", Model)
-                    </div>
-                    <div class="fsm-tab-panel" data-panel="trips">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_Trips.cshtml", Model)
-                    </div>
-                    <div class="fsm-tab-panel" data-panel="relatedList">
-                        @await Html.PartialAsync("~/Views/Components/Partials/UserTabs/_RelatedList.cshtml", Model)
-                    </div> *@
-                </div>
 
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="contacts"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="contacts"
+                         data-fsm-search-columns="0,1,2,3"
+                         data-empty-icon="bi bi-person-lines-fill"
+                         data-empty-title="No contacts found"
+                         data-empty-message="Add the people associated with this company. Keep names, emails, and phone numbers on hand so the right person can always be reached about a job.">
+
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                             <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i> View and manage company contacts.
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="/Customers/Contacts/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                    New Contact
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Table area (fills remaining height, scrolls internally) -->
+                        <div class="d-flex flex-column flex-grow-1" style="min-height: 0;">
+                            <div class="border-0 rounded-2 rounded-top-0 overflow-hidden d-flex flex-column flex-grow-1 bg-surface" style="min-height: 0;">
+
+                                <div class="table-responsive fsm-table-wrapper flex-grow-1" style="overflow-y: auto; min-height: 0;">
+                                    <table class="table align-middle mb-0 fsm-table bg-surface">
+                                        <thead class="sticky-top bg-surface">
+                                            <tr>
+                                                <th class="fsm-sortable" data-sort="name">
+                                                    Contact Name
+                                                    <span class="fsm-sort-icon"><i class="bi bi-chevron-expand"></i></span>
+                                                </th>
+                                                <th>Email</th>
+                                                <th>Phone</th>
+                                                <th>Mobile</th>
+                                                <th>Status</th>
+                                                <th>Created At</th>
+                                                <th class="">
+                                                    <!-- Filter -->
+                                                    <div class="border-left">
+                                                        <div type="button"
+                                                             class="cursor-pointer"
+                                                             id="contactFilterToggle"
+                                                             data-fsm-filter-toggle="contacts"
+                                                             aria-label="Filter contacts"
+                                                             aria-expanded="false">
+                                                            <i class="bi bi-funnel"></i>
+                                                            <span class="notif-filter-badge d-none" id="contactFilterBadge" data-fsm-filter-badge="contacts"></span>
+                                                        </div>
+
+                                                        <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
+                                                             id="contactFilterPanel"
+                                                             data-fsm-filter-panel="contacts">
+                                                            <span class="fw-semibold small notif-filter-title">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                                                                     stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                                                </svg>
+                                                                Filters
+                                                            </span>
+
+                                                            <div class="notif-filter-body fsm-filter-scroll"
+                                                                 id="contactFilterBody"
+                                                                 data-fsm-filter-body="contacts"></div>
+
+                                                            <div class="notif-filter-actions d-flex justify-content-between">
+                                                                <button type="button" class="notif-filter-clear" id="contactFilterClearBtn" data-fsm-filter-clear="contacts">
+                                                                    <i class="bi bi-trash"></i> Clear
+                                                                </button>
+                                                                <button type="button" class="notif-filter-apply" id="contactFilterApplyBtn" data-fsm-filter-apply="contacts">
+                                                                    <i class="bi bi-funnel"></i> Apply
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Field config consumed by fsm-table-filters.js — not rendered, just data -->
+                                                        <script type="application/json" data-fsm-filter-fields="contacts">
+                                                            [
+                                                                { "key": "id", "label": "Contact ID", "type": "guid" },
+                                                                { "key": "salutation", "label": "Salutation", "type": "number" },
+                                                                { "key": "name", "label": "Name", "type": "string" },
+                                                                { "key": "surname", "label": "Surname", "type": "string" },
+                                                                { "key": "email", "label": "Email", "type": "string" },
+                                                                { "key": "phone", "label": "Phone", "type": "string" },
+                                                                { "key": "mobile", "label": "Mobile", "type": "string" },
+                                                                { "key": "companyid", "label": "Company ID", "type": "guid" },
+                                                                { "key": "serviceaddressid", "label": "Service Address ID", "type": "guid" },
+                                                                { "key": "billingaddressid", "label": "Billing Address ID", "type": "guid" },
+                                                                { "key": "organisationid", "label": "Organisation ID", "type": "guid" },
+                                                                { "key": "createdby", "label": "Created By", "type": "guid" },
+                                                                { "key": "updatedby", "label": "Updated By", "type": "guid" },
+                                                                { "key": "isactive", "label": "Active", "type": "bool" },
+                                                                { "key": "isdeleted", "label": "Deleted", "type": "bool" },
+                                                                { "key": "createdat", "label": "Created At", "type": "date" },
+                                                                { "key": "updatedat", "label": "Updated At", "type": "date" }
+                                                            ]
+                                                        </script>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Contacts != null && Contacts.Any())
+                                            {
+                                                foreach (var item in Contacts)
+                                                {
+                                                    var fullName = $"{item.Name} {item.Surname}".Trim();
+                                                    var salutationDisplay = ((UserSalutation?)item.Salutation)?.GetNormalisedDisplayName() ?? "";
+
+                                                    <tr data-sort-value="@fullName"
+                                                        data-id="@item.Id"
+                                                        data-salutation="@item.Salutation"
+                                                        data-name="@item.Name"
+                                                        data-surname="@item.Surname"
+                                                        data-email="@item.Email"
+                                                        data-phone="@item.Phone"
+                                                        data-mobile="@item.Mobile"
+                                                        data-companyid="@item.CompanyId"
+                                                        data-serviceaddressid="@item.ServiceAddressId"
+                                                        data-billingaddressid="@item.BillingAddressId"
+                                                        data-organisationid="@item.OrganisationId"
+                                                        data-createdby="@item.CreatedBy"
+                                                        data-updatedby="@item.UpdatedBy"
+                                                        data-isactive="@item.IsActive.ToString().ToLower()"
+                                                        data-isdeleted="@item.IsDeleted.ToString().ToLower()"
+                                                        data-createdat="@item.CreatedAt.ToString("yyyy-MM-dd")"
+                                                        data-updatedat="@(item.UpdatedAt?.ToString("yyyy-MM-dd") ?? "")">
+                                                        <td>
+                                                            <a href="/Customers/Contacts/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.Id.ToString())"
+                                                               class="d-flex align-items-center gap-2 full-name-wrapper">
+                                                                <img src="@($"https://ui-avatars.com/api/?name={Uri.EscapeDataString(fullName)}&background=random")"
+                                                                     class="fsm-avatar" alt="@fullName" />
+                                                                <span class="fsm-user-name">
+                                                                    @if (!string.IsNullOrWhiteSpace(salutationDisplay))
+                                                                    {
+                                                                        @salutationDisplay <text>.</text>
+                                                                    }
+                                                                    @fullName
+                                                                </span>
+                                                            </a>
+                                                        </td>
+                                                        <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Email) ? "—" : item.Email)</span></td>
+                                                        <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Phone) ? "—" : item.Phone)</span></td>
+                                                        <td><span class="fsm-meta-text">@(string.IsNullOrWhiteSpace(item.Mobile) ? "—" : item.Mobile)</span></td>
+                                                        <td>
+                                                            @{
+                                                                var (statusLabel, iconClass, iconCss) = item.IsDeleted
+                                                                    ? ("Deleted", "bi-x-circle-fill", "text-danger")
+                                                                    : item.IsActive
+                                                                        ? ("Active", "bi-check-circle-fill", "text-success")
+                                                                        : ("Inactive", "bi-x-circle-fill", "text-secondary");
+                                                            }
+                                                            <span class="d-inline-flex align-items-center gap-2">
+                                                                <i class="bi @iconClass @iconCss"></i>
+                                                                <span>@statusLabel</span>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="fsm-meta-text">
+                                                                @item.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item.CreatedAt.ToString("tt").ToUpper()
+                                                            </span>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="fsm-table-footer flex-shrink-0">
+                                    <span>Total Contacts: <strong>@(Contacts?.Count ?? 0)</strong></span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                                        <span class="fsm-page-current">1</span>
+                                        <button type="button" class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                                        <select class="fsm-per-page">
+                                            <option value="10">10 Records per page</option>
+                                            <option value="25">25 Records per page</option>
+                                            <option value="50">50 Records per page</option>
+                                            <option value="100">100 Records per page</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="addresses"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="addresses"
+                         data-empty-icon="bi bi-geo-alt"
+                         data-empty-title="No addresses found."
+                         data-empty-message="Add the service and billing addresses linked to this company. Keeping these up to date ensures technicians are dispatched to the right location and invoices go to the correct place."
+                         data-fsm-search-columns="0,1,2,3"
+                    >
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage company addresses.
+                            </div>
+
+                            
+                            <div class="d-flex align-items-center gap-2 border-left position-relative" data-fsm-filter-wrapper="linkAddress">
+                                <div type="button"
+                                     class="cursor-pointer d-flex gap-2 align-items-center text-muted btn-sm"
+                                     id="linkAddressToggle"
+                                     data-fsm-filter-toggle="linkAddress"
+                                     aria-label="Link address"
+                                     aria-expanded="false">
+                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                    Link Address
+                                </div>
+
+                                <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
+                                     id="linkAddressPanel"
+                                     data-fsm-filter-panel="linkAddress">
+
+                                    <span class="fw-semibold small notif-filter-title">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        Link Address
+                                    </span>
+
+                                    <form id="linkAddressForm"
+                                          class="notif-filter-body fsm-filter-scroll"
+                                          data-fsm-filter-body="linkAddress"
+                                          action="@Url.Action("LinkAddress", "Companies")"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="companyId" value="@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)" />
+
+                                        <div class="d-flex gap-2 my-3">
+                                            <label class="fsm-address-type-option flex-fill" data-address-type-option="Service">
+                                                <span class="fsm-address-type-header">
+                                                    <input type="checkbox"
+                                                           name="addressTypes"
+                                                           value="Service"
+                                                           class="form-check-input m-0"
+                                                           data-address-type-checkbox />
+                                                    Service Address
+                                                </span>
+                                                <span class="fsm-address-type-desc">
+                                                    Where field work is carried out for this company.
+                                                </span>
+                                            </label>
+
+                                            <label class="fsm-address-type-option flex-fill" data-address-type-option="Billing">
+                                                <span class="fsm-address-type-header">
+                                                    <input type="checkbox"
+                                                           name="addressTypes"
+                                                           value="Billing"
+                                                           class="form-check-input m-0"
+                                                           data-address-type-checkbox />
+                                                    Billing Address
+                                                </span>
+                                                <span class="fsm-address-type-desc">
+                                                    Where invoices and statements are sent.
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                        <div class="mb-2 d-none" data-address-select-group="Service">
+                                            <label for="serviceAddressSelect" class="form-label small fw-semibold">Service Address</label>
+                                            <select id="serviceAddressSelect"
+                                                    name="serviceAddressId"
+                                                    class="form-control fsm-form-control"
+                                                    disabled>
+                                                <option value="" disabled selected>Select an address&hellip;</option>
+                                                @foreach (var address in Model?.OrganisationAddresses!)
+                                                {
+                                                    <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString()!)">
+                                                        @address.DisplayText
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-2 d-none" data-address-select-group="Billing">
+                                            <label for="billingAddressSelect" class="form-label small fw-semibold">Billing Address</label>
+                                            <select id="billingAddressSelect"
+                                                    name="billingAddressId"
+                                                    class="form-control fsm-form-control"
+                                                    disabled>
+                                                <option value="" disabled selected>Select an address&hellip;</option>
+                                                @foreach (var address in Model?.OrganisationAddresses!)
+                                                {
+                                                    <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString()!)">
+                                                        @address.DisplayText
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <div class="text-danger small mt-1 d-none" data-link-address-error></div>
+                                    </form>
+
+                                    <div class="notif-filter-actions d-flex justify-content-between">
+                                        <button type="button"
+                                                class="notif-filter-clear"
+                                                id="linkAddressClearBtn"
+                                                data-fsm-filter-clear="linkAddress">
+                                            <i class="bi bi-trash"></i>
+                                            Clear
+                                        </button>
+                                        <button type="submit"
+                                                form="linkAddressForm"
+                                                class="notif-filter-apply"
+                                                id="linkAddressApplyBtn">
+                                            <i class="fa-solid fa-link"></i>
+                                            Link
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Table area -->
+                        <div class="d-flex flex-column flex-grow-1" style="min-height: 0;">
+                            <div class="border-0 rounded-2 rounded-top-0 overflow-hidden d-flex flex-column flex-grow-1 bg-surface"
+                                 style="min-height: 0;">
+
+                                <div class="table-responsive fsm-table-wrapper flex-grow-1"
+                                     style="overflow-y: auto; min-height: 0;">
+
+                                    <table class="table align-middle mb-0 fsm-table bg-surface">
+
+                                        <thead class="sticky-top bg-surface">
+                                            <tr>
+
+                                                <th class="fsm-sortable" data-sort="address">
+                                                    Address
+                                                    <span class="fsm-sort-icon">
+                                                        <i class="bi bi-chevron-expand"></i>
+                                                    </span>
+                                                </th>
+
+                                                <th>Address Type</th>
+
+                                                <th>Primary</th>
+
+                                                <th>Deleted</th>
+
+                                                <th>Linked At</th>
+
+                                                <th>Action</th>
+
+                                                <th class="">
+                                                    <!-- Filter -->
+                                                    <div class="border-left">
+
+                                                        <div type="button"
+                                                             class="cursor-pointer"
+                                                             id="addressFilterToggle"
+                                                             data-fsm-filter-toggle="addresses"
+                                                             aria-label="Filter addresses"
+                                                             aria-expanded="false">
+
+                                                            <i class="bi bi-funnel"></i>
+
+                                                            <span class="notif-filter-badge d-none"
+                                                                  id="addressFilterBadge"
+                                                                  data-fsm-filter-badge="addresses">
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
+                                                             id="addressFilterPanel"
+                                                             data-fsm-filter-panel="addresses">
+
+                                                            <span class="fw-semibold small notif-filter-title">
+
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                     width="14"
+                                                                     height="14"
+                                                                     fill="none"
+                                                                     stroke="currentColor"
+                                                                     stroke-width="2"
+                                                                     viewBox="0 0 24 24">
+
+                                                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+
+                                                                </svg>
+
+                                                                Filters
+
+                                                            </span>
+
+                                                            <div class="notif-filter-body fsm-filter-scroll"
+                                                                 id="addressFilterBody"
+                                                                 data-fsm-filter-body="addresses">
+                                                            </div>
+
+                                                            <div class="notif-filter-actions d-flex justify-content-between">
+
+                                                                <button type="button"
+                                                                        class="notif-filter-clear"
+                                                                        id="addressFilterClearBtn"
+                                                                        data-fsm-filter-clear="addresses">
+
+                                                                    <i class="bi bi-trash"></i>
+                                                                    Clear
+
+                                                                </button>
+
+                                                                <button type="button"
+                                                                        class="notif-filter-apply"
+                                                                        id="addressFilterApplyBtn"
+                                                                        data-fsm-filter-apply="addresses">
+
+                                                                    <i class="bi bi-funnel"></i>
+                                                                    Apply
+
+                                                                </button>
+
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Filter configuration -->
+                                                        <script type="application/json" data-fsm-filter-fields="addresses">
+                                                            [
+                                                                {"key": "id", "label": "Address ID", "type": "guid"},
+                                                                {"key": "street", "label": "Street", "type": "string" },
+                                                                {"key": "city", "label": "City", "type": "string"},
+                                                                {"key": "zipcode", "label": "Postal Code", "type": "string" },
+                                                                {"key": "addresstypeid", "label": "Address Type", "type": "number"},
+                                                                {"key": "isprimary", "label": "Primary", "type": "bool"},
+                                                                {"key": "isdeleted","label": "Deleted", "type": "bool"},
+                                                                {"key": "isentityaddressdeleted","label": "Link Deleted","type": "bool"},
+                                                                {"key": "linkedat","label": "Linked At","type": "date"}
+                                                            ]
+                                                        </script>
+
+                                                    </div>
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+
+                                            @if (Model.LinkedAddresses != null && Model.LinkedAddresses.Any())
+                                            {
+                                                foreach (var item in Model.LinkedAddresses)
+                                                {
+                                                    <tr data-sort-value="@item.DisplayText"
+                                                        data-id="@item.EntityAddressId"
+                                                        data-street="@item.Street"
+                                                        data-city="@item.City"
+                                                        data-zipcode="@item.ZipCode"
+                                                        data-addresstypeid="@item.AddressTypeId"
+                                                        data-addresstypename="@item.AddressTypeName"
+                                                        data-isprimary="@item.IsPrimary.ToString().ToLower()"
+                                                        data-linkedat="@item.LinkedAt.ToString("yyyy-MM-dd")"
+                                                        data-isdeleted="@item.IsDeleted.ToString().ToLower()"
+                                                        data-isentityaddressdeleted="@item.IsEntityAddressDeleted.ToString().ToLower()">
+
+                                                        <!-- Address -->
+                                                        <td>
+
+                                                            <a href="/Customers/Addresses/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.EntityAddressId.ToString())"
+                                                               class="d-flex align-items-center gap-2 full-name-wrapper">
+
+                                                                <span class="fsm-avatar d-inline-flex align-items-center justify-content-center bg-body-tertiary text-muted">
+                                                                    <i class="bi bi-geo-alt mt-1"></i>
+                                                                </span>
+
+                                                                <span class="fsm-user-name">
+                                                                    @item.DisplayText
+                                                                </span>
+
+                                                            </a>
+
+                                                        </td>
+
+                                                        <!-- Address Type -->
+                                                        <td>
+                                                            <span class="fsm-meta-text">
+                                                                @(string.IsNullOrWhiteSpace(item.AddressTypeName)
+                                                                    ? "—"
+                                                                    : item.AddressTypeName)
+                                                            </span>
+                                                        </td>
+
+                                                        <!-- Primary -->
+                                                        <td>
+                                                            @{
+                                                                var (primaryLabel, primaryIconClass, primaryIconCss) = item.IsPrimary
+                                                                    ? ("Primary", "bi-check-circle-fill", "text-success")
+                                                                    : ("Not Primary", "bi-x-circle-fill", "text-danger");
+                                                            }
+                                                            <span class="d-inline-flex align-items-center gap-2">
+                                                                <i class="bi @primaryIconClass @primaryIconCss"></i>
+                                                                <span>@primaryLabel</span>
+                                                            </span>
+                                                        </td>
+
+                                                        <!-- Deleted -->
+                                                        <td>
+                                                            <span class="fsm-meta-text">
+                                                                @(item.IsEntityAddressDeleted ? "Yes" : "No")
+                                                            </span>
+                                                        </td>
+                                                        <!-- Linked At -->
+                                                        <td>
+                                                            <span class="fsm-meta-text">
+                                                                @item.LinkedAt.ToString("MMM dd, yyyy hh:mm")
+                                                                @item.LinkedAt.ToString("tt").ToUpper()
+                                                            </span>
+                                                        </td>
+
+                                                        <!-- Actions -->
+
+                                                        <td class="d-none d-sm-table-cell">
+                                                            @if (item.IsEntityAddressDeleted == false)
+                                                            {
+                                                                <div class="d-flex align-items-center gap-2 text-warning small"
+                                                                     data-fsm-unlink-trigger
+                                                                     role="button"
+                                                                     data-id="@item.EntityAddressId"
+                                                                     data-name="@item.DisplayText">
+                                                                    <i class="bi bi-dash-circle"></i> Unlink
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="d-flex align-items-center gap-2 text-danger small"
+                                                                     data-fsm-delete-link-trigger
+                                                                     role="button"
+                                                                     data-id="@item.Id"
+                                                                     data-name="@item.DisplayText">
+                                                                    <i class="bi bi-trash"></i> Delete Link
+                                                                </div>
+                                                            }
+                                                        </td>
+
+                                                        <td></td>
+
+                                                    </tr>
+                                                }
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="fsm-table-footer flex-shrink-0">
+
+                                    <span>
+                                        Total Addresses:
+                                        <strong>@(Model.LinkedAddresses?.Count ?? 0)</strong>
+                                    </span>
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <button type="button"
+                                                class="fsm-page-btn"
+                                                disabled>
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+
+                                        <span class="fsm-page-current">
+                                            1
+                                        </span>
+
+                                        <button type="button"
+                                                class="fsm-page-btn"
+                                                disabled>
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+
+                                        <select class="fsm-per-page">
+
+                                            <option value="10">
+                                                10 Records per page
+                                            </option>
+
+                                            <option value="25">
+                                                25 Records per page
+                                            </option>
+
+                                            <option value="50">
+                                                50 Records per page
+                                            </option>
+
+                                            <option value="100">
+                                                100 Records per page
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="notes"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="notes"
+                         data-fsm-search-columns="0,1,2,3"
+                    >
+                          <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage company notes.
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                    New Notes
+                                </a>
+                            </div>
+                        </div>
+                
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+                            <h6 class="fw-semibold mb-1">Notes</h6>
+                            <p class="text-muted small mb-3 w-50">Add additional information you want to include regarding the task at hand. Include attachments that provide context for understanding the specifics of the service request. Document decisions, changes, and communications ensuring everyone is on the same page.</p>
+                        </div>
+                        
+                    </div>
+
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="attachments"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="attachments"
+                         data-fsm-search-columns="0,1,2,3"
+                    >
+                          <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage company attachments.
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="/Attachments/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                    New Attchment
+                                </a>
+                            </div>
+                        </div>
+                
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+                            <h6 class="fw-semibold mb-1">Attachments</h6>
+                            <p class="text-muted small mb-3 w-50">View, upload, and manage all attachments related to this record in one place. Collaborate by adding notes and reviewing all attached files directly within this Record.</p>
+                        </div>
+                        
+                    </div>
+
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="billing"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="billing"
+                         data-fsm-search-columns="0,1,2,3">
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage company billing data.
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                    New bill
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-bank"></i></div>
+                            <h6 class="fw-semibold mb-1">Billing</h6>
+                            <p class="text-muted small mb-3 w-50">Add additional information you want to include regarding the task at hand. Include attachments that provide context for understanding the specifics of the service request. Document decisions, changes, and communications ensuring everyone is on the same page.</p>
+                        </div>
+
+                    </div>
+
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="relatedList"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="relatedList"
+                         data-fsm-search-columns="0,1,2,3">
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage company related list data.
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                    New bill
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-card-checklist"></i></div>
+                            <h6 class="fw-semibold mb-1">Billing</h6>
+                            <p class="text-muted small mb-3 w-50">Add additional information you want to include regarding the task at hand. Include attachments that provide context for understanding the specifics of the service request. Document decisions, changes, and communications ensuring everyone is on the same page.</p>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-
 
 <div class="offcanvas offcanvas-start fsm-side-offcanvas"
      tabindex="-1"
@@ -173,66 +844,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body p-0 overflow-y-auto">
-        @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", company)
-    </div>
-</div>
-
-<div id="fsm-change-owner-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="owner-title">
-    <div class="fsm-dialog fsm-dialog-lg">
-        <p id="owner-title" class="dialog-title">Change Company Owner</p>
-
-        <div class="dialog-warning">
-            <div class="warn-icon">
-                <i class="bi bi-person-gear"></i>
-            </div>
-            <div class="warn-text">
-                <p>Company Ownership Transfer</p>
-                <p class="warn-sub">You are about to transfer ownership of the entire company to a new user.</p>
-            </div>
-        </div>
-
-        <div class="dialog-body">
-            To change the company owner, please select the new owner below. All company records, settings, and ownership rights will be transferred.
-        </div>
-
-        <div class="d-flex flex-column align-items-start mb-2 mx-2">
-            <h6 class="d-flex align-items-center gap-2">New Company Owner <span class="text-danger">*</span></h6>
-            <select class="dialog-select w-50" id="new-owner-select">
-                <!-- Options populated dynamically -->
-                <option value="">Select user...</option>
-            </select>
-        </div>
-
-      @*   <div class="bd-callout bd-callout-info my-0 p-2 mx-2 bg-opacity-10">
-            <strong>Note</strong>
-            <br />
-            <span class="smaller">
-                • All records owned by the current owner will be transferred to the new owner (Requests, Estimates, Work Orders, Service Appointments, etc.).
-                <br />
-                • Crews owned or led by the current owner will be transferred.
-                <br />
-                • If the current owner is a field technician, their Timesheets, Trips, and Location tracking will be closed or stopped automatically.
-                <br />
-                <strong class="text-danger">This action cannot be easily undone.</strong>
-            </span>
-        </div> *@
-
-        <div class="dialog-body">
-            Please select <strong>Transfer Ownership</strong> to proceed with changing the company owner, or <strong>Cancel</strong> to return without making any changes.
-        </div>
-
-        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
-            <i class="bi bi-exclamation-circle-fill text-danger"></i>
-            Failed to transfer ownership. Please try again.
-            <button class="read-more-btn text-black small">Read more</button>
-        </div>
-
-        <div class="dialog-footer">
-            <button type="button" class="btn-cancel" data-fsm-transfer-cancel>Cancel</button>
-            <button class="btn-confirm" id="fsm-change-owner-confirm">
-                Transfer Ownership
-            </button>
-        </div>
+        @await Html.PartialAsync("~/Views/Components/Partials/_CompanyLeftPanel.cshtml", Model)
     </div>
 </div>
 
@@ -257,13 +869,11 @@
             <strong>Note</strong>
             <br />
             <span class="smaller">
-                • All records owned by this company will be transferred to the new owner (Requests, Estimates, Work Orders, Service Appointments, etc.).
+                This company and all associated records — Requests, Estimates, Work Orders, Service Appointments, crews, teams, and assets — will be removed from active use.
                 <br />
-                • Crews, teams, and assets will be transferred to the new owner.
+                Active timesheets, trips, and location tracking for this company will be closed or stopped automatically.
                 <br />
-                • Active timesheets, trips, and location tracking will be closed or stopped automatically.
-                <br />
-                <strong class="text-danger">This action is irreversible. All company data will be permanently deleted after transfer.</strong>
+                <strong class="text-danger">This action cannot be undone.</strong>
             </span>
         </div>
 
@@ -271,153 +881,146 @@
             Please select <strong>Delete Company</strong> to proceed with removing this company, or <strong>Cancel</strong> to return without making any changes.
         </div>
 
-        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none">
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none"
+             id="fsm-delete-company-error">
             <i class="bi bi-exclamation-circle-fill text-danger"></i>
-            Failed to delete this company. Please try again.
+            <span id="fsm-delete-company-error-text">Failed to delete this company. Please try again.</span>
             <button class="read-more-btn text-black small">Read more</button>
         </div>
 
-        <div class="dialog-footer">
-            <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
-            <button class="btn-confirm" id="fsm-delete-confirm">
-                Delete Company
-            </button>
+        <form id="fsm-delete-company-form" asp-controller="Companies" asp-action="DeleteCompany" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="companyId" value="@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)" />
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+                <button class="btn btn-danger btn-sm mt-1" id="fsm-delete-confirm" type="submit">
+                    Delete Company
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="fsm-unlink-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="unlink-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="unlink-title" class="dialog-title">Unlink Address</p>
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0-1h-7A.5.5 0 0 1 4 8" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Unlink Confirmation Required</p>
+                <p class="warn-sub" id="fsm-unlink-item-label">
+                    This will remove <strong id="fsm-unlink-item-name"></strong> from this company. You can link a new address afterwards.
+                </p>
+            </div>
         </div>
+
+        <div class="dialog-body">
+            This won't delete the address itself, only the link to this company. Select <strong>Unlink</strong> to proceed, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="bg-danger-subtle p-1 px-2 d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                @errorMessage
+            </div>
+        }
+
+        <form id="fsm-unlink-form" asp-controller="Companies" asp-action="UnlinkAddress" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="companyId" value="@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)" />
+            <input type="hidden" name="entityAddressId" id="fsm-unlink-id-input" value="" />
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-unlink-cancel>Cancel</button>
+                <button type="submit" class="btn btn-warning btn-sm mt-1" id="fsm-unlink-confirm">
+                    Unlink
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="fsm-remove-link-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="unlink-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="unlink-title" class="dialog-title">Permanently Remove Address Link</p>
+
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>        
+            </div>
+
+            <div class="warn-text">
+                <p>Permanent Removal Confirmation</p>
+                <p class="warn-sub" id="fsm-unlink-item-label">
+                    You are about to permanently remove
+                    <strong id="fsm-remove-link-item-name"></strong>
+                    from this company.
+                </p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            <p>
+                This will permanently remove the link between this address and the company.
+                <strong>The address itself will not be deleted</strong> and can still be linked
+                to the company again in the future if required.
+            </p>
+
+            <p class="mb-0">
+                Removing outdated or incorrect address links helps keep company records
+                <strong>accurate, organised, and up to date</strong>, ensuring that only
+                relevant addresses are associated with the company.
+            </p>
+        </div>
+
+        <div id="fsm-remove-link-error" class="bg-danger-subtle p-1 px-2 d-flex align-items-center gap-2 d-none">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            <span id="fsm-remove-link-error-text"></span>
+        </div>
+
+        <form id="fsm-unlink-form" asp-controller="Companies" asp-action="RemoveAddressLink" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="companyId"
+                   value="@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)" />
+
+            <input type="hidden"
+                   name="addressId"
+                   id="fsm-remove-link-id-input"
+                   value="" />
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-delete-link-cancel>
+                    Cancel
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger btn-sm mt-1"
+                        id="fsm-unlink-confirm">
+                    Permanently Remove Link
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 @section scripts {
-    <script type="text/javascript" nonce="9815422428">
-        const transferDialog   = document.getElementById('fsm-change-owner-dialog');
-        const transferTriggers = document.querySelectorAll('[data-fsm-transfer-trigger]');
-        const transferCancels  = document.querySelectorAll('[data-fsm-transfer-cancel]');
-
-        // ── Delete dialog ─────────────────────────────────────────────────────────
-        const deleteDialog   = document.getElementById('fsm-delete-dialog');
-        const deleteTriggers = document.querySelectorAll('[data-fsm-delete-trigger]');
-        const deleteCancels  = document.querySelectorAll('[data-fsm-delete-cancel]');
-
-        transferTriggers.forEach(btn => btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            transferDialog?.classList.add('show');
-        }));
-
-        transferCancels.forEach(btn => btn.addEventListener('click', () => {
-            transferDialog?.classList.remove('show');
-        }));
-
-
-        deleteTriggers.forEach(btn => btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            deleteDialog?.classList.add('show');
-        }));
-
-        deleteCancels.forEach(btn => btn.addEventListener('click', () => {
-            deleteDialog?.classList.remove('show');
-        }));
-
-        (function () {
-            const track    = document.getElementById('fsm-tab-track');
-            const moreWrap = document.getElementById('fsm-tab-more');
-            const moreBtn  = document.getElementById('fsm-tab-more-btn');
-            const moreMenu = document.getElementById('fsm-tab-more-menu');
-            const tabs     = Array.from(track?.querySelectorAll('.fsm-tab') ?? []);
-            const panels   = Array.from(document.querySelectorAll('.fsm-tab-panel'));
-
-            if (!track || !tabs.length) return;
-
-            // ── Activate ──────────────────────────────────────────────────
-            function activate(tabName) {
-                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
-                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
-                moreMenu?.querySelectorAll('button').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.tab === tabName);
-                });
-            }
-
-            tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.tab)));
-
-            // ── Overflow calculation ──────────────────────────────────────
-            function recalc() {
-                if (!moreWrap) return;
-
-                tabs.forEach(t => { t.style.display = ''; });
-                moreWrap.style.display    = 'none';
-                moreWrap.style.visibility = 'hidden';
-                moreMenu.innerHTML        = '';
-
-                requestAnimationFrame(() => {
-                    const barWidth   = track.parentElement.offsetWidth;
-                    const moreBtnW   = 44;
-                    let   used       = 0;
-                    const overflowed = [];
-
-                    tabs.forEach(tab => {
-                        used += tab.getBoundingClientRect().width;
-                        if (used > barWidth - moreBtnW) {
-                            tab.style.display = 'none';
-                            overflowed.push(tab);
-                        }
-                    });
-
-                    if (overflowed.length === 0) {
-                        moreWrap.style.display    = 'none';
-                        moreWrap.style.visibility = '';
-                        return;
-                    }
-
-                    moreWrap.style.display    = '';
-                    moreWrap.style.visibility = '';
-
-                    overflowed.forEach(tab => {
-                        const btn       = document.createElement('button');
-                        btn.type        = 'button';
-                        btn.role        = 'menuitem';
-                        btn.dataset.tab = tab.dataset.tab;
-                        btn.textContent = tab.textContent.trim();
-                        btn.className   = 'dropdown-item' + (tab.classList.contains('active') ? ' active' : '');
-                        btn.addEventListener('click', () => {
-                            activate(tab.dataset.tab);
-                            moreMenu.classList.remove('show');
-                            moreBtn.setAttribute('aria-expanded', 'false');
-                        });
-                        moreMenu.appendChild(btn);
-                    });
-                });
-            }
-
-            // ── More button toggle ────────────────────────────────────────
-            moreBtn?.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log("clicked")
-                const isOpen = moreMenu.classList.contains('show');
-                console.log(isOpen)
-                document.querySelectorAll('.fsm-dropdown-menu.show').forEach(m => {
-                    console.log(m)
-                    m.classList.remove('show');
-                    m.closest('.fsm-dropdown')
-                     ?.querySelector('[aria-expanded]')
-                     ?.setAttribute('aria-expanded', 'false');
-                });
-
-                if (!isOpen) {
-                    moreMenu.classList.add('show');
-                    console.log(moreMenu);
-                    moreBtn.setAttribute('aria-expanded', 'true');
-                }
-            });
-
-            moreMenu?.addEventListener('click', (e) => e.stopPropagation());
-
-            document.addEventListener('click', () => {
-                moreMenu?.classList.remove('show');
-                moreBtn?.setAttribute('aria-expanded', 'false');
-            });
-
-            // ── Init ──────────────────────────────────────────────────────
-            requestAnimationFrame(() => requestAnimationFrame(recalc));
-            window.addEventListener('resize', recalc);
-        })();
-
-    </script>
+    <script type="text/javascript" src="~/js/customers/company-details.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/shared/fsm-data-table.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/shared/fsm-table-filters.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/customers/link-company-address.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/customers/remove-company-address-link.js" nonce="9815422428"></script>
+    <script type="text/javascript" nonce="9815422428" src="~/js/customers/delete-company.js"></script>
 }

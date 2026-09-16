@@ -1,0 +1,9 @@
+﻿.fsm-search-wrapper {
+    display: none;
+    align-items: center;
+    gap: 4px;
+}
+
+.fsm-search-wrapper.active {
+    display: flex;
+}

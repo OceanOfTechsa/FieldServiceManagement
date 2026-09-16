@@ -49,6 +49,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using FieldServiceManagement.Models;
+using FieldServiceManagement.Data.DataModels.Entity;
 
 namespace FieldServiceManagement.Data
 {
@@ -81,6 +82,7 @@ namespace FieldServiceManagement.Data
         public DbSet<Organisation> Organisations { get; set; }
         public DbSet<OrganisationSubscription> OrganisationSubscriptions { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<AddressWithUsage> AddressWithUsages { get; set; }
         public DbSet<Department> Departments { get; set; }
         #endregion
 
@@ -114,6 +116,10 @@ namespace FieldServiceManagement.Data
         public DbSet<Crew> Crews { get; set; }
         public DbSet<CrewMember> CrewMembers { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
+        public DbSet<EntityAddress> EntityAddresses { get; set; }
+        public DbSet<EntityType> EntityTypes { get; set; }
+        public DbSet<AddressType> AddressTypes { get; set; }
+        public DbSet<EntityLinkedAddress> EntityLinkedAddresses { get; set; }
         #endregion
 
         #region Error
@@ -177,6 +183,8 @@ namespace FieldServiceManagement.Data
             modelBuilder.Entity<AnnouncementAdminListItem>().HasNoKey();
             modelBuilder.Entity<SettingsDetailsForDisplay>().HasNoKey();
             modelBuilder.Entity<UserNotification>().HasNoKey();
+            modelBuilder.Entity<AddressWithUsage>().HasNoKey();
+            modelBuilder.Entity<EntityLinkedAddress>().HasNoKey();
         }
     }
 }
