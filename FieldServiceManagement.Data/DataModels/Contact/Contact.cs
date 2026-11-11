@@ -28,7 +28,7 @@ namespace FieldServiceManagement.Data.DataModels.Contact
 
         public Guid CreatedBy { get; set; }
 
-        public Guid UpdatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
 
         public bool IsActive { get; set; }
 

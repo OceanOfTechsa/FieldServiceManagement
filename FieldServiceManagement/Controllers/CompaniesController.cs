@@ -38,7 +38,7 @@ namespace FieldServiceManagement.Controllers
             if (Model.Company.OrganisationId != User?.GetOrganisationIdOrThrow())
                 return Forbid();
 
-            Model.OrganisationAddresses = await new AddressBusiness().GetAvailableAddressesForCompanyAsync(User?.Identity?.Name!, Model.Company.Id);
+            Model.OrganisationAddresses = await new AddressBusiness().GetAvailableAddressesForCompanyAsync(User.GetOrganisationIdOrThrow(), Model.Company.Id);
             return View(Model);
         }
 
@@ -108,9 +108,7 @@ namespace FieldServiceManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LinkAddress(LinkAddressRequest request)
         {
-            var result = await new CompanyBusiness()
-                .LinkCompanyAddressesAsync(request, User.Identity!.Name!);
-
+            var result = await new AddressBusiness().LinkEntityAddressesAsync("Contact", request, User.Identity!.Name!);
             return Json(new { success = result.Success, message = result.Message });
         }
 
@@ -118,8 +116,10 @@ namespace FieldServiceManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlinkAddress(string companyId, Guid entityAddressId)
         {
-            var result = await new CompanyBusiness()
-                .UnlinkCompanyAddressAsync(entityAddressId, User.Identity!.Name!);
+            var compId = Guid.Parse(UrlEncryptionBusiness.DecryptParam(companyId));
+
+            var result = await new AddressBusiness()
+                .UnlinkEntityAddressAsync("Company", compId, entityAddressId, User?.Identity.Name!);
 
             if (!result.Success)
                 TempData["ErrorMessage"] = result.Message ?? "Couldn't unlink this address. Please try again.";
@@ -132,8 +132,8 @@ namespace FieldServiceManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveAddressLink(string companyId, Guid addressId)
         {
-            var result = await new CompanyBusiness()
-                .RemoveCompanyAddressLink(companyId, addressId);
+            var result = await new AddressBusiness()
+                .RemoveEntityAddressLinkAsync(companyId, addressId, User!.GetOrganisationIdOrThrow());
 
             if (!result.Success)
                 TempData["ErrorMessage"] = result.Message ?? "Couldn't unlink this address. Please try again.";
@@ -161,7 +161,7 @@ namespace FieldServiceManagement.Controllers
             if (model is null) return;
 
             model.OrganisationAddresses = await new AddressBusiness()
-                .GetAvailableAddressesForCompanyAsync(User?.Identity?.Name!, companyId);
+                .GetAvailableAddressesForCompanyAsync(User.GetOrganisationIdOrThrow(), companyId);
         }
         #endregion
     }

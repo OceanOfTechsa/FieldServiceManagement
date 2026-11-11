@@ -220,11 +220,16 @@
             <div class="accordion-body px-2 pt-1 mt-0">
                 <div class="d-flex flex-column gap-3">
                     <span class="small gap-2 text-muted d-flex align-items-center">
-                        <i class="bi bi-exclamation-circle me-2"></i>Record not synced yet. <i class="bi bi-link-45deg ms-2 fs-5 text-primary cursor-pointer"
-                                                                                               data-bs-toggle="tooltip"
-                                                                                               data-bs-title="Link to Invoices"
-                                                                                               data-bs-placement="bottom"
-                                                                                               data-bs-custom-class="fsm-tooltip"></i>
+                        <i class="bi bi-exclamation-circle me-2"></i>Record not synced yet.
+                        @if(Company.IsDeleted != true)
+                        {
+                             <i class="bi bi-link-45deg ms-2 fs-5 text-primary cursor-pointer"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="Link to Invoices"
+                                data-bs-placement="bottom"
+                                data-bs-custom-class="fsm-tooltip">
+                            </i>
+                        }
                     </span>
                 </div>
             </div>

@@ -14,6 +14,7 @@
     let errorEl = null;
     let submitBtn = null;
 
+
     function init() {
         toggleEl = document.getElementById("linkAddressToggle");
         panelEl = document.querySelector(PANEL_SELECTOR);

@@ -78,21 +78,6 @@ namespace FieldServiceManagement.Repository.Repositories
             return row?.Success == true ? row.Id : null;
         }
 
-        public async Task<RepoResults> LinkCompanyAddressesAsync(
-          Guid companyId, Guid? serviceAddressId, Guid? billingAddressId, string userEmail)
-        {
-            var results = await _dbContext.Database.SqlQueryRaw<RepoResults>(
-                "EXEC LinkCompanyAddresses @CompanyId, @ServiceAddressId, @BillingAddressId, @UserEmail",
-                new SqlParameter("@CompanyId", companyId),
-                new SqlParameter("@ServiceAddressId", (object?)serviceAddressId ?? DBNull.Value),
-                new SqlParameter("@BillingAddressId", (object?)billingAddressId ?? DBNull.Value),
-                new SqlParameter("@UserEmail", userEmail)
-            ).ToListAsync();
-
-            return results.FirstOrDefault()
-                ?? new RepoResults { Success = false, ErrorMessage = "No result returned." };
-        }
-
         public async Task<RepoResults> DeleteCompanyAsync(Guid companyId, string userEmail, string? ipAddress = null)
         {
             var results = await _dbContext.Database.SqlQueryRaw<RepoResults>(

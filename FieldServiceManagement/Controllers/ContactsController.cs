@@ -2,13 +2,14 @@
 using FieldServiceManagement.Business.CompanyBusiness;
 using FieldServiceManagement.Business.ContactBusiness;
 using FieldServiceManagement.Business.URLEncryptionBusiness;
+using FieldServiceManagement.Helpers;
 using FieldServiceManagement.Models;
+using FieldServiceManagement.ViewModels.Address;
 using FieldServiceManagement.ViewModels.Contact;
 using FieldServiceManagement.ViewModels.Interfaces;
 using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using X.PagedList.Extensions;
 
 namespace FieldServiceManagement.Controllers
 {
@@ -19,7 +20,7 @@ namespace FieldServiceManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string? status)
         {
-            var contacts = await new ContactBusiness().GetContactsByUserEmailAsync(User?.Identity?.Name!);
+            var contacts = await new ContactBusiness().GetContactsByUserEmailAsync(User.Identity!.Name!);
             if (!contacts.Any())
                 return View("~/Views/Shared/PageEmptyState.cshtml", PageEmptyStates.Contacts);
             
@@ -33,8 +34,8 @@ namespace FieldServiceManagement.Controllers
         public async Task<IActionResult> Create(Guid? companyId)
         {
             var model = new CreateContactViewModel { CompanyId = companyId ?? Guid.Empty };
-            await PopulateOrganisationAddresses(model);
-            model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
+            await PopulateOrganisationAddresses(model, User.GetOrganisationIdOrThrow());
+            model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User.Identity?.Name!);
             return View(model);
         }
 
@@ -46,35 +47,144 @@ namespace FieldServiceManagement.Controllers
 
             if (!ModelState.IsValid)
             {
-                await PopulateOrganisationAddresses(model);
-                model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
+                await PopulateOrganisationAddresses(model, User.GetOrganisationIdOrThrow());
+                model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User.Identity?.Name!);
                 return View(model);
             }
-            var contactId = await new ContactBusiness().CreateContactAsync(model, User?.Identity?.Name!);
+            var contactId = await new ContactBusiness().CreateContactAsync(model, User.Identity?.Name!);
             return RedirectToAction("Info", new { Id = UrlEncryptionBusiness.EncryptParam(contactId.ToString()!) });
         }
 
         [HttpGet("Import")]
-        public IActionResult Import()
-        {
-            return View();
-        }
+        public IActionResult Import() => View();
+  
 
         [HttpGet("Info")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Info(int? page, Guid Id)
         {
-            var model = await new ContactBusiness().GetContactFullDetailsByIdAsync(Id);
-            if (!model.Any())
+            var model = await new ContactBusiness().GetContactFullDetailsByIdAsync(Id, User.Identity?.Name!);
+            if (model?.Contact is null)
                 return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Contact" });
 
-            return View(model.ToPagedList(page ?? 1, 10));
+            var orgId = User!.GetOrganisationIdOrThrow();
+
+            if (model.Contact.OrganisationId != orgId)
+                return Forbid();
+
+            model.OrganisationAddresses = await new AddressBusiness().GetAvailableAddressesForCompanyAsync(orgId, model.Company.Id);
+
+            return View(model);
         }
 
-        private async Task PopulateOrganisationAddresses<T>(T? model) where T : class, IHasOrganisationAddresses
+        [HttpGet("Edit")]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
+        [MVCDecryptFilter]
+        public async Task<IActionResult> Edit(Guid Id)
+        {
+            var model = await new ContactBusiness().GetContactByIdAsync(Id);
+            if (model is null)
+                return View("ResourceNotFound", new ResourceNotFoundViewModel { ResourceName = "Contact" });
+
+            var OrgId = User.GetOrganisationIdOrThrow();
+
+            if (model.OrganisationId != OrgId)
+                return Forbid();
+
+            await PopulateOrganisationAddresses(model, OrgId);
+            await PopulateCompanies(model);
+            return View(model);
+        }
+
+        [HttpPost("LinkAddress")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LinkAddress(LinkAddressRequest request)
+        {
+            var result = await new AddressBusiness().LinkEntityAddressesAsync("Contact",request, User.Identity!.Name!);
+
+            return Json(new { success = result.Success, message = result.Message });
+        }
+        [HttpPost("UnlinkAddress")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlinkAddress(string contactId, Guid entityAddressId)
+        {
+            Guid contactGuid;
+            try
+            {
+                contactGuid = Guid.Parse(UrlEncryptionBusiness.DecryptParam(contactId));
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Invalid reference.";
+                return RedirectToAction("Index");
+            }
+
+            var result = await new AddressBusiness()
+                .UnlinkEntityAddressAsync("Contact", contactGuid, entityAddressId, User?.Identity?.Name!);
+
+            if (!result.Success)
+                TempData["ErrorMessage"] = result.Message ?? "Couldn't unlink this address. Please try again.";
+
+            return RedirectToAction("Info", new { Id = contactId });
+        }
+
+        [HttpPost("RemoveAddressLink")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveAddressLink(string contactId, Guid addressId)
+        {
+            var result = await new AddressBusiness()
+                .RemoveEntityAddressLinkAsync(contactId, addressId, User!.GetOrganisationIdOrThrow());
+
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message ?? "Couldn't remove the address link. Please try again." });
+
+            return Ok(new { success = true });
+        }
+        
+         [HttpPost("DeleteContact")]
+         [ValidateAntiForgeryToken]
+         public async Task<IActionResult> DeleteContact()
+         {
+             var contactId = Request.Form["contactId"].ToString();
+             var result = await new ContactBusiness()
+                 .DeleteContact(contactId, User.Identity?.Name!);
+          
+             if (!result.Success)
+                 return BadRequest(new { success = false, message = result.Message ?? "Couldn't delete this contact. Please try again." });
+          
+             return Ok(new { success = true });
+         }
+         
+         [HttpPost("Edit")]
+         [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
+         [ValidateAntiForgeryToken]
+         public async Task<IActionResult> Edit(ContactViewModel model)
+         {
+             if (!ModelState.IsValid)
+             {
+                 await PopulateOrganisationAddresses(model, model.Id);
+                 await PopulateCompanies(model);
+                 ModelState.AddModelError(string.Empty, "Couldn't save the contact. Please try again.");
+                 return View(model);
+             }
+             
+             var result = await new ContactBusiness().UpdateContactAsync(model, User?.Identity?.Name!);
+             return RedirectToAction("Info", "Contacts",new { Id = UrlEncryptionBusiness.EncryptParam(model.Id.ToString()) });
+         }
+
+        #region PRIVATE METHODS
+
+        private async Task PopulateOrganisationAddresses<T>(T? model, Guid organisationId) where T : class, IHasOrganisationAddresses
         {
             if (model is null) return;
-            model.OrganisationAddresses = await new AddressBusiness().GetAllAddressesByOrganisationIdAsync(User?.Identity?.Name!);
+            model.OrganisationAddresses = await new AddressBusiness().GetAllAddressesByOrganisationIdAsync(organisationId);
         }
+
+        private async Task PopulateCompanies<T>(T? model) where T : class, IHasCompanies
+        {
+            if (model is null) return;
+            model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
+        }
+        #endregion
     }
 }

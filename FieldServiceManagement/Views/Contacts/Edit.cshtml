@@ -1,25 +1,332 @@
-﻿
+﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
+@model FieldServiceManagement.ViewModels.Contact.ContactViewModel
+
 @{
-    ViewData["Title"] = "Create New Company";
+    var fullName = $"{Model.Name} {Model.Surname}".Trim();
+    var encryptedId = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString());
+
+    var addressReturnUrl = Uri.EscapeDataString($"/Customers/Contacts/Edit?Id={encryptedId}");
+
+    ViewData["Title"] = $"Edit {fullName}";
+
+    var addresses = Model.OrganisationAddresses ?? new();
+    var hasAddresses = addresses.Any();
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-white d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
         <div class="d-flex gap-1 align-items-center text-black">
-            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item text-blue"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item text-blue">Customers</li>
-                    <li class="breadcrumb-item text-blue"><a href="/Customers/Companies">Contacts</a></li>
-                    <li class="breadcrumb-item link-success" aria-current="page">Create</li>
-                </ol>
-            </nav>
+            @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
+            new BreadcrumbViewModel
+            {
+                ShowBack = true,
+                ShowHome = true,
+                Icon = "bi-person-lines-fill",
+                Items = new List<BreadcrumbItem>
+                {
+                    new() { Label = "Customers", Url = null },
+                    new() { Label = "Contacts", Url = "/Customers/Contacts" },
+                    new() { Label = fullName, Url = Url.Action("Info", "Contacts", new { Id = encryptedId }) },
+                    new() { Label = "Edit" }
+                }
+            })
         </div>
     </div>
 
-    <div class="fsm-fixed-view-wrapper-forms">
-        <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
-            to add form
+    <div class="fsm-fixed-view-wrapper-forms" id="fsm-edit-contact">
+        <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
+
+            @using (Html.BeginForm("Edit", "Contacts", new { area = "" }, FormMethod.Post, null, new { id = "edit-contact-form", style = "display:flex;flex-direction:column;flex:1;overflow:hidden;" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.OrganisationId)
+                @Html.HiddenFor(m => m.IsDeleted)
+                @Html.HiddenFor(m => m.CreatedBy)
+                @Html.HiddenFor(m => m.CreatedAt)
+                @Html.HiddenFor(m => m.UpdatedBy)
+
+                <div style="flex:1;overflow-y:auto;padding:0 24px;" class="my-3">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    }
+
+                    <h6 class="mb-2">Contact Details</h6>
+
+                    <div class="row g-3">
+                        <!-- Salutation -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Salutation, new { @class = "form-label" })
+                                <select id="salutation" name="Salutation" class="form-select">
+                                    <option value="">Select Salutation</option>
+                                    @foreach (UserSalutation salutation in Enum.GetValues(typeof(UserSalutation)))
+                                    {
+                                        <option value="@((int)salutation)" selected="@(Model.Salutation == (int)salutation ? "selected" : null)">
+                                            @salutation.GetNormalisedDisplayName()
+                                        </option>
+                                    }
+                                </select>
+                                @Html.ValidationMessageFor(m => m.Salutation, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Name -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Sithuliso", @autocomplete = "given-name" })
+                                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Surname -->
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Surname, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                @Html.TextBoxFor(m => m.Surname, new { @class = "form-control", @placeholder = "Dlamini", @autocomplete = "family-name" })
+                                @Html.ValidationMessageFor(m => m.Surname, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-12 col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @placeholder = "contact@oceanoftech.co.za", @autocomplete = "email" })
+                                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Company -->
+                        <div class="col-12 col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.CompanyId, "Company", new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                <select id="companyId" name="CompanyId" class="form-select">
+                                  <option value="">
+                                    Select Company
+                                  </option>
+                                  @foreach (var company in Model?.Companies)
+                                  {
+                                    <option value="@company.Id.ToString("D")"
+                                      selected="@(Model.CompanyId == company.Id ? "selected" : null)">
+                                      @company.Name
+                                    </option>
+                                  }
+                                </select>
+                                @Html.ValidationMessageFor(m => m.CompanyId, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-12 col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Phone, new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+                                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", @placeholder = "+27 69 890 2422", @autocomplete = "tel" })
+                                @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Mobile -->
+                        <div class="col-12 col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Mobile, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.Mobile, new { @class = "form-control", @placeholder = "082 686 7925", @autocomplete = "tel" })
+                                @Html.ValidationMessageFor(m => m.Mobile, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mt-4 mb-2">Address</h6>
+
+                    <div class="row g-3">
+                        <!-- Service Address -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.ServiceAddressId, "Service Address", new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+
+                                @if (!hasAddresses)
+                                {
+                                    <select class="form-select" disabled>
+                                        <option>No addresses available</option>
+                                    </select>
+                                    <div class="mt-1">
+                                        <a href="/addresses/Create?returnUrl=@addressReturnUrl" class="small text-decoration-none">
+                                            <i class="bi bi-plus-circle-dotted"></i> Create a new address
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <select id="serviceAddress" name="ServiceAddressId" class="form-select">
+                                        <option value="">Select Service Address</option>
+                                        @foreach (var address in addresses)
+                                        {
+                                            <option value="@address.Id.ToString("D")"
+                                                    selected="@(Model.ServiceAddressId == address.Id ? "selected" : null)">
+                                                @address.Street, @address.City, @address.ZipCode
+                                            </option>
+                                        }
+                                    </select>
+                                }
+                                @Html.ValidationMessageFor(m => m.ServiceAddressId, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Billing Address -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.BillingAddressId, "Billing Address", new { @class = "form-label" })
+                                <span class="text-danger mt-2">*</span>
+
+                                @if (hasAddresses)
+                                {
+                                    <div class="my-2 d-flex gap-1 align-items-center">
+                                        <label for="same" class="form-label mb-0">Same as Service Address?</label>
+                                        <input id="same"
+                                               type="checkbox"
+                                               data-toggle="switch"
+                                               data-size="mini"
+                                               data-handle-width="2"
+                                               data-on-text="Yes"
+                                               data-off-text="No"
+                                               @(Model.ServiceAddressId.HasValue && Model.ServiceAddressId == Model.BillingAddressId ? "checked" : "") />
+                                    </div>
+
+                                    <select id="billingAddress" name="BillingAddressId" class="form-select">
+                                        <option value="">Select Billing Address</option>
+                                        @foreach (var address in addresses)
+                                        {
+                                            <option value="@address.Id.ToString("D")"
+                                                    selected="@(Model.BillingAddressId == address.Id ? "selected" : null)">
+                                                @address.Street, @address.City, @address.ZipCode
+                                            </option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select class="form-select" disabled>
+                                        <option>No addresses available</option>
+                                    </select>
+                                    <div class="mt-1">
+                                        <a href="/addresses/Create?returnUrl=@addressReturnUrl" class="small text-decoration-none">
+                                            <i class="bi bi-plus-circle-dotted"></i> Create a new address
+                                        </a>
+                                    </div>
+                                }
+                                @Html.ValidationMessageFor(m => m.BillingAddressId, "", new { @class = "field-error" })
+                            </div>
+                        </div>
+
+                        <!-- Active -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                <div class="mt-2 d-flex gap-1 align-items-center">
+                                    <label for="IsActive">IsActive?</label>
+                                    @Html.CheckBoxFor(model => model.IsActive, new
+                                    {
+                                        id = "IsActive",
+                                        data_toggle = "switch",
+                                        data_size = "mini",
+                                        data_handle_width = "2",
+                                        data_on_text = "Yes",
+                                        data_off_text = "No"
+                                    })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="FormFooter">
+                    <a href="@Url.Action("Info", "Contacts", new { Id = encryptedId })" class="btn btn-light btn-xs border">
+                        Cancel
+                    </a>
+                    <button type="submit" id="save-contact-btn" class="btn btn-primary btn-xs" data-loading-text="Saving" data-spinner-size="spinner-xs">
+                        Save changes
+                    </button>
+                </div>
+            }
         </div>
     </div>
 </div>
+
+@section scripts {
+    <script>
+        const choicesDefaults = {
+            searchEnabled: true,
+            itemSelectText: '',
+            shouldSort: false,
+            removeItemButton: true
+        };
+
+        new Choices('#salutation', { ...choicesDefaults, searchPlaceholderValue: 'Search...' });
+        new Choices('#companyId', { ...choicesDefaults, searchPlaceholderValue: 'Search company...', noResultsText: 'No companies found' });
+
+        const serviceEl = document.getElementById('serviceAddress');
+        const billingEl = document.getElementById('billingAddress');
+
+        // The address selects only exist when the organisation has addresses
+        const serviceAddressChoices = serviceEl
+            ? new Choices(serviceEl, { ...choicesDefaults, searchPlaceholderValue: 'Search address...', noResultsText: 'No addresses found' })
+            : null;
+        const billingAddressChoices = billingEl
+            ? new Choices(billingEl, { ...choicesDefaults, searchPlaceholderValue: 'Search address...', noResultsText: 'No addresses found' })
+            : null;
+
+        $(document).ready(function () {
+            $("[data-toggle='switch']").bootstrapSwitch();
+
+            if (!serviceAddressChoices || !billingAddressChoices) return;
+
+            function updateToggleState() {
+                const serviceVal = $('#serviceAddress').val() || '';
+                const billingVal = $('#billingAddress').val() || '';
+                const isSame = serviceVal !== '' && serviceVal === billingVal;
+                $('#same').bootstrapSwitch('state', isSame, true); // true = skip the change event
+            }
+
+            function applyBillingLock(locked) {
+                locked ? billingAddressChoices.disable() : billingAddressChoices.enable();
+            }
+
+            updateToggleState();
+            applyBillingLock($('#same').bootstrapSwitch('state'));
+
+            $('#same').on('switchChange.bootstrapSwitch', function (e, state) {
+                if (state) {
+                    const serviceVal = $('#serviceAddress').val();
+                    if (serviceVal) {
+                        billingAddressChoices.setChoiceByValue(serviceVal);
+                    }
+                }
+                applyBillingLock(state);
+            });
+
+            $('#serviceAddress').on('change', function () {
+                if ($('#same').bootstrapSwitch('state')) {
+                    billingAddressChoices.setChoiceByValue($(this).val());
+                } else {
+                    updateToggleState();
+                }
+            });
+
+            $('#billingAddress').on('change', updateToggleState);
+
+            // Disabled selects are not posted, so unlock billing before submitting
+            $('#edit-contact-form').on('submit', function () {
+                billingAddressChoices.enable();
+            });
+        });
+    </script>
+}

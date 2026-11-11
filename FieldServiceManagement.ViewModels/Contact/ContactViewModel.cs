@@ -1,8 +1,11 @@
 ﻿using FieldServiceManagement.Data.DataModels.BaseClass;
+using FieldServiceManagement.ViewModels.Address;
+using FieldServiceManagement.ViewModels.Company;
+using FieldServiceManagement.ViewModels.Interfaces;
 
 namespace FieldServiceManagement.ViewModels.Contact
 {
-    public class ContactViewModel : BaseGuidPrimaryKeyViewModel
+    public class ContactViewModel : BaseGuidPrimaryKeyViewModel, IHasOrganisationAddresses, IHasCompanies
     {
         public int Salutation { get; set; }
 
@@ -26,7 +29,7 @@ namespace FieldServiceManagement.ViewModels.Contact
 
         public Guid CreatedBy { get; set; }
 
-        public Guid UpdatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
 
         public bool IsActive { get; set; }
 
@@ -35,5 +38,9 @@ namespace FieldServiceManagement.ViewModels.Contact
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+
+        public List<AddressViewModel>? OrganisationAddresses { get; set; }
+        public IEnumerable<CompanyListItemViewModel>? Companies { get; set; }
     }
 }

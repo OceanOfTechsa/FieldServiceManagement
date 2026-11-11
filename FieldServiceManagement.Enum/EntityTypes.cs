@@ -6,6 +6,7 @@
         Company = 2,
         Crew = 3,
         Site = 4,
-        Equipment = 5
+        Equipment = 5,
+        Contact = 6
     }
 }

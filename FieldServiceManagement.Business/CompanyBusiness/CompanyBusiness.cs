@@ -51,53 +51,6 @@ namespace FieldServiceManagement.Business.CompanyBusiness
             return await new CompanyRepository().UpdateCompanyAsync(dbModel, currentUserEmail, new LocalIPResolver().GetRoutedIPv4()!);
         }
 
-        public async Task<BusinessResult> LinkCompanyAddressesAsync(LinkAddressRequest request, string currentUserEmail)
-        {
-            if (string.IsNullOrWhiteSpace(request.ServiceAddressId) && string.IsNullOrWhiteSpace(request.BillingAddressId))
-                return new BusinessResult { Success = false, Message = "Select at least one address type." };
-
-            Guid companyId;
-            Guid? serviceAddressId;
-            Guid? billingAddressId;
-
-            try
-            {
-                companyId = Guid.Parse(UrlEncryptionBusiness.DecryptParam(request.CompanyId));
-                serviceAddressId = ParseOptional(request.ServiceAddressId);
-                billingAddressId = ParseOptional(request.BillingAddressId);
-            }
-            catch
-            {
-                return new BusinessResult { Success = false, Message = "Invalid reference." };
-            }
-
-            var results = await new CompanyRepository().LinkCompanyAddressesAsync(
-                companyId, serviceAddressId, billingAddressId, currentUserEmail);
-
-            if (!results.Success)
-                return new BusinessResult { Success = false, Message = results.ErrorMessage };
-
-            return new BusinessResult { Success = true };
-        }
-
-        public async Task<BusinessResult> UnlinkCompanyAddressAsync(Guid entityAddressId, string currentUserEmail)
-        {
-            var addressRepository = new EntityAddressRepository();
-
-            var currentUser = await new UserBusiness.UserBusiness().GetUserDetailsByUserNameAsync(currentUserEmail);
-            var entityAddress = await addressRepository.GetEntityAddressByIdAsync(entityAddressId, currentUser.OrganisationId);
-            if (entityAddress is null)
-                return new BusinessResult { Success = false, Message = "Address link not found." };
-
-            var unlinked = await addressRepository.UnlinkEntityAddressAsync(entityAddress, entityAddressId, currentUser.OrganisationId, currentUser.Id);
-            if (!unlinked)
-                return new BusinessResult { Success = false, Message = "Couldn't unlink the address." };
-
-            LogFieldChangeAsync(entityAddress, currentUser);
-
-            return new BusinessResult { Success = true };
-        }
-
         public async Task<BusinessResult> RemoveCompanyAddressLink(string CompanyId, Guid AddressId)
         {
             Guid compId = Guid.Parse(UrlEncryptionBusiness.DecryptParam(CompanyId));
@@ -154,46 +107,6 @@ namespace FieldServiceManagement.Business.CompanyBusiness
             }
 
             return model;
-        }
-
-        private static Guid? ParseOptional(string? encrypted)
-        {
-            return string.IsNullOrWhiteSpace(encrypted) ? null : Guid.Parse(UrlEncryptionBusiness.DecryptParam(encrypted));
-        }
-
-        private static string NormaliseAddressTypeName(int EntityAddressId)
-        {
-            return (AddressTypes)EntityAddressId switch
-            {
-                AddressTypes.Service => "Service",
-                AddressTypes.Billing => "Billing",
-                AddressTypes.Home => "Home",
-                AddressTypes.Work => "Work",
-                AddressTypes.Postal => "Postal",
-                AddressTypes.Delivery => "Delivery",
-                _ => "Address"
-            };
-        }
-
-        private static async void LogFieldChangeAsync(EntityAddress entityAddress, AppUserViewModel currentUser)
-        {
-            var addressTypeName = NormaliseAddressTypeName(entityAddress.AddressTypeId);
-
-            await new AuditLogBusiness().LogFieldChangeAsync(new AuditLogViewModel
-            {
-                EntityName = "Company",
-                EntityId = entityAddress.EntityId.ToString(),
-                Action = "Updated",
-                FieldName = $"{addressTypeName} Address",
-                OldValue = entityAddress.AddressId.ToString(),
-                NewValue = null,
-                PerformedByUserId = currentUser.Id,
-                PerformedByName = $"{currentUser.Name} {currentUser.Surname}",
-                Comment = $"{currentUser.Name} {currentUser.Surname} Unliked {addressTypeName} address.",
-                OrganisationId = currentUser.OrganisationId,
-                IpAddress = null,
-                ShowComment = true
-            });
         }
 
         #endregion

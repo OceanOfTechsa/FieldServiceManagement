@@ -65,7 +65,11 @@
     </div>
 
     <!-- Table -->
-    <div class="border-0 rounded-2 overflow-hidden mx-2">
+    <div class="border-0 rounded-2 overflow-hidden mx-2"
+        data-fsm-table="companies-list"
+        data-fsm-search-columns="0,1,2,3,4"
+    >
+
         <div class="table-responsive fsm-table-wrapper bg-surface">
             <table class="table align-middle mb-0 fsm-table bg-surface">
                 <thead>
@@ -84,6 +88,58 @@
                         <th>Status</th>
                         <th>Created By</th>
                         <th>Created At</th>
+                        <th>
+                        <!-- Filter -->
+                        <div class="border-left">
+                            <div type="button"
+                                 class="cursor-pointer"
+                                 data-fsm-filter-toggle="companies-list"
+                                 aria-label="Filter Companies"
+                                 aria-expanded="false">
+                                <i class="bi bi-funnel"></i>
+                                <span class="notif-filter-badge d-none" data-fsm-filter-badge="companies-list"></span>
+                            </div>
+
+                            <div class="notif-filter-panel fsm-filter-panel-wide rounded-2" data-fsm-filter-panel="companies-list">
+                                <span class="fw-semibold small notif-filter-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                    </svg>
+                                    Filters
+                                </span>
+
+                                <div class="notif-filter-body fsm-filter-scroll" data-fsm-filter-body="companies-list"></div>
+
+                                <div class="notif-filter-actions d-flex justify-content-between">
+                                    <button type="button" class="notif-filter-clear" data-fsm-filter-clear="companies-list">
+                                        <i class="bi bi-trash"></i> Clear
+                                    </button>
+                                    <button type="button" class="notif-filter-apply" data-fsm-filter-apply="companies-list">
+                                        <i class="bi bi-funnel"></i> Apply
+                                    </button>
+                                </div>
+                            </div>
+
+                            <script type="application/json" data-fsm-filter-fields="companies-list">
+                               [
+                                    { "key": "id", "label": "Company ID", "type": "guid" },
+                                    { "key": "name", "label": "Company Name", "type": "string" },
+                                    { "key": "email", "label": "Email", "type": "string" },
+                                    { "key": "phone", "label": "Phone", "type": "string" },
+                                    { "key": "mobile", "label": "Mobile", "type": "string" },
+                                    { "key": "website", "label": "Website", "type": "string" },
+                                    { "key": "type", "label": "Type", "type": "number" },
+                                    { "key": "serviceaddressname", "label": "Service Address", "type": "string" },
+                                    { "key": "billingaddressname", "label": "Billing Address", "type": "string" },
+                                    { "key": "isactive", "label": "Active", "type": "bool" },
+                                    { "key": "isdeleted", "label": "Deleted", "type": "bool" },
+                                    { "key": "createdat", "label": "Created At", "type": "date" },
+                                    { "key": "createdbyname", "label": "Created By", "type": "date" }
+                                ]
+                            </script>
+                        </div>
+                    </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,6 +219,7 @@
                                         @item?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item?.CreatedAt.ToString("tt").ToUpper()
                                     </span>
                                 </td>
+                                <td></td>
                             </tr>
                         }
                     }
@@ -256,7 +313,7 @@
             },
             template: `
                     <div style="position:relative;display:inline-block;" v-click-outside="close">
-                        <button class="btn btn-sm border-0 bg-transparent px-2" type="button" @@click="toggle">
+                        <button class="btn btn-sm border-0 bg-transparent px-2 text-muted" type="button" @@click="toggle">
                             {{ display }}<span v-if="suffix"> {{ suffix }}</span>
                             <i class="bi bi-chevron-down" style="font-size:10px;"></i>
                         </button>

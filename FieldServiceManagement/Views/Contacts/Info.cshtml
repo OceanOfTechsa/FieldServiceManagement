@@ -1,59 +1,713 @@
 ﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.Enum
-@using FieldServiceManagement.ViewModels.Audit
 @using FieldServiceManagement.ViewModels.Shared
-@using X.PagedList
-@model IPagedList<FieldServiceManagement.ViewModels.Contact.ContactDetailsViewModel>
+@model FieldServiceManagement.ViewModels.Contact.ContactDetailsViewModel
 
 @{
-    var contact = Model.FirstOrDefault();
-    ViewData["Title"] = contact?.Name;
-    var auditLogs = Model
-        .Where(m => m.AuditLogId.HasValue)
-        .Select(m => new AuditLogViewModel
-        {
-            Id = m.AuditLogId ?? Guid.Empty,
-            EntityName = m.AuditLogEntityName,
-            EntityId = m.AuditLogEntityId,
-            Action = m.AuditLogAction,
-            FieldName = m.AuditLogFieldName,
-            OldValue = m.AuditLogOldValue,
-            NewValue = m.AuditLogNewValue,
-            Comment = m.AuditLogComment,
-            PerformedByUserId = m.AuditLogPerformedByUserId ?? Guid.Empty,
-            PerformedByName = m.AuditLogPerformedByName,
-            IpAddress = m.AuditLogIpAddress,
-            OrganisationId = m.AuditLogOrganisationId,
-            CreatedAt = m.AuditLogCreatedAt ?? DateTime.MinValue,
-            ShowEntityType = false,
-            ShowComment = m.AuditLogShowComment,
-            VisibleTo = m.AuditLogVisibleTo,
-            createdByEmail = m.CreatedByEmail
+    var contact = Model.Contact;
+    var fullName = $"{contact.Name} {contact.Surname}".Trim();
+    var encryptedContactId = UrlEncryptionBusiness.EncryptParam(contact.Id.ToString());
+    var canManage = (User.IsInRole(nameof(UserRole.Administrator))
+                  || User.IsInRole(nameof(UserRole.SuperAdmin))
+                  || User.IsInRole(nameof(UserRole.CallCenterAgent)))
+                  && contact.IsDeleted == false;
+    var organisationAddresses = Model.OrganisationAddresses ?? new();
 
-        })
-        .ToList();
+    ViewData["Title"] = fullName;
 }
 
+<link type="text/css" rel="stylesheet" href="~/css/customers/company-info.css" />
+
 <div class="d-flex flex-column container-fluid px-0 h-full">
-    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3 py-1">
         @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
         new BreadcrumbViewModel
         {
             ShowBack = true,
             ShowHome = true,
             Icon = "bi-person-lines-fill",
-            Items = new List<BreadcrumbItem>
-            {
-                new() { Label = "Customers",         Url = null },
+            Items =
+            [
+                new() { Label = "Customers", Url = null },
                 new() { Label = "Contacts", Url = "/Customers/Contacts" },
-                new() { Label = contact?.Name, Url = null},
-            }
+                new() { Label = fullName, Url = null }
+            ]
         })
+        
+        @if (canManage)
+        {
+            <div class="fsm-btn-group bg-primary">
+                <a href="/Customers/Contacts/Edit?Id=@encryptedContactId"
+                   class="btn-main"
+                   data-bs-toggle="tooltip" data-bs-title="Edit"
+                   data-bs-placement="bottom"
+                   data-bs-custom-class="fsm-tooltip mobile-only-tooltip">
+                    Edit
+                </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <button class="fsm-btn-group__item"
+                            data-bs-toggle="tooltip" data-bs-title="Delete"
+                            data-bs-placement="bottom"
+                            data-bs-custom-class="fsm-tooltip mobile-only-tooltip"
+                            data-fsm-delete-trigger>
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        }
     </div>
 
-    <div class="fsm-fixed-view-wrapper-forms">
-        <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
-            @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", auditLogs)
+    <div class="fsm-fixed-view-wrapper">
+        <div class="d-flex gap-2 w-100 h-100">
+            <div class="d-none d-lg-flex flex-column h-100 gap-2 overflow-y-auto overflow-x-hidden fsm-left-panel rounded-2">
+                @await Html.PartialAsync("~/Views/Components/Partials/_ContactLeftPanel.cshtml", Model)
+            </div>
+
+            <button class="btn fsm-panel-fab d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#leftPanelOffcanvas"
+                    aria-controls="leftPanelOffcanvas">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+
+            <div class="flex-grow-1 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column">
+                <div class="fsm-tab-bar" id="fsm-user-tab-bar">
+                    <div class="fsm-tab-track" id="fsm-tab-track">
+                        <button class="fsm-tab active" data-tab="timeline" data-index="0">Timeline</button>
+                        <button class="fsm-tab" data-tab="addresses" data-index="1">Addresses</button>
+                        <button class="fsm-tab" data-tab="notes" data-index="2">Notes</button>
+                        <button class="fsm-tab" data-tab="attachments" data-index="3">Attachments</button>
+                        <button class="fsm-tab" data-tab="relatedList" data-index="4">Related List</button>
+                        <button class="fsm-tab" data-tab="billing" data-index="5">Billing</button>
+                    </div>
+
+                    <div class="fsm-tab-more fsm-dropdown" id="fsm-tab-more" style="display:none;">
+                        <button class="fsm-tab-more-btn nav-dropdown-toggle"
+                                id="fsm-tab-more-btn"
+                                type="button"
+                                aria-expanded="false"
+                                aria-label="More tabs">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="fsm-dropdown-menu fsm-tab-more-menu show"
+                             id="fsm-tab-more-menu"
+                             role="menu">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fsm-tab-content flex-grow-1 overflow-auto">
+
+                    @* ───────────── Timeline ───────────── *@
+                    <div class="fsm-tab-panel active" data-panel="timeline">
+                        @await Html.PartialAsync("~/Views/Shared/_AuditLog.cshtml", Model.AuditLogs)
+                    </div>
+
+                    @* ───────────── Addresses ───────────── *@
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="addresses"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="addresses"
+                         data-empty-icon="bi bi-geo-alt"
+                         data-empty-title="No addresses found."
+                         data-empty-message="Add the service and billing addresses linked to this contact. Keeping these up to date ensures technicians are dispatched to the right location and invoices go to the correct place."
+                         data-fsm-search-columns="0,1,2,3">
+
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage contact addresses.
+                            </div>
+
+                            @if (contact.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2 border-left position-relative" data-fsm-filter-wrapper="linkAddress">
+                                    <div type="button"
+                                         class="cursor-pointer d-flex gap-2 align-items-center text-muted btn-sm"
+                                         id="linkAddressToggle"
+                                         data-fsm-filter-toggle="linkAddress"
+                                         aria-label="Link address"
+                                         aria-expanded="false">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        Link Address
+                                    </div>
+
+                                    <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
+                                         id="linkAddressPanel"
+                                         data-fsm-filter-panel="linkAddress">
+
+                                        <span class="fw-semibold small notif-filter-title">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                            Link Address
+                                        </span>
+
+                                        <form id="linkAddressForm"
+                                              class="notif-filter-body fsm-filter-scroll"
+                                              data-fsm-filter-body="linkAddress"
+                                              action="@Url.Action("LinkAddress", "Contacts")"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="EntityId" value="@encryptedContactId" />
+
+                                            <div class="d-flex gap-2 my-3">
+                                                <label class="fsm-address-type-option flex-fill" data-address-type-option="Service">
+                                                    <span class="fsm-address-type-header">
+                                                        <input type="checkbox"
+                                                               name="addressTypes"
+                                                               value="Service"
+                                                               class="form-check-input m-0"
+                                                               data-address-type-checkbox />
+                                                        Service Address
+                                                    </span>
+                                                    <span class="fsm-address-type-desc">
+                                                        Where field work is carried out for this contact.
+                                                    </span>
+                                                </label>
+
+                                                <label class="fsm-address-type-option flex-fill" data-address-type-option="Billing">
+                                                    <span class="fsm-address-type-header">
+                                                        <input type="checkbox"
+                                                               name="addressTypes"
+                                                               value="Billing"
+                                                               class="form-check-input m-0"
+                                                               data-address-type-checkbox />
+                                                        Billing Address
+                                                    </span>
+                                                    <span class="fsm-address-type-desc">
+                                                        Where invoices and statements are sent.
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-2 d-none" data-address-select-group="Service">
+                                                <label for="serviceAddressSelect" class="form-label small fw-semibold">Service Address</label>
+                                                <select id="serviceAddressSelect"
+                                                        name="serviceAddressId"
+                                                        class="form-control fsm-form-control"
+                                                        disabled>
+                                                    <option value="" disabled selected>Select an address&hellip;</option>
+                                                    @foreach (var address in organisationAddresses)
+                                                    {
+                                                        <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString())">
+                                                            @address.DisplayText
+                                                        </option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-2 d-none" data-address-select-group="Billing">
+                                                <label for="billingAddressSelect" class="form-label small fw-semibold">Billing Address</label>
+                                                <select id="billingAddressSelect"
+                                                        name="billingAddressId"
+                                                        class="form-control fsm-form-control"
+                                                        disabled>
+                                                    <option value="" disabled selected>Select an address&hellip;</option>
+                                                    @foreach (var address in organisationAddresses)
+                                                    {
+                                                        <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString())">
+                                                            @address.DisplayText
+                                                        </option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="text-danger small mt-1 d-none" data-link-address-error></div>
+                                        </form>
+
+                                        <div class="notif-filter-actions d-flex justify-content-between">
+                                            <button type="button"
+                                                    class="notif-filter-clear"
+                                                    id="linkAddressClearBtn"
+                                                    data-fsm-filter-clear="linkAddress">
+                                                <i class="bi bi-trash"></i>
+                                                Clear
+                                            </button>
+                                            <button type="submit"
+                                                    form="linkAddressForm"
+                                                    class="notif-filter-apply"
+                                                    id="linkAddressApplyBtn">
+                                                <i class="fa-solid fa-link"></i>
+                                                Link
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex flex-column flex-grow-1" style="min-height: 0;">
+                            <div class="border-0 rounded-2 rounded-top-0 overflow-hidden d-flex flex-column flex-grow-1 bg-surface" style="min-height: 0;">
+
+                                <div class="table-responsive fsm-table-wrapper flex-grow-1" style="overflow-y: auto; min-height: 0;">
+                                    <table class="table align-middle mb-0 fsm-table bg-surface">
+                                        <thead class="sticky-top bg-surface">
+                                            <tr>
+                                                <th class="fsm-sortable" data-sort="address">
+                                                    Address
+                                                    <span class="fsm-sort-icon"><i class="bi bi-chevron-expand"></i></span>
+                                                </th>
+                                                <th>Address Type</th>
+                                                <th>Primary</th>
+                                                <th>Deleted</th>
+                                                <th>Linked At</th>
+                                                <th>Action</th>
+                                                <th>
+                                                    <div class="border-left">
+                                                        <div type="button"
+                                                             class="cursor-pointer"
+                                                             id="addressFilterToggle"
+                                                             data-fsm-filter-toggle="addresses"
+                                                             aria-label="Filter addresses"
+                                                             aria-expanded="false">
+                                                            <i class="bi bi-funnel"></i>
+                                                            <span class="notif-filter-badge d-none" id="addressFilterBadge" data-fsm-filter-badge="addresses"></span>
+                                                        </div>
+
+                                                        <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
+                                                             id="addressFilterPanel"
+                                                             data-fsm-filter-panel="addresses">
+                                                            <span class="fw-semibold small notif-filter-title">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                                                                     stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                                                </svg>
+                                                                Filters
+                                                            </span>
+
+                                                            <div class="notif-filter-body fsm-filter-scroll"
+                                                                 id="addressFilterBody"
+                                                                 data-fsm-filter-body="addresses"></div>
+
+                                                            <div class="notif-filter-actions d-flex justify-content-between">
+                                                                <button type="button" class="notif-filter-clear" id="addressFilterClearBtn" data-fsm-filter-clear="addresses">
+                                                                    <i class="bi bi-trash"></i> Clear
+                                                                </button>
+                                                                <button type="button" class="notif-filter-apply" id="addressFilterApplyBtn" data-fsm-filter-apply="addresses">
+                                                                    <i class="bi bi-funnel"></i> Apply
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <script type="application/json" data-fsm-filter-fields="addresses">
+                                                            [
+                                                                { "key": "id", "label": "Address ID", "type": "guid" },
+                                                                { "key": "street", "label": "Street", "type": "string" },
+                                                                { "key": "city", "label": "City", "type": "string" },
+                                                                { "key": "zipcode", "label": "Postal Code", "type": "string" },
+                                                                { "key": "addresstypeid", "label": "Address Type", "type": "number" },
+                                                                { "key": "isprimary", "label": "Primary", "type": "bool" },
+                                                                { "key": "isdeleted", "label": "Deleted", "type": "bool" },
+                                                                { "key": "isentityaddressdeleted", "label": "Link Deleted", "type": "bool" },
+                                                                { "key": "linkedat", "label": "Linked At", "type": "date" }
+                                                            ]
+                                                        </script>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @if (Model.LinkedAddresses.Any())
+                                            {
+                                                foreach (var item in Model.LinkedAddresses)
+                                                {
+                                                    <tr data-sort-value="@item.DisplayText"
+                                                        data-id="@item.EntityAddressId"
+                                                        data-street="@item.Street"
+                                                        data-city="@item.City"
+                                                        data-zipcode="@item.ZipCode"
+                                                        data-addresstypeid="@item.AddressTypeId"
+                                                        data-addresstypename="@item.AddressTypeName"
+                                                        data-isprimary="@item.IsPrimary.ToString().ToLower()"
+                                                        data-linkedat="@item.LinkedAt.ToString("yyyy-MM-dd")"
+                                                        data-isdeleted="@item.IsDeleted.ToString().ToLower()"
+                                                        data-isentityaddressdeleted="@item.IsEntityAddressDeleted.ToString().ToLower()">
+
+                                                        <td>
+                                                            <a href="/Customers/Addresses/Info?Id=@UrlEncryptionBusiness.EncryptParam(item.EntityAddressId.ToString())"
+                                                               class="d-flex align-items-center gap-2 full-name-wrapper">
+                                                                <span class="fsm-avatar d-inline-flex align-items-center justify-content-center bg-body-tertiary text-muted">
+                                                                    <i class="bi bi-geo-alt mt-1"></i>
+                                                                </span>
+                                                                <span class="fsm-user-name">@item.DisplayText</span>
+                                                            </a>
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="fsm-meta-text">
+                                                                @(string.IsNullOrWhiteSpace(item.AddressTypeName) ? "—" : item.AddressTypeName)
+                                                            </span>
+                                                        </td>
+
+                                                        <td>
+                                                            @{
+                                                                var (primaryLabel, primaryIconClass, primaryIconCss) = item.IsPrimary
+                                                                    ? ("Primary", "bi-check-circle-fill", "text-success")
+                                                                    : ("Not Primary", "bi-x-circle-fill", "text-danger");
+                                                            }
+                                                            <span class="d-inline-flex align-items-center gap-2">
+                                                                <i class="bi @primaryIconClass @primaryIconCss"></i>
+                                                                <span>@primaryLabel</span>
+                                                            </span>
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="fsm-meta-text">@(item.IsEntityAddressDeleted ? "Yes" : "No")</span>
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="fsm-meta-text">
+                                                                @item.LinkedAt.ToString("MMM dd, yyyy hh:mm") @item.LinkedAt.ToString("tt").ToUpper()
+                                                            </span>
+                                                        </td>
+
+                                                        <td class="d-none d-sm-table-cell">
+                                                            @if (contact?.IsDeleted != true)
+                                                            {
+                                                                if (item.IsEntityAddressDeleted == false)
+                                                                {
+                                                                    <div class="d-flex align-items-center gap-2 text-warning small"
+                                                                         data-fsm-unlink-trigger
+                                                                         role="button"
+                                                                         data-id="@item.EntityAddressId"
+                                                                         data-name="@item.DisplayText">
+                                                                        <i class="bi bi-dash-circle"></i> Unlink
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="d-flex align-items-center gap-2 text-danger small"
+                                                                         data-fsm-delete-link-trigger
+                                                                         role="button"
+                                                                         data-id="@item.Id"
+                                                                         data-name="@item.DisplayText">
+                                                                        <i class="bi bi-trash"></i> Delete Link
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </td>
+
+                                                        <td></td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="fsm-table-footer flex-shrink-0">
+                                    <span>Total Addresses: <strong>@(Model.LinkedAddresses.Count)</strong></span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="fsm-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                                        <span class="fsm-page-current">1</span>
+                                        <button type="button" class="fsm-page-btn" disabled><i class="bi bi-chevron-right"></i></button>
+                                        <select class="fsm-per-page">
+                                            <option value="10">10 Records per page</option>
+                                            <option value="25">25 Records per page</option>
+                                            <option value="50">50 Records per page</option>
+                                            <option value="100">100 Records per page</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* ───────────── Notes ───────────── *@
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="notes"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="notes"
+                         data-fsm-search-columns="0,1,2,3">
+
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage contact notes.
+                            </div>
+
+                            @if (contact?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Notes/Create?contactId=@encryptedContactId"
+                                       class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New Note
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+                            <h6 class="fw-semibold mb-1">Notes</h6>
+                            <p class="text-muted small mb-3 w-50">Add additional information you want to include regarding this contact. Document decisions, changes, and communications ensuring everyone is on the same page.</p>
+                        </div>
+                    </div>
+
+                    @* ───────────── Attachments ───────────── *@
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="attachments"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="attachments"
+                         data-fsm-search-columns="0,1,2,3">
+
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage contact attachments.
+                            </div>
+
+                            @if (contact?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Attachments/Create?contactId=@encryptedContactId"
+                                       class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New Attachment
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-paperclip"></i></div>
+                            <h6 class="fw-semibold mb-1">Attachments</h6>
+                            <p class="text-muted small mb-3 w-50">View, upload, and manage all attachments related to this contact in one place. Collaborate by adding notes and reviewing all attached files directly within this record.</p>
+                        </div>
+                    </div>
+
+                    @* ───────────── Related List ───────────── *@
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="relatedList"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="relatedList"
+                         data-fsm-search-columns="0,1,2,3">
+
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage contact related list data.
+                            </div>
+                        </div>
+
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-card-checklist"></i></div>
+                            <h6 class="fw-semibold mb-1">Related List</h6>
+                            <p class="text-muted small mb-3 w-50">Requests, estimates, work orders and other records linked to this contact will appear here.</p>
+                        </div>
+                    </div>
+
+                    @* ───────────── Billing ───────────── *@
+                    <div class="fsm-tab-panel h-100 p-0"
+                         data-panel="billing"
+                         data-panel-controller="all"
+                         style="min-height: 0;"
+                         data-fsm-table="billing"
+                         data-fsm-search-columns="0,1,2,3">
+
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 flex-shrink-0">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1 text-info"></i>
+                                View and manage contact billing data.
+                            </div>
+                        </div>
+
+                        <div class="fsm-empty-state-data-table">
+                            <div class="fsm-empty-icon"><i class="bi bi-bank"></i></div>
+                            <h6 class="fw-semibold mb-1">Billing</h6>
+                            <p class="text-muted small mb-3 w-50">Invoices and billing activity for this contact will appear here once billing is synced.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@* ───────────── Mobile left panel ───────────── *@
+<div class="offcanvas offcanvas-start fsm-side-offcanvas"
+     tabindex="-1"
+     id="leftPanelOffcanvas"
+     aria-labelledby="leftPanelLabel">
+    <div class="offcanvas-header py-2 px-3">
+        <h6 class="offcanvas-title mb-0" id="leftPanelLabel">Contact Details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 overflow-y-auto">
+        @await Html.PartialAsync("~/Views/Components/Partials/_ContactLeftPanel.cshtml", Model)
+    </div>
+</div>
+
+@* ───────────── Delete contact ───────────── *@
+<div id="fsm-delete-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="delete-title" class="dialog-title">Delete Contact</p>
+
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Delete Confirmation Required</p>
+                <p class="warn-sub">Are you sure you want to permanently delete the contact <strong>@fullName</strong>?</p>
+            </div>
+        </div>
+
+        <div class="bd-callout bd-callout-info my-0 mt-3 p-2 mx-2 bg-opacity-10">
+            <strong>Note</strong>
+            <br />
+            <span class="smaller">
+                This contact and its links to requests, estimates, work orders and service appointments will be removed from active use.
+                <br />
+                <strong class="text-danger">This action cannot be undone.</strong>
+            </span>
+        </div>
+
+        <div class="dialog-body">
+            Please select <strong>Delete Contact</strong> to proceed with removing this contact, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+        <div class="bg-danger-subtle text-black small p-1 px-2 d-flex align-items-center gap-2 d-none"
+             id="fsm-delete-contact-error">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            <span id="fsm-delete-contact-error-text">Failed to delete this contact. Please try again.</span>
+            <button class="read-more-btn text-black small">Read more</button>
+        </div>
+
+        <form id="fsm-delete-contact-form" asp-controller="Contacts" asp-action="DeleteContact" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="contactId" value="@encryptedContactId" />
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-delete-cancel>Cancel</button>
+                <button class="btn btn-danger btn-sm mt-1" id="fsm-delete-confirm" type="submit" data-loading-text="Deleting">
+                    Delete Contact
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@* ───────────── Unlink address ───────────── *@
+<div id="fsm-unlink-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="unlink-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="unlink-title" class="dialog-title">Unlink Address</p>
+        <div class="dialog-warning">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0-1h-7A.5.5 0 0 1 4 8" />
+                </svg>
+            </div>
+            <div class="warn-text">
+                <p>Unlink Confirmation Required</p>
+                <p class="warn-sub" id="fsm-unlink-item-label">
+                    This will remove <strong id="fsm-unlink-item-name"></strong> from this contact. You can link a new address afterwards.
+                </p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            This won't delete the address itself, only the link to this contact. Select <strong>Unlink</strong> to proceed, or <strong>Cancel</strong> to return without making any changes.
+        </div>
+
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="bg-danger-subtle p-1 px-2 d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                @errorMessage
+            </div>
+        }
+
+        <form id="fsm-unlink-form" asp-controller="Contacts" asp-action="UnlinkAddress" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="contactId" value="@encryptedContactId" />
+            <input type="hidden" name="entityAddressId" id="fsm-unlink-id-input" value="" />
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-unlink-cancel>Cancel</button>
+                <button type="submit" class="btn btn-warning btn-sm mt-1" id="fsm-unlink-confirm">
+                    Unlink
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@* ───────────── Permanently remove address link ───────────── *@
+<div id="fsm-remove-link-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="remove-link-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="remove-link-title" class="dialog-title">Permanently Remove Address Link</p>
+
+        <div class="dialog-danger">
+            <div class="warn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                </svg>
+            </div>
+
+            <div class="warn-text">
+                <p>Permanent Removal Confirmation</p>
+                <p class="warn-sub" id="fsm-remove-link-item-label">
+                    You are about to permanently remove
+                    <strong id="fsm-remove-link-item-name"></strong>
+                    from this contact.
+                </p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            <p>
+                This will permanently remove the link between this address and the contact.
+                <strong>The address itself will not be deleted</strong> and can still be linked
+                to the contact again in the future if required.
+            </p>
+            <p class="mb-0">
+                Removing outdated or incorrect address links helps keep contact records
+                <strong>accurate, organised, and up to date</strong>.
+            </p>
+        </div>
+
+        <div id="fsm-remove-link-error" class="bg-danger-subtle p-1 px-2 d-flex align-items-center gap-2 d-none">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            <span id="fsm-remove-link-error-text"></span>
+        </div>
+
+        <form id="fsm-remove-link-form" asp-controller="Contacts" asp-action="RemoveAddressLink" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="contactId" value="@encryptedContactId" />
+            <input type="hidden" name="addressId" id="fsm-remove-link-id-input" value="" />
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-cancel" data-fsm-delete-link-cancel>Cancel</button>
+                <button type="submit" class="btn btn-danger btn-sm mt-1" id="fsm-remove-link-confirm">
+                    Permanently Remove Link
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</div>
+@section scripts {
+    <script type="text/javascript" src="~/js/customers/contacts/contact-details.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/shared/fsm-data-table.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/shared/fsm-table-filters.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/customers/contacts/link-contact-address.js" nonce="9815422428"></script>
+    <script type="text/javascript" src="~/js/customers/contacts/remove-contact-address-link.js" nonce="9815422428"></script>
+    <script type="text/javascript" nonce="9815422428" src="~/js/customers/contacts/delete-contact.js"></script>
+}

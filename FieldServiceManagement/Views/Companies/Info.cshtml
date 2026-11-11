@@ -116,13 +116,16 @@
                                 <i class="bi bi-info-circle me-1 text-info"></i> View and manage company contacts.
                             </div>
 
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="/Customers/Contacts/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
-                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
-                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
-                                    New Contact
-                                </a>
-                            </div>
+                            @if(Model?.Company?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Customers/Contacts/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                       class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New Contact
+                                    </a>
+                                </div>                                
+                            }
                         </div>
 
                         <!-- Table area (fills remaining height, scrolls internally) -->
@@ -311,118 +314,123 @@
                                 View and manage company addresses.
                             </div>
 
-                            
-                            <div class="d-flex align-items-center gap-2 border-left position-relative" data-fsm-filter-wrapper="linkAddress">
-                                <div type="button"
-                                     class="cursor-pointer d-flex gap-2 align-items-center text-muted btn-sm"
-                                     id="linkAddressToggle"
-                                     data-fsm-filter-toggle="linkAddress"
-                                     aria-label="Link address"
-                                     aria-expanded="false">
-                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
-                                    Link Address
-                                </div>
+                            @if (Model?.Company?.IsDeleted != true)
+                            {
 
-                                <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
-                                     id="linkAddressPanel"
-                                     data-fsm-filter-panel="linkAddress">
-
-                                    <span class="fw-semibold small notif-filter-title">
-                                        <i class="fa-solid fa-location-dot"></i>
+                                 <div class="d-flex align-items-center gap-2 border-left position-relative" data-fsm-filter-wrapper="linkAddress">
+                                    <div type="button"
+                                         class="cursor-pointer d-flex gap-2 align-items-center text-muted btn-sm"
+                                         id="linkAddressToggle"
+                                         data-fsm-filter-toggle="linkAddress"
+                                         aria-label="Link address"
+                                         aria-expanded="false">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
                                         Link Address
-                                    </span>
+                                    </div>
 
-                                    <form id="linkAddressForm"
-                                          class="notif-filter-body fsm-filter-scroll"
-                                          data-fsm-filter-body="linkAddress"
-                                          action="@Url.Action("LinkAddress", "Companies")"
-                                          method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="companyId" value="@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)" />
+                                 
+                              
+                                    <div class="notif-filter-panel fsm-filter-panel-wide rounded-2"
+                                         id="linkAddressPanel"
+                                         data-fsm-filter-panel="linkAddress">
 
-                                        <div class="d-flex gap-2 my-3">
-                                            <label class="fsm-address-type-option flex-fill" data-address-type-option="Service">
-                                                <span class="fsm-address-type-header">
-                                                    <input type="checkbox"
-                                                           name="addressTypes"
-                                                           value="Service"
-                                                           class="form-check-input m-0"
-                                                           data-address-type-checkbox />
-                                                    Service Address
-                                                </span>
-                                                <span class="fsm-address-type-desc">
-                                                    Where field work is carried out for this company.
-                                                </span>
-                                            </label>
+                                        <span class="fw-semibold small notif-filter-title">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                            Link Address
+                                        </span>
 
-                                            <label class="fsm-address-type-option flex-fill" data-address-type-option="Billing">
-                                                <span class="fsm-address-type-header">
-                                                    <input type="checkbox"
-                                                           name="addressTypes"
-                                                           value="Billing"
-                                                           class="form-check-input m-0"
-                                                           data-address-type-checkbox />
-                                                    Billing Address
-                                                </span>
-                                                <span class="fsm-address-type-desc">
-                                                    Where invoices and statements are sent.
-                                                </span>
-                                            </label>
+                                        <form id="linkAddressForm"
+                                              class="notif-filter-body fsm-filter-scroll"
+                                              data-fsm-filter-body="linkAddress"
+                                              action="@Url.Action("LinkAddress", "Companies")"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="EntityId" value="@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)" />
+
+                                            <div class="d-flex gap-2 my-3">
+                                                <label class="fsm-address-type-option flex-fill" data-address-type-option="Service">
+                                                    <span class="fsm-address-type-header">
+                                                        <input type="checkbox"
+                                                               name="addressTypes"
+                                                               value="Service"
+                                                               class="form-check-input m-0"
+                                                               data-address-type-checkbox />
+                                                        Service Address
+                                                    </span>
+                                                    <span class="fsm-address-type-desc">
+                                                        Where field work is carried out for this company.
+                                                    </span>
+                                                </label>
+
+                                                <label class="fsm-address-type-option flex-fill" data-address-type-option="Billing">
+                                                    <span class="fsm-address-type-header">
+                                                        <input type="checkbox"
+                                                               name="addressTypes"
+                                                               value="Billing"
+                                                               class="form-check-input m-0"
+                                                               data-address-type-checkbox />
+                                                        Billing Address
+                                                    </span>
+                                                    <span class="fsm-address-type-desc">
+                                                        Where invoices and statements are sent.
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-2 d-none" data-address-select-group="Service">
+                                                <label for="serviceAddressSelect" class="form-label small fw-semibold">Service Address</label>
+                                                <select id="serviceAddressSelect"
+                                                        name="serviceAddressId"
+                                                        class="form-control fsm-form-control"
+                                                        disabled>
+                                                    <option value="" disabled selected>Select an address&hellip;</option>
+                                                    @foreach (var address in Model?.OrganisationAddresses!)
+                                                    {
+                                                        <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString()!)">
+                                                            @address.DisplayText
+                                                        </option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-2 d-none" data-address-select-group="Billing">
+                                                <label for="billingAddressSelect" class="form-label small fw-semibold">Billing Address</label>
+                                                <select id="billingAddressSelect"
+                                                        name="billingAddressId"
+                                                        class="form-control fsm-form-control"
+                                                        disabled>
+                                                    <option value="" disabled selected>Select an address&hellip;</option>
+                                                    @foreach (var address in Model?.OrganisationAddresses!)
+                                                    {
+                                                        <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString()!)">
+                                                            @address.DisplayText
+                                                        </option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="text-danger small mt-1 d-none" data-link-address-error></div>
+                                        </form>
+
+                                        <div class="notif-filter-actions d-flex justify-content-between">
+                                            <button type="button"
+                                                    class="notif-filter-clear"
+                                                    id="linkAddressClearBtn"
+                                                    data-fsm-filter-clear="linkAddress">
+                                                <i class="bi bi-trash"></i>
+                                                Clear
+                                            </button>
+                                            <button type="submit"
+                                                    form="linkAddressForm"
+                                                    class="notif-filter-apply"
+                                                    id="linkAddressApplyBtn">
+                                                <i class="fa-solid fa-link"></i>
+                                                Link
+                                            </button>
                                         </div>
-
-                                        <div class="mb-2 d-none" data-address-select-group="Service">
-                                            <label for="serviceAddressSelect" class="form-label small fw-semibold">Service Address</label>
-                                            <select id="serviceAddressSelect"
-                                                    name="serviceAddressId"
-                                                    class="form-control fsm-form-control"
-                                                    disabled>
-                                                <option value="" disabled selected>Select an address&hellip;</option>
-                                                @foreach (var address in Model?.OrganisationAddresses!)
-                                                {
-                                                    <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString()!)">
-                                                        @address.DisplayText
-                                                    </option>
-                                                }
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-2 d-none" data-address-select-group="Billing">
-                                            <label for="billingAddressSelect" class="form-label small fw-semibold">Billing Address</label>
-                                            <select id="billingAddressSelect"
-                                                    name="billingAddressId"
-                                                    class="form-control fsm-form-control"
-                                                    disabled>
-                                                <option value="" disabled selected>Select an address&hellip;</option>
-                                                @foreach (var address in Model?.OrganisationAddresses!)
-                                                {
-                                                    <option value="@UrlEncryptionBusiness.EncryptParam(address.Id.ToString()!)">
-                                                        @address.DisplayText
-                                                    </option>
-                                                }
-                                            </select>
-                                        </div>
-
-                                        <div class="text-danger small mt-1 d-none" data-link-address-error></div>
-                                    </form>
-
-                                    <div class="notif-filter-actions d-flex justify-content-between">
-                                        <button type="button"
-                                                class="notif-filter-clear"
-                                                id="linkAddressClearBtn"
-                                                data-fsm-filter-clear="linkAddress">
-                                            <i class="bi bi-trash"></i>
-                                            Clear
-                                        </button>
-                                        <button type="submit"
-                                                form="linkAddressForm"
-                                                class="notif-filter-apply"
-                                                id="linkAddressApplyBtn">
-                                            <i class="fa-solid fa-link"></i>
-                                            Link
-                                        </button>
                                     </div>
                                 </div>
-                            </div>
+                            }
                         </div>
 
                         <!-- Table area -->
@@ -722,13 +730,17 @@
                                 View and manage company notes.
                             </div>
 
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
-                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
-                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
-                                    New Notes
-                                </a>
-                            </div>
+                            @if (Model?.Company?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                       class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New Notes
+                                    </a>
+                                </div>                                
+                            }
+
                         </div>
                 
                         <div class="fsm-empty-state-data-table">
@@ -753,13 +765,16 @@
                                 View and manage company attachments.
                             </div>
 
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="/Attachments/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
-                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
-                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
-                                    New Attchment
-                                </a>
-                            </div>
+                            @if (Model?.Company?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Attachments/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                    class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New Attchment
+                                    </a>
+                                </div>
+                            }
                         </div>
                 
                         <div class="fsm-empty-state-data-table">
@@ -783,13 +798,16 @@
                                 View and manage company billing data.
                             </div>
 
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
-                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
-                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
-                                    New bill
-                                </a>
-                            </div>
+                            @if (Model?.Company?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                    class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New bill
+                                    </a>
+                                </div>
+                            }
                         </div>
 
                         <div class="fsm-empty-state-data-table">
@@ -813,13 +831,16 @@
                                 View and manage company related list data.
                             </div>
 
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
-                                   class="d-flex gap-2 align-items-center text-muted btn-sm">
-                                    <i class="fa-solid fa-plus me-1 text-primary"></i>
-                                    New bill
-                                </a>
-                            </div>
+                            @if (Model?.Company?.IsDeleted != true)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/Notes/Create?companyId=@UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!)"
+                                    class="d-flex gap-2 align-items-center text-muted btn-sm">
+                                        <i class="fa-solid fa-plus me-1 text-primary"></i>
+                                        New bill
+                                    </a>
+                                </div>
+                            }
                         </div>
 
                         <div class="fsm-empty-state-data-table">

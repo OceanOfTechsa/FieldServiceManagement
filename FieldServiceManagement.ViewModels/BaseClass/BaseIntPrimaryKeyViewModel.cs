@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace FieldServiceManagement.Data.DataModels.BaseClass
+﻿namespace FieldServiceManagement.Data.DataModels.BaseClass
 {
     public class BaseIntPrimaryKeyViewModel
     {
