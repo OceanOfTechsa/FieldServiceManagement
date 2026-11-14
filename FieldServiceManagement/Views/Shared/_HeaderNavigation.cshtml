@@ -7,7 +7,7 @@
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
 @{
-    bool redirectToLogin()
+    bool RedirectToLogin()
     {
         Context.Response.Redirect(Url.Action("Login", "Account", new { area = "Identity" })!);
         return true;
@@ -26,9 +26,9 @@
     var currentPath = Context.Request.Path.Value ?? "";
     AppUserProfileViewModel? Model = null;
 
-    if (string.IsNullOrEmpty(User?.Identity?.Name) && redirectToLogin()) return;
+    if (string.IsNullOrEmpty(User?.Identity?.Name) && RedirectToLogin()) return;
     Model = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User?.Identity?.Name!);
-    if (Model == null && redirectToLogin()) return;
+    if (Model == null && RedirectToLogin()) return;
 
     isLoading = false;
     var organisationId = Model?.Organisation?.Id;
@@ -391,14 +391,6 @@
                 </a>
             }
         }
-
-        @* Settings (admin/dispatcher only — gate in C# if needed) *@
-        @* <a href="/fsm/@organisationId/settings"
-               class="mobile-nav-link @(settingsActive ? "active" : "")"
-               data-fsm-mobile-close>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
-            Settings *@
-        </a>
     </nav>
 
     <div class="mobile-bottom">
@@ -423,11 +415,11 @@
 
         <button class="mobile-profile-trigger" data-fsm-profile-trigger data-fsm-mobile-close>
             <img src="@(string.IsNullOrWhiteSpace(Model?.User?.AvatarUrl)
-            ? $"https://ui-avatars.com/api/?name={Model?.User?.Name + " " + Model?.User.Surname}&background=random"
+            ? $"https://ui-avatars.com/api/?name={Model?.User?.Name + " " + Model?.User!.Surname}&background=random"
             : Model.User.AvatarUrl)" alt="Avatar" class="fsm-avatar" />
             <div class="mp-info">
-                <span class="mp-name">@Model?.User.Name @Model?.User.Surname</span>
-                <span class="mp-role">@User.Identity?.Name</span>
+                <span class="mp-name">@Model?.User!.Name @Model?.User!.Surname</span>
+                <span class="mp-role">@User!.Identity?.Name</span>
             </div>
         </button>
     </div>
@@ -788,7 +780,7 @@
         <div class="px-2">
             <!-- Search -->
             <div class="p-2 mb-3 border-bottom">
-                <div class="fw-bold small text-muted" mb-1">
+                <div class="fw-bold small text-muted mb-1">
                     <i class="bi bi-search me-1"></i> Search
                 </div>
                 <p class="small mb-2">
@@ -801,7 +793,7 @@
             </div>
 
             <!-- Filters -->
-            <div class="fw-bold small text-muted" mb-2 px-2">
+            <div class="fw-bold small text-muted mb-2 px-2">
                 <i class="bi bi-funnel me-1"></i> Filters
             </div>
 

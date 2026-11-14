@@ -116,7 +116,7 @@ namespace FieldServiceManagement.Business.UserBusiness
             var Model = new AppUserProfileViewModel { User = user };
             Model.Organisation = await new OrganisationBusiness().GetOrganisationById(Model.User.OrganisationId);
             
-            bool canSeePlan = Model.Organisation?.CreatedById == Model.User.Id || Model.User.UserRoleId == (int)UserRole.SuperAdmin || Model.User.UserRoleId == (int)UserRole.Administrator;
+            bool canSeePlan = Model.Organisation?.CreatedById == Model.User.Id || Model.User.UserRoleId == (int)UserRole.Administrator;
             if (canSeePlan)
             {
                 Model.OrgSubscription = await new OrganisationSubscriptionBusiness().GetOrganisationSubscriptionByOrgIdAsync(Model!.Organisation!.Id!);

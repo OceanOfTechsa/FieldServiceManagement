@@ -111,6 +111,38 @@ namespace FieldServiceManagement.Repository.Repositories
             return rowsAffected > 0;
         }
 
+
+        // One notification for one user (the bulk method above is for roles)
+        public async Task<bool> CreateUserNotificationAsync(CreateUserNotification model, DateTime createdAt)
+        {
+            if (model.UserId is null) return false;
+
+            var parameters = new[]
+            {
+                new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = Guid.NewGuid() },
+                new SqlParameter("@OrganisationId", SqlDbType.UniqueIdentifier) { Value = (object?)model.OrganisationId ?? DBNull.Value },
+                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Value = model.UserId },
+                new SqlParameter("@Type", SqlDbType.NVarChar, -1) { Value = model.Type },
+                new SqlParameter("@Title", SqlDbType.NVarChar, -1) { Value = model.Title },
+                new SqlParameter("@Message", SqlDbType.NVarChar, -1) { Value = model.Message },
+                new SqlParameter("@RelatedEntityType", SqlDbType.NVarChar, -1) { Value = (object?)model.RelatedEntityType ?? DBNull.Value },
+                new SqlParameter("@RelatedEntityId", SqlDbType.UniqueIdentifier) { Value = (object?)model.RelatedEntityId ?? DBNull.Value },
+                new SqlParameter("@Severity", SqlDbType.TinyInt) { Value = model.Severity },
+                new SqlParameter("@ActionText", SqlDbType.NVarChar, 100) { Value = (object?)model.ActionText ?? DBNull.Value },
+                new SqlParameter("@ActionUrl", SqlDbType.NVarChar, 500) { Value = (object?)model.ActionUrl ?? DBNull.Value },
+                new SqlParameter("@CreatedById", SqlDbType.UniqueIdentifier) { Value = (object?)model.CreatedById ?? DBNull.Value },
+                new SqlParameter("@CreatedAt", SqlDbType.DateTime2) { Value = createdAt }
+            };
+
+            var rowsAffected = await _dbContext.Database.ExecuteSqlRawAsync(
+                "INSERT INTO dbo.Notifications " +
+                "(Id, OrganisationId, UserId, [Type], Title, [Message], RelatedEntityType, RelatedEntityId, IsRead, IsDeleted, CreatedAt, CreatedById, Severity, ActionText, ActionUrl) " +
+                "VALUES (@Id, @OrganisationId, @UserId, @Type, @Title, @Message, @RelatedEntityType, @RelatedEntityId, 0, 0, @CreatedAt, @CreatedById, @Severity, @ActionText, @ActionUrl)",
+                parameters);
+
+            return rowsAffected > 0;
+        }
+
         #region DISPOSE
         public void Dispose()
         {

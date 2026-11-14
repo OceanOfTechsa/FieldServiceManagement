@@ -1,6 +1,9 @@
 ﻿using FieldServiceManagement.Data;
+using FieldServiceManagement.Data.DataModels.Address;
 using FieldServiceManagement.Data.DataModels.Company;
 using FieldServiceManagement.Data.DataModels.Contact;
+using FieldServiceManagement.Data.DataModels.Entity;
+using FieldServiceManagement.Data.DataModels.Note;
 using FieldServiceManagement.Data.DataModels.Shared;
 using FieldServiceManagement.Data.RepositoryServices;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
@@ -9,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FieldServiceManagement.Repository.Repositories
 {
-    public class ContactRepository
+    public class ContactRepository : IDisposable
     {
         private DataContext _dbContext;
         private readonly IRepository<Contact> _repository;
@@ -108,6 +111,69 @@ namespace FieldServiceManagement.Repository.Repositories
  
             return results.FirstOrDefault()
                    ?? new RepoResults { Success = false, ErrorMessage = "No result returned." };
+        }
+
+        // The contacts that already exist for the organisation. AsNoTracking: the worker only reads them here.
+        public async Task<List<Contact>> GetContactsAsync(Guid OrganisationId)
+        {
+            return await _dbContext.Contacts.AsNoTracking()                          // check: DbSet name
+                .Where(c => c.OrganisationId == OrganisationId && !c.IsDeleted)      // check: IsDeleted
+                .ToListAsync();
+        }
+
+        // Every active (not deleted) address link in the organisation, for any entity type.
+        // All types are loaded so the worker can tell when an address is shared with another record.
+        public async Task<List<EntityAddress>> GetAddressLinksAsync(Guid OrganisationId)
+        {
+            return await _dbContext.EntityAddresses.AsNoTracking()
+                .Where(l => l.OrganisationId == OrganisationId && !l.IsDeleted)
+                .ToListAsync();
+        }
+
+        // The addresses the existing contacts point to
+        public async Task<List<Address>> GetAddressesByIdsAsync(List<Guid> Ids)
+        {
+            var result = new List<Address>();
+
+            // SQL Server limits how many values one IN (...) can hold, so read them in chunks of 1,000
+            foreach (var chunk in Ids.Distinct().Chunk(1000))
+                result.AddRange(await _dbContext.Addresses.AsNoTracking()
+                    .Where(a => chunk.Contains(a.Id))
+                    .ToListAsync());
+
+            return result;
+        }
+
+       // The active notes already attached to a type of record, so a re-import does not add the same note twice
+        public async Task<List<Note>> GetNotesAsync(Guid OrganisationId, int EntityTypeId)
+        {
+            return await _dbContext.Notes.AsNoTracking()
+                .Where(n => n.OrganisationId == OrganisationId && n.EntityTypeId == EntityTypeId && !n.IsDeleted)
+                .ToListAsync();
+        }
+
+        // One SaveChanges is one database transaction: the whole batch is saved, or none of it.
+        public async Task SaveBatchAsync(List<Contact> NewContacts, List<Contact> UpdatedContacts,
+                                         List<Address> NewAddresses, List<Address> UpdatedAddresses,
+                                         List<EntityAddress> NewLinks, List<EntityAddress> UpdatedLinks,
+                                         List<Note> NewNotes)
+        {
+            _dbContext.Addresses.AddRange(NewAddresses);
+            _dbContext.Contacts.AddRange(NewContacts);
+            _dbContext.EntityAddresses.AddRange(NewLinks);
+            _dbContext.Notes.AddRange(NewNotes);
+            _dbContext.Addresses.UpdateRange(UpdatedAddresses);
+            _dbContext.Contacts.UpdateRange(UpdatedContacts);
+            _dbContext.EntityAddresses.UpdateRange(UpdatedLinks);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // Every address in the organisation that is not deleted. The worker uses them to reuse an address that already exists.
+        public async Task<List<Address>> GetAddressesAsync(Guid OrganisationId)
+        {
+            return await _dbContext.Addresses.AsNoTracking()
+                .Where(a => a.OrganisationId == OrganisationId && !a.IsDeleted)
+                .ToListAsync();
         }
 
         #region DISPOSE

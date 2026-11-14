@@ -1,5 +1,5 @@
 ﻿using FieldServiceManagement.StartupModules.ServiceModules;
-using FieldServiceManagement.Web.StartupModules.PipelineModules;
+using FieldServiceManagement.StartupModules.PipelineModules;
 
 namespace FieldServiceManagement;
 
@@ -17,8 +17,8 @@ public class Startup
             .AddEnvironmentVariables();
     }
 
-    public IConfiguration Configuration { get; }
-    public IWebHostEnvironment WebHostEnvironment { get; }
+    private IConfiguration Configuration { get; }
+    private IWebHostEnvironment WebHostEnvironment { get; }
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -37,6 +37,7 @@ public class Startup
             .AddCacheModule(WebHostEnvironment)
             .AddElmahModule(WebHostEnvironment)
             .AddResendModule(WebHostEnvironment)
+            .AddImportModule()
             .AddHealthModule();
     }
 

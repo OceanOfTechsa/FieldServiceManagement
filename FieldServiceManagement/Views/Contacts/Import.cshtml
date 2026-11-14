@@ -1,25 +1,9 @@
 ﻿@using FieldServiceManagement.ViewModels.Shared
 
 @{
-    ViewData["Title"] = "Import Contacts Data";
+    ViewData["Title"] = "Import Contacts";
 }
-<style>
-    .al-bg {
-        background: #f7fafc;
 
-        [data-bs-theme="dark"] & {
-            background: #1b1e21;
-        }
-    }
-
-    .al-text {
-        color: #374151;
-
-        [data-bs-theme="dark"] & {
-            color: #f1f5f9;
-        }
-    }
-</style>
 <div class="d-flex flex-column container-fluid px-0 h-full">
     <div class="bg-surface d-flex justify-content-between align-items-center mb-2 py-1 px-3">
         @await Html.PartialAsync("~/Views/Shared/_Breadcrumb.cshtml",
@@ -36,30 +20,35 @@
                   new() { Label = "Import", Url = null }
             }
         })
+       
         <div class="mt-1">
-            <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>
-                Cancel
-            </button>
-            <button class="btn btn-xs btn-primary" onclick="handleNext()" disabled id="nextBtn">
-                Next
-            </button>
+            <div id="step1Actions" class="d-flex align-items-center gap-2">
+                <a href="/ImportHistory?module=Contacts" class="text-primary-hover small"><i class="bi bi-clock-history me-1"></i> View Import History</a>
+                <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>Cancel</button>
+                <button class="btn btn-xs btn-primary" onclick="handleNext()" disabled id="nextBtn">Next</button>
+            </div>
+            <div id="step2Actions" class="d-none gap-2">
+                <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>Cancel</button>
+                <button class="btn btn-xs btn-outline-secondary" id="prevBtn">Previous</button>
+                <button class="btn btn-xs btn-primary" id="importBtn">Import</button>
+            </div>
         </div>
     </div>
     <div class="fsm-fixed-view-wrapper-forms">
         <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column p-2">
             <div class="d-flex align-items-start justify-content-between">
                 <nav class="fsm-breadcrumb-sm" style="--bc-max-width: 20px;">
-                    <span class="fsm-breadcrumb-item active">
+                    <span class="fsm-breadcrumb-item active" id="stepUpload">
                         <span class="fsm-breadcrumb-badge">1</span>
                         <span class="fsm-breadcrumb-complete-badge">✓</span>
                         Upload your file
                     </span>
-                    <span class="fsm-breadcrumb-item">
+                    <span class="fsm-breadcrumb-item" id="stepMap">
                         <span class="fsm-breadcrumb-badge">2</span>
                         <span class="fsm-breadcrumb-complete-badge">✓</span>
                         Map your data
                     </span>
-                    <span class="fsm-breadcrumb-item">
+                    <span class="fsm-breadcrumb-item" id="stepDone">
                         <span class="fsm-breadcrumb-badge">3</span>
                         <span class="fsm-breadcrumb-complete-badge">✓</span>
                         Completed
@@ -72,17 +61,15 @@
                 </i>
             </div>
 
-            <div class="bg-soft text-black mt-3 rounded-2 p-2 d-flex align-items-start gap-2 position-relative overflow-hidden overflow-y-auto"
-                 style="height: calc(100vh - 190px);">
+            <div class="bg-soft text-black mt-3 rounded-2 p-2 d-flex align-items-start gap-2 position-relative overflow-hidden overflow-y-auto" style="height: calc(100vh - 190px);" id="uploadStep">
                 <div class="flex-grow-1" style="flex-basis: 60%; height: calc(100vh - 210px);">
-
                     <!-- ==================== CONTACTS ==================== -->
                     <div id="contactsSection" class="bg-surface rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
                         <div class="fsm-upload-container rounded-2 overflow-hidden">
                             <input type="file" class="d-none" id="contacts" accept=".csv" />
                             <label for="contacts" class="fsm-upload-label w-100 rounded-2" id="fsm-upload-label-contacts">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="fw-semibold">Companies</span>
+                                    <span class="fw-semibold">Contacts</span>
                                     <span class="al-text small small">Upload the file you wish to import as Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
@@ -90,7 +77,7 @@
 
                             <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-contacts">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="fw-semibold">Companies</span>
+                                    <span class="fw-semibold">Contacts</span>
                                     <span class="al-text small">Upload the file you wish to import as Contacts</span>
                                 </span>
                             </span>
@@ -120,6 +107,17 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <span class="mt-2 text-muted small d-flex gap-2 align-items-center">
+                                                <span class="d-flex gap-1">
+                                                    <i class="bi bi-info-circle text-info"></i>
+                                                    The file will be parsed using the character set
+                                                </span>
+                                                <select class="fsm-per-page" id="charset-contacts">
+                                                    <option value="utf-8" selected>UTF-8 (Unicode)</option>
+                                                    <option value="iso-8859-1">ISO-8859-1 (Western Europe)</option>
+                                                    <option value="windows-1252">Windows-1252 (Western Europe)</option>
+                                                </select>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -160,7 +158,7 @@
                                         </div>
                                         <div class="form-check ms-3 smaller">
                                             <input class="form-check-input" type="checkbox" id="chkNoEmptyUpdate" checked>
-                                            <label class="form-check-label text-muted">Don't update empty values</label>
+                                            <label class="form-check-label text-muted">Don't update empty values for existing Contacts</label>
                                         </div>
                                     </div>
                                 </div>
@@ -179,7 +177,7 @@
                                         </div>
                                         <div class="form-check ms-3 smaller">
                                             <input class="form-check-input" type="checkbox" id="chkNoEmptyBoth" checked>
-                                            <label class="form-check-label text-muted">Don't update empty values</label>
+                                            <label class="form-check-label text-muted">Don't update empty values for existing Contacts</label>
                                         </div>
                                     </div>
                                 </div>
@@ -249,7 +247,11 @@
                                                         <i class="bi bi-info-circle text-info"></i>
                                                         The file will be parsed using the character set
                                                     </span>
-                                                    <span class="text-primary">ISO-8859-1 (Western Europe)</span>
+                                                    <select class="fsm-per-page" id="charset-addresses">
+                                                        <option value="utf-8">UTF-8 (Unicode)</option>
+                                                        <option value="iso-8859-1" selected>ISO-8859-1 (Western Europe)</option>
+                                                        <option value="windows-1252">Windows-1252 (Western Europe)</option>
+                                                    </select>
                                                 </span>
                                             </div>
                                         </div>
@@ -317,7 +319,11 @@
                                                         <i class="bi bi-info-circle text-info"></i>
                                                         The file will be parsed using the character set
                                                     </span>
-                                                    <span class="text-primary">ISO-8859-1 (Western Europe)</span>
+                                                    <select class="fsm-per-page" id="charset-notes">
+                                                        <option value="utf-8">UTF-8 (Unicode)</option>
+                                                        <option value="iso-8859-1" selected>ISO-8859-1 (Western Europe)</option>
+                                                        <option value="windows-1252">Windows-1252 (Western Europe)</option>
+                                                    </select>
                                                 </span>
                                             </div>
                                         </div>
@@ -338,6 +344,8 @@
                     @await Html.PartialAsync("~/Views/Components/ImportInformation/_ContactsImportInformation.cshtml")
                 </div>
             </div>
+
+            @await Html.PartialAsync("~/Views/Components/ImportInformation/_ContactsImportMapping.cshtml")
         </div>
     </div>
 </div>
@@ -376,6 +384,29 @@
     </div>
 </div>
 
+<div id="fsm-confirm-import-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirm-import-title">
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="confirm-import-title" class="dialog-title">Initiate Data Import?</p>
+        <div class="dialog-success">
+            <div class="warn-icon">
+                <i class="bi bi-exclamation-lg"></i>
+            </div>
+            <div class="warn-text">
+                <p>Confirmation Required</p>
+                <p class="warn-sub">Are you sure you want to proceed with the data import?</p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            The import will run in the background and we will email you the summary once it is complete. Do you want to start the import?
+        </div>
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" id="fsm-confirm-import-cancel">Cancel</button>
+            <button type="button" class="btn-confirm" id="fsm-confirm-import-yes">Yes, Initiate Import</button>
+        </div>
+    </div>
+</div>
+
 <div class="offcanvas offcanvas-bottom pb-4" tabindex="-1" id="infoOffcanvas" style="height: 91vh;">
     <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title">Information</h5>
@@ -386,209 +417,204 @@
     </div>
 </div>
 
-<script>
-    class FileUploader {
-        constructor(sectionId, inputId) {
-            this.section = document.getElementById(sectionId);
-            if (!this.section) return;
-
-            this.input = document.getElementById(inputId);
-            this.uploadLabel = this.section.querySelector('.fsm-upload-label');
-            this.noUploadLabel = this.section.querySelector('.bg-white.w-100.rounded-2.d-none');
-            this.attachmentAccordion = this.section.querySelector('.accordion');
-            this.howto = this.section.id === 'contactsSection' ? document.getElementById('howto') : null;
-
-            this.fileNameEl = this.section.querySelector('.file-name');
-            this.fileInfoEl = this.section.querySelector('.text-muted.smaller');
-            this.progressContainer = this.section.querySelector('[id^="uploadProgressContainer"]');
-            this.progressBar = this.section.querySelector('[id^="uploadProgressBar"]');
-            this.errorEl = this.section.querySelector('[id^="upload-error"]');
-            this.errorMsg = this.section.querySelector('[id^="uploadErrorMsg"]');
-
-            this.currentFile = null;
-            this.init();
-        }
-
-        init() {
-            if (this.input) this.input.addEventListener('change', e => this.handleFileSelect(e));
-            const closeBtn = this.section.querySelector('[id^="close-error"]');
-            if (closeBtn) closeBtn.addEventListener('click', () => this.hideError());
-        }
-
-        handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            this.hideError();
-
-            if (!file.name.toLowerCase().endsWith('.csv')) {
-                this.showError("Only .CSV files are allowed.");
-                e.target.value = '';
-                return;
-            }
-            if (file.size > 1 * 1024 * 1024) {
-                this.showError("File size must be less than 1MB.");
-                e.target.value = '';
-                return;
-            }
-
-            this.currentFile = file;
-            this.updateFilePreview(file);
-            this.showUploadedUI();
-        }
-
-        updateFilePreview(file) {
-            if (this.fileNameEl) this.fileNameEl.textContent = this.truncateFileName(file.name);
-            if (this.fileInfoEl) this.fileInfoEl.textContent = `Size: ${this.formatFileSize(file.size)}`;
-        }
-
-        formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + " B";
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-            return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-        }
-
-        truncateFileName(name, max = 22) {
-            if (name.length <= max) return name;
-            const ext = name.substring(name.lastIndexOf('.'));
-            return name.substring(0, max - 3) + '...' + ext;
-        }
-
-        showUploadedUI() {
-            this.uploadLabel?.classList.add("d-none");
-            this.noUploadLabel?.classList.remove("d-none");
-            this.attachmentAccordion?.classList.remove("d-none");
-            if (this.howto) this.howto.classList.remove("d-none");
-
-            if (this.progressContainer) {
-                this.progressContainer.classList.remove("d-none");
-                this.simulateUploadProgress();
-            }
-        }
-
-        simulateUploadProgress() {
-            let progress = 0;
-            if (!this.progressBar) return;
-            this.progressBar.style.width = '0%';
-
-            const interval = setInterval(() => {
-                progress += Math.random() * 25;
-                if (progress > 100) progress = 100;
-                this.progressBar.style.width = `${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => this.progressContainer.classList.add("d-none"), 800);
-                    enableNextButton();
-                }
-            }, 150);
-        }
-
-        showError(message) {
-            if (this.errorMsg) this.errorMsg.textContent = message;
-            this.errorEl?.classList.remove('d-none');
-            this.uploadLabel?.classList.remove("rounded-2");
-            this.uploadLabel?.classList.add("rounded-top");
-        }
-
-        hideError() {
-            this.errorEl?.classList.add('d-none');
-            this.uploadLabel?.classList.add("rounded-2");
-            this.uploadLabel?.classList.remove("rounded-top");
-        }
-
-        removeFile() {
-            if (this.input) this.input.value = '';
-            this.currentFile = null;
-            this.uploadLabel?.classList.remove("d-none");
-            this.noUploadLabel?.classList.add("d-none");
-            this.attachmentAccordion?.classList.add("d-none");
-            if (this.howto) this.howto.classList.add("d-none");
-            this.progressContainer?.classList.add("d-none");
-            if (this.contactsUploader.currentFile == null) {
-                document.getElementById("nextBtn").toggleAttribute("disabled", true);
-            }
-        }
-    }
-
-    // Initialize all uploaders
-    const contactsUploader = new FileUploader('contactsSection', 'contacts');
-    const addressesUploader = new FileUploader('addressesSection', 'addresses');
-    const notesUploader = new FileUploader('notesSection', 'notes');
-
-    function enableNextButton() {
-        const contactsFile = contactsUploader.currentFile;
-        if (contactsFile) {
-            document.getElementById("nextBtn").toggleAttribute("disabled", false);
-        }
-    };
-
-    // ==================== COLLECT ALL FORM DATA ====================
-    function getImportData() {
-        const importOption = document.querySelector('input[name="importOption"]:checked')?.value || 'new';
-
-        return {
-            contactsFile: contactsUploader.currentFile,
-            addressesFile: addressesUploader.currentFile,
-            notesFile: notesUploader.currentFile,
-
-            importOption: importOption,
-            skipExistingBasedOn: document.getElementById('skipBasedOn')?.value,
-            findExistingBasedOn: (importOption === 'update' ?
-                document.getElementById('findBasedOnUpdate')?.value :
-                document.getElementById('findBasedOnBoth')?.value),
-
-            dontUpdateEmpty: {
-                update: document.getElementById('chkNoEmptyUpdate')?.checked ?? true,
-                both: document.getElementById('chkNoEmptyBoth')?.checked ?? true
-            }
+@section Scripts{
+    <script>
+        const IMPORT_LIMITS = {
+            maxFileBytes: @(ViewBag.ImportMaxFileBytes ?? 1048576L),
+            maxRecords: @(ViewBag.ImportMaxRecords ?? 1000)
         };
-    }
+        class FileUploader {
+            constructor(sectionId, inputId) {
+                this.section = document.getElementById(sectionId);
+                if (!this.section) return;
 
-    // Example: Next button handler
-    function handleNext() {
-        const data = getImportData();
-        console.log("Import Data:", data);
+                this.input = document.getElementById(inputId);
+                this.uploadLabel = this.section.querySelector('.fsm-upload-label');
+                this.noUploadLabel = this.section.querySelector('.bg-white.w-100.rounded-2.d-none');
+                this.attachmentAccordion = this.section.querySelector('.accordion');
+                this.howto = this.section.id === 'contactsSection' ? document.getElementById('howto') : null;
 
-        // You can now send this data via fetch/FormData
-        // Example:
-        // const formData = new FormData();
-        // if (data.contactsFile) formData.append('contactsFile', data.contactsFile);
-        // ... etc
+                this.fileNameEl = this.section.querySelector('.file-name');
+                this.fileInfoEl = this.section.querySelector('.text-muted.smaller');
+                this.progressContainer = this.section.querySelector('[id^="uploadProgressContainer"]');
+                this.progressBar = this.section.querySelector('[id^="uploadProgressBar"]');
+                this.errorEl = this.section.querySelector('[id^="upload-error"]');
+                this.errorMsg = this.section.querySelector('[id^="uploadErrorMsg"]');
 
-        alert("Data collected! Check console.");
-    }
+                this.currentFile = null;
+                this.init();
+            }
 
-    // Cancel Dialog
-    document.querySelectorAll('[data-fsm-cancel-trigger]').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.stopPropagation();
-            document.getElementById('fsm-cancel-import-dialog').classList.add('show');
+            init() {
+                if (this.input) this.input.addEventListener('change', e => this.handleFileSelect(e));
+                const closeBtn = this.section.querySelector('[id^="close-error"]');
+                if (closeBtn) closeBtn.addEventListener('click', () => this.hideError());
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                this.hideError();
+
+                if (!file.name.toLowerCase().endsWith('.csv')) {
+                    this.showError("Only .CSV files are allowed.");
+                    e.target.value = '';
+                    return;
+                }
+
+                if (file.size > IMPORT_LIMITS.maxFileBytes) {
+                    this.showError(`File size must not be larger than ${IMPORT_LIMITS.maxFileBytes / (1024 * 1024)}MB.`);
+                    e.target.value = '';
+                    return;
+                }
+
+                this.currentFile = file;
+                this.updateFilePreview(file);
+                this.showUploadedUI();
+            }
+
+            updateFilePreview(file) {
+                if (this.fileNameEl) this.fileNameEl.textContent = this.truncateFileName(file.name);
+                if (this.fileInfoEl) this.fileInfoEl.textContent = `Size: ${this.formatFileSize(file.size)}`;
+            }
+
+            formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + " B";
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+                return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+            }
+
+            truncateFileName(name, max = 22) {
+                if (name.length <= max) return name;
+                const ext = name.substring(name.lastIndexOf('.'));
+                return name.substring(0, max - 3) + '...' + ext;
+            }
+
+            showUploadedUI() {
+                this.uploadLabel?.classList.add("d-none");
+                this.noUploadLabel?.classList.remove("d-none");
+                this.attachmentAccordion?.classList.remove("d-none");
+                if (this.howto) this.howto.classList.remove("d-none");
+
+                if (this.progressContainer) {
+                    this.progressContainer.classList.remove("d-none");
+                    this.simulateUploadProgress();
+                }
+            }
+
+            simulateUploadProgress() {
+                let progress = 0;
+                if (!this.progressBar) return;
+                this.progressBar.style.width = '0%';
+
+                const interval = setInterval(() => {
+                    progress += Math.random() * 25;
+                    if (progress > 100) progress = 100;
+                    this.progressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => this.progressContainer.classList.add("d-none"), 800);
+                        enableNextButton();
+                    }
+                }, 150);
+            }
+
+            showError(message) {
+                if (this.errorMsg) this.errorMsg.textContent = message;
+                this.errorEl?.classList.remove('d-none');
+                this.uploadLabel?.classList.remove("rounded-2");
+                this.uploadLabel?.classList.add("rounded-top");
+            }
+
+            hideError() {
+                this.errorEl?.classList.add('d-none');
+                this.uploadLabel?.classList.add("rounded-2");
+                this.uploadLabel?.classList.remove("rounded-top");
+            }
+
+            removeFile() {
+                if (this.input) this.input.value = '';
+                this.currentFile = null;
+                this.uploadLabel?.classList.remove("d-none");
+                this.noUploadLabel?.classList.add("d-none");
+                this.attachmentAccordion?.classList.add("d-none");
+                if (this.howto) this.howto.classList.add("d-none");
+                this.progressContainer?.classList.add("d-none");
+                enableNextButton();
+            }
+        }
+
+        // Initialize all uploaders
+        const contactsUploader = new FileUploader('contactsSection', 'contacts');
+        const addressesUploader = new FileUploader('addressesSection', 'addresses');
+        const notesUploader = new FileUploader('notesSection', 'notes');
+
+        function enableNextButton() {
+            const any = contactsUploader.currentFile || addressesUploader.currentFile || notesUploader.currentFile;
+            document.getElementById("nextBtn").toggleAttribute("disabled", !any);
+        }
+
+        // ==================== COLLECT ALL FORM DATA ====================
+        function getImportData() {
+            const importOption = contactsUploader.currentFile
+                ? (document.querySelector('input[name="importOption"]:checked')?.value || 'new')
+                : 'new';
+
+            return {
+                contactsFile: contactsUploader.currentFile,
+                addressesFile: addressesUploader.currentFile,
+                notesFile: notesUploader.currentFile,
+
+                importOption: importOption,
+                skipExistingBasedOn: document.getElementById('skipBasedOn')?.value,
+                findExistingBasedOn: (importOption === 'update' ?
+                    document.getElementById('findBasedOnUpdate')?.value :
+                    document.getElementById('findBasedOnBoth')?.value),
+
+                dontUpdateEmpty: {
+                    update: document.getElementById('chkNoEmptyUpdate')?.checked ?? true,
+                    both: document.getElementById('chkNoEmptyBoth')?.checked ?? true
+                }
+            };
+        }
+
+      
+
+        // Cancel Dialog
+        document.querySelectorAll('[data-fsm-cancel-trigger]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                document.getElementById('fsm-cancel-import-dialog').classList.add('show');
+            });
         });
-    });
 
-    document.querySelectorAll('[data-fsm-reinvite-cancel]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('fsm-cancel-import-dialog').classList.remove('show');
+        document.querySelectorAll('[data-fsm-reinvite-cancel]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('fsm-cancel-import-dialog').classList.remove('show');
+            });
         });
-    });
 
-    // Radio sub-options toggle
-    const radios = document.querySelectorAll('input[name="importOption"]');
-    const subOptions = {
-        new: document.getElementById("subNew"),
-        update: document.getElementById("subUpdate"),
-        both: document.getElementById("subBoth")
-    };
+        // Radio sub-options toggle
+        const radios = document.querySelectorAll('input[name="importOption"]');
+        const subOptions = {
+            new: document.getElementById("subNew"),
+            update: document.getElementById("subUpdate"),
+            both: document.getElementById("subBoth")
+        };
 
-    function toggleSubOptions(selected) {
-        Object.keys(subOptions).forEach(key => {
-            subOptions[key].classList.toggle('d-none', key !== selected);
+        function toggleSubOptions(selected) {
+            Object.keys(subOptions).forEach(key => {
+                subOptions[key].classList.toggle('d-none', key !== selected);
+            });
+        }
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', () => toggleSubOptions(radio.value));
         });
-    }
 
-    radios.forEach(radio => {
-        radio.addEventListener('change', () => toggleSubOptions(radio.value));
-    });
+        toggleSubOptions("new");
 
-    toggleSubOptions("new");
-</script>
+    </script>
+    <script src="~/js/customers/contacts/import-contacts-mapping.js" nonce="9815422428"></script>
+}

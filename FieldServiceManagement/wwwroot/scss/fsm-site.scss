@@ -1,0 +1,172 @@
+﻿// Contacts import
+.al-bg {
+    background: #f7fafc;
+
+    [data-bs-theme="dark"] & {
+        background: #1b1e21;
+    }
+}
+
+.al-text {
+    color: #374151;
+
+    [data-bs-theme="dark"] & {
+        color: #f1f5f9;
+    }
+}
+
+
+// contacts import mapping partial
+.fsm-map-grid {
+    display: grid;
+    grid-template-columns: minmax(230px, 1.1fr) minmax(190px, 1fr) minmax(180px, 1fr) minmax(130px, .8fr) minmax(130px, .8fr);
+    align-items: center;
+}
+
+.fsm-map-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bs-tertiary-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    font-weight: 500;
+}
+
+    .fsm-map-head .fsm-map-cell {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+.fsm-map-cell {
+    padding: 6px 12px;
+    min-width: 0;
+}
+
+.fsm-map-row {
+    border-bottom: 1px solid var(--bs-border-color);
+    min-height: 48px;
+}
+
+.fsm-map-section {
+    background: var(--bs-tertiary-bg);
+    font-weight: 600;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.fsm-map-sample {
+    color: var(--bs-secondary-color);
+    font-size: .85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fsm-map-stats > span + span {
+    border-left: 1px solid var(--bs-border-color);
+    padding-left: .75rem;
+    margin-left: .75rem;
+}
+
+.fsm-map-buttons > button + button {
+    border-left: 1px solid var(--bs-border-color);
+    padding-left: .55rem;
+    margin-left: .55rem;
+}
+
+#mapStep select,
+#mapStep .form-select {
+    cursor: pointer;
+}
+
+    #mapStep select:focus,
+    #mapStep select:focus-visible,
+    #mapStep .form-select:focus,
+    #mapStep .form-select:focus-visible,
+    #mapStep .form-select.is-invalid:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+.fsm-map-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: .85rem;
+}
+
+.fsm-map-filter {
+    border: 0;
+    background-color: transparent;
+    padding: 0 1.25rem 0 .25rem;
+    font-weight: 500;
+    width: auto;
+    box-shadow: none;
+}
+
+.fsm-import-files {
+    position: static;
+
+    .fsm-import-files-trigger {
+        cursor: default;
+    }
+
+    .fsm-import-files-popup {
+        position: fixed;
+        z-index: 2000;
+        width: max-content;
+        min-width: 360px;
+        max-width: min(520px, calc(100vw - 16px));
+        padding: 8px 16px;
+        background: var(--bs-body-bg, #fff);
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(5px);
+        transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+        pointer-events: none;
+
+        &::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 18px;
+            width: 10px;
+            height: 10px;
+            background: var(--bs-body-bg, #fff);
+            border-top: 1px solid var(--bs-border-color, #dee2e6);
+            border-left: 1px solid var(--bs-border-color, #dee2e6);
+            transform: translateY(5px) rotate(45deg);
+        }
+    }
+
+    .fsm-import-file-item {
+        padding: 9px 0;
+
+        & + .fsm-import-file-item {
+            border-top: 1px solid var(--bs-border-color, #dee2e6);
+        }
+
+        .fsm-meta-text {
+            font-size: 12px;
+        }
+    }
+}
+
+/* Show popup when hovering anywhere over the row */
+.fsm-table tbody tr.has-import-files:hover .fsm-import-files-popup {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+//footer
+.online-btn {
+    .fa-thumb-tack {
+        transform: rotate(-45deg);
+        display: inline-block;
+    }
+}

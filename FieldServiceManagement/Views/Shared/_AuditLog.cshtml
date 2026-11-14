@@ -1,8 +1,9 @@
 @using FieldServiceManagement.ViewModels.Audit
 @model List<AuditLogViewModel>
+
 @{
-    var Events = Model ?? new List<AuditLogViewModel>();
-    var IconPath = new Dictionary<string, string>
+    var events = Model ?? new List<AuditLogViewModel>();
+    var iconPath = new Dictionary<string, string>
     {
         ["Created"] = "<path d='M12 5v14'/><path d='M5 12h14'/>",
         ["Updated"] = "<path d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z'/>",
@@ -27,7 +28,8 @@
         ["ProfileDeleted"] = "<polyline points='3 6 5 6 21 6'/><path d='M19 6l-1 14H6L5 6'/><path d='M10 11v6'/><path d='M14 11v6'/><path d='M9 6V4h6v2'/>",
         ["Linked"] = "<path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/>",
     };
-    var EventConfig = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
+    
+    var eventConfig = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
     {
         ["Created"] = ("#ecfdf5", "#a7f3d0", "#059669", "Created"),
         ["Updated"] = ("#fffbeb", "#fde68a", "#d97706", "Updated"),
@@ -53,31 +55,31 @@
         ["Linked"] = ("#f0f9ff", "#bae6fd", "#0284c7", "Linked"),
     };
 
-    var EventConfigDark = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
-    {
-        ["Created"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Created"),
-        ["Updated"] = ("rgba(245,158,11,0.12)", "rgba(245,158,11,0.3)", "#f59e0b", "Updated"),
-        ["Deleted"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Deleted"),
-        ["Restored"] = ("rgba(96,165,250,0.12)", "rgba(96,165,250,0.3)", "#60a5fa", "Restored"),
-        ["Viewed"] = ("#24272b", "#2d3238", "#9ca3af", "Viewed"),
-        ["StatusChanged"] = ("rgba(129,140,248,0.12)", "rgba(129,140,248,0.3)", "#818cf8", "Status changed"),
-        ["Assigned"] = ("rgba(74,222,128,0.12)", "rgba(74,222,128,0.3)", "#4ade80", "Assigned"),
-        ["Unassigned"] = ("#24272b", "#2d3238", "#a1a1aa", "Unassigned"),
-        ["Activated"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Activated"),
-        ["Deactivated"] = ("#24272b", "#2d3238", "#a1a1aa", "Deactivated"),
-        ["Exported"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Exported"),
-        ["Imported"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Imported"),
-        ["Commented"] = ("rgba(192,132,252,0.12)", "rgba(192,132,252,0.3)", "#c084fc", "Commented"),
-        ["Approved"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Approved"),
-        ["Rejected"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Rejected"),
-        ["ProfileCreated"] = ("rgba(96,165,250,0.12)", "rgba(96,165,250,0.3)", "#60a5fa", "Profile created"),
-        ["AddedToOrganisation"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Organisation created"),
-        ["ProfileUpdated"] = ("rgba(245,158,11,0.12)", "rgba(245,158,11,0.3)", "#f59e0b", "Profile updated"),
-        ["UserLockedOut"] = ("#24272b", "#2d3238", "#a1a1aa", "Locked out"),
-        ["RoleChanged"] = ("rgba(129,140,248,0.12)", "rgba(129,140,248,0.3)", "#818cf8", "Role changed"),
-        ["ProfileDeleted"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Deleted"),
-        ["Linked"] = ("#0c4a6e", "#0369a1", "#38bdf8", "Linked"),
-    };
+    // var EventConfigDark = new Dictionary<string, (string Bg, string Border, string IconColor, string Label)>
+    // {
+    //     ["Created"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Created"),
+    //     ["Updated"] = ("rgba(245,158,11,0.12)", "rgba(245,158,11,0.3)", "#f59e0b", "Updated"),
+    //     ["Deleted"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Deleted"),
+    //     ["Restored"] = ("rgba(96,165,250,0.12)", "rgba(96,165,250,0.3)", "#60a5fa", "Restored"),
+    //     ["Viewed"] = ("#24272b", "#2d3238", "#9ca3af", "Viewed"),
+    //     ["StatusChanged"] = ("rgba(129,140,248,0.12)", "rgba(129,140,248,0.3)", "#818cf8", "Status changed"),
+    //     ["Assigned"] = ("rgba(74,222,128,0.12)", "rgba(74,222,128,0.3)", "#4ade80", "Assigned"),
+    //     ["Unassigned"] = ("#24272b", "#2d3238", "#a1a1aa", "Unassigned"),
+    //     ["Activated"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Activated"),
+    //     ["Deactivated"] = ("#24272b", "#2d3238", "#a1a1aa", "Deactivated"),
+    //     ["Exported"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Exported"),
+    //     ["Imported"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Imported"),
+    //     ["Commented"] = ("rgba(192,132,252,0.12)", "rgba(192,132,252,0.3)", "#c084fc", "Commented"),
+    //     ["Approved"] = ("rgba(16,185,129,0.12)", "rgba(16,185,129,0.3)", "#10b981", "Approved"),
+    //     ["Rejected"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Rejected"),
+    //     ["ProfileCreated"] = ("rgba(96,165,250,0.12)", "rgba(96,165,250,0.3)", "#60a5fa", "Profile created"),
+    //     ["AddedToOrganisation"] = ("rgba(56,189,248,0.12)", "rgba(56,189,248,0.3)", "#38bdf8", "Organisation created"),
+    //     ["ProfileUpdated"] = ("rgba(245,158,11,0.12)", "rgba(245,158,11,0.3)", "#f59e0b", "Profile updated"),
+    //     ["UserLockedOut"] = ("#24272b", "#2d3238", "#a1a1aa", "Locked out"),
+    //     ["RoleChanged"] = ("rgba(129,140,248,0.12)", "rgba(129,140,248,0.3)", "#818cf8", "Role changed"),
+    //     ["ProfileDeleted"] = ("rgba(248,113,113,0.12)", "rgba(248,113,113,0.3)", "#f87171", "Deleted"),
+    //     ["Linked"] = ("#0c4a6e", "#0369a1", "#38bdf8", "Linked"),
+    // };
 
     string FormatGroup(DateTime d) => d.ToString("dd MMM yyyy");
     string FormatTime(DateTime d) => d.ToString("h:mm tt");
@@ -92,8 +94,8 @@
         return localDate == today;
     }
 
-    bool ShowEntityType = Events.FirstOrDefault()?.ShowEntityType ?? false;
-    var sortedEvents = Events.OrderByDescending(e => e.CreatedAt).ToList();
+    // bool showEntityType = events.FirstOrDefault()?.ShowEntityType ?? false;
+    var sortedEvents = events.OrderByDescending(e => e.CreatedAt).ToList();
 
     var groups = new List<(string Label, DateTime Date, List<AuditLogViewModel> Events)>();
     foreach (var ev in sortedEvents)
@@ -105,18 +107,18 @@
     }
 
     string GetIcon(string action) =>
-        IconPath.TryGetValue(action, out var p)
+        iconPath.TryGetValue(action, out var p)
             ? p
             : "<circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/>";
 
-    var entityLabel = Events.FirstOrDefault()?.EntityName;
+    var entityLabel = events.FirstOrDefault()?.EntityName;
     entityLabel = string.IsNullOrWhiteSpace(entityLabel) ? "Entity" : entityLabel;
 }
 
 <link rel="stylesheet" href="~/css/FSM/audits.css" asp-append-version="true" />
 <script type="application/json" id="alGenEventsData">
     @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-    Events.Select(e => new
+    events.Select(e => new
     {
             id = e.Id,
             type = e.Action,
@@ -220,7 +222,7 @@
                         var ev = groupEvents[i];
                         var isLast = globalIdx == total - 1;
                         var isLastInGroup = i == groupEvents.Count - 1;
-                        var cfg = EventConfig.TryGetValue(ev.Action, out var c) ? c : ("#f8fafc", "#e2e8f0", "#64748b", ev.Action);
+                        var cfg = eventConfig.TryGetValue(ev.Action, out var c) ? c : ("#f8fafc", "#e2e8f0", "#64748b", ev.Action);
                         var iconData = GetIcon(ev.Action);
                         var actor = string.IsNullOrWhiteSpace(ev.PerformedByName) ? "System (Automated)" : ev.PerformedByName;
 
@@ -287,7 +289,7 @@
                                                     <strong>@ev.NewValue</strong>
                                                 }
                                             }
-                                            @if (!string.IsNullOrWhiteSpace(ev.Comment) && ev.ShowComment == true)
+                                            @if (!string.IsNullOrWhiteSpace(ev.Comment) && ev.ShowComment)
                                             {
                                                 <div style="opacity:0.9;">@ev.Comment</div>
                                             }
@@ -307,13 +309,13 @@
     (function() {
         // ---------- Config ----------
         const EVENT_CONFIG = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-        EventConfig.ToDictionary(kv => kv.Key, kv => new
+        eventConfig.ToDictionary(kv => kv.Key, kv => new
         {
             bg = kv.Value.Bg,
                 border = kv.Value.Border,
                 iconColor = kv.Value.IconColor,
                 label = kv.Value.Label,
-                iconPath = IconPath.TryGetValue(kv.Key, out var p) ? p : ""
+                iconPath = iconPath.TryGetValue(kv.Key, out var p) ? p : ""
         })
         ));
 

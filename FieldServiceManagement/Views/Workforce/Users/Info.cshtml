@@ -4,7 +4,7 @@
 @model FieldServiceManagement.ViewModels.User.AppUserProfileViewModel
 
 @{
-    ViewData["Title"] = Model.User.Name + " " + Model.User.Surname;
+    ViewData["Title"] = $"{Model.User.Name} {Model.User.Surname} (Users)";
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">

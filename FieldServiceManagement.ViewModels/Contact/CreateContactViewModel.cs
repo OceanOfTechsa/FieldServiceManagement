@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace FieldServiceManagement.ViewModels.Contact
 {
-    public class CreateContactViewModel : IHasOrganisationAddresses
+    public class CreateContactViewModel : IHasOrganisationAddresses, IHasCompanies
     {
         public int Salutation { get; set; }
 

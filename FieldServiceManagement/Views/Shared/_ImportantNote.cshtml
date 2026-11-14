@@ -2,7 +2,9 @@
 @using FieldServiceManagement.Business.EmailQueueBusiness
 
 @if ((AppSettings.isSystemNoteActive) && (!string.IsNullOrEmpty(AppSettings.systemNote)))
+{
     @Html.Raw(AppSettings.systemNote)
+}
                     
 @{
     var result = EmailQueueBusiness.HaveWeReachedEmailThresholdForTheDay();

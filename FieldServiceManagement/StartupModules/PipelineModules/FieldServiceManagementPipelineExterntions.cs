@@ -2,20 +2,18 @@
 using FieldServiceManagement.Business.Configuration;
 using FieldServiceManagement.Data.DataModels.User;
 using FieldServiceManagement.StartupModules.Middleware;
-using FieldServiceManagement.StartupModules.ServiceModules;
+using System.Globalization;
+using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Net.Http.Headers;
-using System.Globalization;
+using FieldServiceManagement.StartupModules.ServiceModules;
 
-namespace FieldServiceManagement.Web.StartupModules.PipelineModules;
+namespace FieldServiceManagement.StartupModules.PipelineModules;
 
 public static class PipelineExtensions
 {
-    public static IApplicationBuilder UseFSMPipeline(
-        this IApplicationBuilder app,
-        IWebHostEnvironment env)
+    public static IApplicationBuilder UseFSMPipeline(this IApplicationBuilder app, IWebHostEnvironment env)
     {
         // 🔥 Exception handling (MUST be first)
         if (env.IsDevelopment())

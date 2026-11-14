@@ -17,5 +17,7 @@ namespace FieldServiceManagement.Data.DataModels.SubscriptionPlan
         public string CurrencyCode { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int MaxImportFileMb { get; set; }
+        public int MaxImportRecords { get; set; }
     }
 }

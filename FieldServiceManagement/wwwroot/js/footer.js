@@ -182,7 +182,7 @@
         }
     }
 
-    pingHealth();
+    // pingHealth();
     pingAnnouncements();
     setInterval(pingHealth, 1 * 60 * 1000);
     setInterval(pingAnnouncements, 2 * 60 * 1000);

@@ -1,0 +1,281 @@
+﻿@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.Shared
+@using FieldServiceManagement.Business.URLEncryptionBusiness
+
+@model FieldServiceManagement.ViewModels.Contact.ContactDetailsViewModel
+
+@{
+    var contact = Model.Contact;
+    var company = Model.Company;          
+    var CreatedBy = Model.CreatedBy;
+    var UpdatedBy = Model.UpdatedBy;
+    var Addresses = Model.LinkedAddresses;
+
+    var EmptyFieldReplacer = new EmptyFieldReplacer().Field;
+    var salutaion = ((UserSalutation)contact.Salutation).GetNormalisedDisplayName();
+
+    var (statusLabel, iconClass, iconCss) = contact!.IsDeleted
+        ? ("Deleted", "bi-x-circle-fill", "text-danger") : contact!.IsActive
+        ? ("Active", "bi-check-circle-fill", "text-success") : ("Inactive", "bi-x-circle-fill", "text-secondary");
+}
+
+<div class="accordion accordion-flush px-2 mt-3 px-sm-0 mt-sm-0 fsm-accordion" id="contactInfoAccordion">
+
+    @if (contact?.IsDeleted == true)
+    {
+        <div class="accordion-item rounded-2 mb-2 border border-danger bg-danger-subtle">
+            <div class="accordion-header d-flex gap-1 my-2 fw-semibold align-items-center justify-content-between px-2">
+                <div>Deletion Details</div>
+                <div data-toggle="tooltip" class="ms-2" title="This contact has been permanently deleted from the system.">
+                    <i class="bi bi-info-circle"></i>
+                </div>
+            </div>
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-node-minus-fill"></i>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">Status</span>
+                            <span>
+                                <span class="fsm-pill bg-danger text-white me-2">Deleted</span>
+                                On @contact?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @contact?.UpdatedAt?.ToString("tt").ToUpper()
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-person-circle"></i>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">Deleted By</span>
+                            <span>@UpdatedBy?.Name @UpdatedBy?.Surname</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Contact Information -->
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#contactInfoCollapse"
+                    aria-expanded="true"
+                    aria-controls="contactInfoCollapse">
+                Contact Information
+            </button>
+        </h2>
+        
+        <div id="contactInfoCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#contactInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-vcard"></i>
+                        <span class="text-muted">Salutation:</span>
+                        <span class="">@salutaion</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-person"></i>
+                        <span class="text-muted">Name:</span>
+                        <span>@contact?.Name @contact?.Surname</span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-envelope"></i>
+                        <span class="text-muted">Email:</span>
+                        <span>@(string.IsNullOrWhiteSpace(contact?.Email) ? EmptyFieldReplacer : contact?.Email)</span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-telephone"></i>
+                        <span class="text-muted">Phone:</span>
+                        <span>@(string.IsNullOrWhiteSpace(contact?.Phone) ? EmptyFieldReplacer : contact?.Phone)</span>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-phone"></i>
+                        <span class="text-muted">Mobile:</span>
+                        <span>@(string.IsNullOrWhiteSpace(contact?.Mobile) ? EmptyFieldReplacer : contact?.Mobile)</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-node-minus"></i>
+                            <span class="text-muted">Status: </span>
+                            <div class="d-flex align-items-center">
+                                <i class="bi @iconClass @iconCss icon-sm"></i>
+                                <span class="ms-1">@statusLabel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company card (link to company) -->
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#contactCompanyCollapse"
+                    aria-expanded="true"
+                    aria-controls="contactCompanyCollapse">
+                Company
+            </button>
+        </h2>
+        <div id="contactCompanyCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#contactInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0 gap-3">
+                @if (!string.IsNullOrWhiteSpace(company.Name))
+                {
+                    <a href="@Url.Action("Info", "Companies", new { Id = UrlEncryptionBusiness.EncryptParam(company?.Id.ToString()!) })"
+                       class="rounded p-0 d-flex justify-content-start align-items-center gap-1">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-buildings "></i>
+                            <span class="full-name-wrapper">@company!.Name</span>
+                        </div>
+
+                    </a>
+                       
+                    @if(company!.IsDeleted)
+                    {
+                        <div class="d-flex align-items-start gap-2 mt-3 small text-danger">
+                            <i class="bi bi-info-circle"></i>
+                            <span>This company has been deleted. The associated contact records may therefore be outdated or invalid.</span>
+                        </div>
+                    }      
+                }
+                else
+                {
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-buildings"></i>
+                        <span class="text-muted">@EmptyFieldReplacer</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Address -->
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <h2 class="accordion-header px-2">
+            <button class="accordion-button rounded-2 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#contactAddressCollapse"
+                    aria-expanded="true"
+                    aria-controls="contactAddressCollapse">
+                Address
+            </button>
+        </h2>
+        <div id="contactAddressCollapse"
+             class="accordion-collapse collapse show"
+             data-bs-parent="#contactInfoAccordion">
+            <div class="accordion-body px-2 pt-1 mt-0">
+                @{
+                    var activeAddresses = Addresses?.Where(a => !a.IsEntityAddressDeleted).ToList();
+                }
+                @if (activeAddresses != null && activeAddresses.Any())
+                {
+                    @foreach (var address in activeAddresses)
+                    {
+                        <div class="d-flex gap-2 align-items-start @(address != activeAddresses.First() ? "mt-3" : "")">
+                            <i class="bi bi-geo-alt"></i>
+                            <div class="d-flex flex-column gap-1">
+                                <span class="mb-1">@(((AddressTypes)address.AddressTypeId).ToString()) Address</span>
+                                <span>
+                                    @Html.Raw(address.DisplayText
+                                        .Replace(",", ",<br />")
+                                        .Replace(" ,", ","))
+                                </span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-geo-alt"></i>
+                        <span class="text-muted">@EmptyFieldReplacer</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Created / Modified -->
+    <div class="accordion-item border-0 rounded-2 mb-2">
+        <div class="accordion-body px-2">
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex gap-3 align-items-start">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <div class="gap-1">
+                        <span class="small">Created By</span>
+                        @{
+                            var createdBy = $"{CreatedBy?.Name} {CreatedBy?.Surname}".Trim();
+                            var isSystemCreated = createdBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                        }
+                        @if (isSystemCreated || CreatedBy == null)
+                        {
+                            <span class="d-flex align-items-center gap-2 mt-1 small text-muted"
+                                  title="This record was self-registered">
+                                System
+                            </span>
+                        }
+                        else
+                        {
+                            <div class="my-2">
+                                @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                {
+                                    Id = CreatedBy.Id!,
+                                    Name = CreatedBy.Name!,
+                                    Surname = CreatedBy.Surname!,
+                                    AvatarUrl = CreatedBy.AvatarUrl!
+                                })
+                            </div>
+                        }
+                        <span class="small mb-2">On @contact?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @contact?.CreatedAt.ToString("tt").ToUpper()</span>
+                    </div>
+                </div>
+
+                @if (contact!.UpdatedBy.HasValue)
+                {
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        <div class="gap-1">
+                            <span class="small">Modified By</span>
+                            @{
+                                var modifiedBy = $"{UpdatedBy?.Name} {UpdatedBy?.Surname}".Trim();
+                                var isSystemModified = modifiedBy.Contains("System User", StringComparison.OrdinalIgnoreCase);
+                            }
+                            @if (isSystemModified || UpdatedBy == null)
+                            {
+                                <span class="d-flex align-items-center gap-2 mt-1 small text-muted">System</span>
+                            }
+                            else
+                            {
+                                <div class="my-2">
+                                    @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                    {
+                                        Id = UpdatedBy.Id,
+                                        Name = UpdatedBy.Name,
+                                        Surname = UpdatedBy.Surname,
+                                        AvatarUrl = UpdatedBy.AvatarUrl!
+                                    })
+                                </div>
+                            }
+                            <span class="small mb-2">On @contact?.UpdatedAt?.ToString("MMM dd, yyyy hh:mm") @contact?.UpdatedAt?.ToString("tt").ToUpper()</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

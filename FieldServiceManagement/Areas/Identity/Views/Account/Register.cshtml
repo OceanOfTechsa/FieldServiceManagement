@@ -31,7 +31,9 @@
 {
     @Html.AntiForgeryToken()
     @if (!ViewData.ModelState.IsValid)
+    {
         @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+    }
 
      <div class="form-group mb-2">
         @Html.LabelFor(Model => Model.Email, new { @class = "form-label" })

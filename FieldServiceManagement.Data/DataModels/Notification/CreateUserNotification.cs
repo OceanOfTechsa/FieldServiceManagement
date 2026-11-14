@@ -14,5 +14,7 @@
         public string ActionUrl { get; set; }
         public Guid? CreatedById { get; set; }
         public string CreatedByEmail { get; set; }
+
+        public Guid? UserId { get; set; }   // set it to notify one user. RoleIds stays null for these.
     }
 }

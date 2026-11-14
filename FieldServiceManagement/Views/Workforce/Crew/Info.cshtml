@@ -318,7 +318,9 @@ rounded-2">
                                             <div style="flex:1;overflow-y:auto;padding:0px 0px;" class="my-3 h-100">
 
                                                 @if (!ViewData.ModelState.IsValid)
+                                            {
                                                     @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                                                }
 
                                                 <div class="small p-1 px-2 d-flex align-items-center gap-2 d-none mb-2 mx-1" id="edit-crew-alert">
                                                     <i class="bi bi-exclamation-circle-fill text-danger d-none" id="edit-crew-alert-error-icn"></i>

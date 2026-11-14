@@ -1,0 +1,74 @@
+<div id="mapStep" class="d-flex d-none mt-3 border border-fsm rounded-2 bg-surface flex-column overflow-hidden"
+     style="height: calc(100vh - 190px);">
+
+    @Html.AntiForgeryToken()
+
+    <!-- Toolbar -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-2 border-bottom border-fsm flex-shrink-0">
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            <select id="mapModuleSelect" class="form-select form-select-sm w-auto fw-medium cursor-pointer" aria-label="File to map"></select>
+
+            <div class="fsm-map-stats small text-muted d-flex flex-wrap">
+                <span>Total Fields - <strong class="text-body" id="mapStatTotal">0</strong></span>
+                <span>Mapped - <strong class="text-body" id="mapStatMapped">0</strong></span>
+                <span>Unmapped - <strong class="text-body" id="mapStatUnmapped">0</strong></span>
+                 <span>
+                    <i class="bi bi-exclamation-circle me-1 text-danger"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="These fields are required for the data import to succeed."
+                        data-bs-placement="top"
+                        data-bs-custom-class="fsm-tooltip"
+                    ></i>
+                    Unmapped Mandatory - <strong id="mapStatMandatory" class="text-body">0</strong>
+                </span>
+            </div>
+        </div>
+
+        <div class="fsm-map-buttons d-flex align-items-center gap-2">
+            <button type="button" class="fsm-map-link text-muted" id="mapResetBtn">Reset Field Mapping</button>
+            <button type="button" class="fsm-map-link text-primary" id="mapAutoBtn">Apply Auto Mapping</button>
+        </div>
+    </div>
+
+    <div id="mapError" class="bg-danger-subtle small p-1 px-2 d-flex align-items-center gap-2 d-none flex-shrink-0">
+        <i class="bi bi-exclamation-circle-fill text-danger"></i>
+        <span id="mapErrorText"></span>
+    </div>
+
+    <!-- Mapping table -->
+    <div class="flex-grow-1 overflow-auto" style="min-height: 0;">
+        <div class="fsm-map-grid fsm-map-head">
+            <div class="fsm-map-cell d-flex align-items-center gap-2">
+                <i class="bi bi-funnel text-muted"></i>
+                <select id="mapFilter" class="form-select form-select-sm fsm-map-filter cursor-pointer" aria-label="Filter fields">
+                    <option value="all">Fields In FSM</option>
+                    <option value="mapped">Mapped fields</option>
+                    <option value="unmapped">Unmapped fields</option>
+                    <option value="mandatory">Unmapped mandatory</option>
+                </select>
+            </div>
+            <div class="fsm-map-cell">Columns In File</div>
+            <div class="fsm-map-cell">Replace Empty Value</div>
+            <div class="fsm-map-cell" style="grid-column: span 2;">Sample Data From File</div>
+        </div>
+
+        <div id="mapRows"></div>
+    </div>
+</div>
+
+
+@* Step 3: shown after Import is pressed. The import runs in the background. *@
+<div id="doneStep" class="d-flex d-none flex-column align-items-center justify-content-center text-center mt-3 bg-surface rounded-2 px-3"
+     style="height: calc(100vh - 190px);">
+
+    <img src="/Assets/Images/Application/import-triggered.svg" alt="Import triggered" width="247" height="150" />  
+
+    <h6 class="fw-semibold mt-3 mb-2">We have initiated the Data Import</h6>
+    <p class="small mb-1">We will send you an email notification with the import summary once the import is complete.</p>
+    <p class="small mb-3">You can also check the status and details of this import on the Data Import page.</p>
+
+    <div class="d-flex gap-2">
+        <a href="/Customers/Contacts" class="btn btn-sm btn-outline-secondary">Back to Contacts</a>
+        <a href="#" id="viewImportHistoryBtn" class="btn btn-sm btn-primary">View Import History</a>
+    </div>
+</div>

@@ -32,7 +32,7 @@
            <form id="create-announcement-form" method="post" action="/Admin/Announcements/Create" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(m => m.CreatedByEmail)
-                <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="my-3">
+                <div style="flex:1;overflow-y:auto;padding:0 24px;" class="my-3">
                     <div class="bd-callout bd-callout-info my-0 p-2 mb-3 bg-opacity-10">
                         <span class="smaller">
                             • Announcements are issued to organisations across the platform to communicate <strong>updates</strong>, <strong>maintenance</strong>, and <strong>new features</strong>.
@@ -44,7 +44,9 @@
                     </div>
 
                     @if (!ViewData.ModelState.IsValid)
-                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    {
+                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    }
                     
 
                     <div>

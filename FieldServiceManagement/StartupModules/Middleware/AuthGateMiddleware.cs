@@ -1,4 +1,4 @@
-﻿namespace FieldServiceManagement.Web.Middleware
+﻿namespace FieldServiceManagement.StartupModules.Middleware
 {
     public class AuthGateMiddleware
     {

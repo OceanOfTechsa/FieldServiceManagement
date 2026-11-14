@@ -48,18 +48,26 @@
                     <button id="cancelSearch" class="cancel-btn">✕</button>
                 </div>
             </div>
-            <a href="/Customers/Contacts/Import" class="btn border-fsm btn-xs">
-                <i class="bi bi-file-earmark-arrow-up"></i>
-            </a>
-            <button class="btn btn-info-soft btn-xs">
+
+            <button type="button" class="btn btn-secondary-soft btn-xs">
                 <i class="bi bi-question-circle-fill"></i>
             </button>
-            <a href="/Customers/Contacts/Create" class="btn btn-primary btn-xs"
-               title="New Contact"
-               aria-label="New Contact">
-                <i class="fa-solid fa-plus"></i>
-                New Contact
-            </a>
+
+            <div class="fsm-btn-group bg-primary">
+                <a href="/Customers/Contacts/Create" class="btn-main">
+                    @* <i class="fa-solid fa-plus"></i> *@
+                    Create
+                </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <a href="/Customers/Contacts/Import" class="fsm-btn-group__item">
+                        Import
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -85,7 +93,7 @@
                     <th>Status</th>
                     <th>Created By</th>
                     <th>Created At</th>
-                    <th>
+                    @* <th>
                         <!-- Filter -->
                         <div class="border-left">
                             <div type="button"
@@ -137,7 +145,7 @@
                             ]
                             </script>
                         </div>
-                    </th>
+                    </th> *@
                 </tr>
             </thead>
             <tbody>
@@ -232,7 +240,7 @@
                                     @item?.CreatedAt.ToString("MMM dd, yyyy hh:mm") @item?.CreatedAt.ToString("tt").ToUpper()
                                 </span>
                             </td>
-                            <td></td>
+                            @* <td></td> *@
                         </tr>
                     }
                 }

@@ -1,7 +1,7 @@
-﻿using FieldServiceManagement.Business.HealthCheckBusiness;
-using FieldServiceManagement.Data;
+﻿using FieldServiceManagement.Data;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using FieldServiceManagement.Business.HealthCheckBusiness;
 
 namespace FieldServiceManagement.StartupModules.ServiceModules
 {

@@ -2,6 +2,7 @@
 using FieldServiceManagement.Business.CompanyBusiness;
 using FieldServiceManagement.Business.ContactBusiness;
 using FieldServiceManagement.Business.URLEncryptionBusiness;
+using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Helpers;
 using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Address;
@@ -10,6 +11,7 @@ using FieldServiceManagement.ViewModels.Interfaces;
 using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace FieldServiceManagement.Controllers
 {
@@ -35,7 +37,7 @@ namespace FieldServiceManagement.Controllers
         {
             var model = new CreateContactViewModel { CompanyId = companyId ?? Guid.Empty };
             await PopulateOrganisationAddresses(model, User.GetOrganisationIdOrThrow());
-            model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User.Identity?.Name!);
+            await PopulateCompanies(model);
             return View(model);
         }
 
@@ -48,7 +50,7 @@ namespace FieldServiceManagement.Controllers
             if (!ModelState.IsValid)
             {
                 await PopulateOrganisationAddresses(model, User.GetOrganisationIdOrThrow());
-                model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User.Identity?.Name!);
+                await PopulateCompanies(model);
                 return View(model);
             }
             var contactId = await new ContactBusiness().CreateContactAsync(model, User.Identity?.Name!);
@@ -56,8 +58,39 @@ namespace FieldServiceManagement.Controllers
         }
 
         [HttpGet("Import")]
-        public IActionResult Import() => View();
-  
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Import()
+        {
+            var currentUser = await new UserBusiness().GetUserDetailsByUserNameAsync(User.Identity?.Name!);
+            var limits = await new ContactBusiness().GetContactImportLimitsAsync(currentUser);
+            ViewBag.ImportMaxFileBytes = limits.MaxFileBytes;
+            ViewBag.ImportMaxRecords = limits.MaxRecords;
+            return View();
+        }
+
+        [HttpPost("Import")]
+        [Authorize(Roles = "Administrator")]
+        [ValidateAntiForgeryToken]
+        [RequestSizeLimit(16 * 1024 * 1024)]
+        public async Task<IActionResult> Import(ContactImportRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var message = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m)) ?? "The import request is invalid.";
+
+                return BadRequest(new { success = false, message });
+            }
+
+            var result = await new ContactBusiness().StartContactImportAsync(request, User.Identity?.Name!);
+
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
+
+            return Accepted(new { success = true, importId = result.ImportId });
+        }
 
         [HttpGet("Info")]
         [MVCDecryptFilter]
@@ -104,6 +137,7 @@ namespace FieldServiceManagement.Controllers
 
             return Json(new { success = result.Success, message = result.Message });
         }
+
         [HttpPost("UnlinkAddress")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlinkAddress(string contactId, Guid entityAddressId)
@@ -183,7 +217,8 @@ namespace FieldServiceManagement.Controllers
         private async Task PopulateCompanies<T>(T? model) where T : class, IHasCompanies
         {
             if (model is null) return;
-            model.Companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
+            var companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
+            model.Companies = companies.Where(c => c.IsDeleted == false);
         }
         #endregion
     }

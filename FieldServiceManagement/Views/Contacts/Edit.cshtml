@@ -1,6 +1,7 @@
-﻿@using FieldServiceManagement.Business.URLEncryptionBusiness
-@using FieldServiceManagement.Enum
+﻿@using FieldServiceManagement.Enum
+@using FieldServiceManagement.Business.URLEncryptionBusiness
 @using FieldServiceManagement.ViewModels.Shared
+
 @model FieldServiceManagement.ViewModels.Contact.ContactViewModel
 
 @{
@@ -8,11 +9,10 @@
     var encryptedId = UrlEncryptionBusiness.EncryptParam(Model.Id.ToString());
 
     var addressReturnUrl = Uri.EscapeDataString($"/Customers/Contacts/Edit?Id={encryptedId}");
-
-    ViewData["Title"] = $"Edit {fullName}";
-
     var addresses = Model.OrganisationAddresses ?? new();
     var hasAddresses = addresses.Any();
+
+    ViewData["Title"] = $"Edit Contact: {fullName}";
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">

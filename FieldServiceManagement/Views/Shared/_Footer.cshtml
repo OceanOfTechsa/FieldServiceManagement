@@ -54,6 +54,11 @@
         <div id="fsm-fp-online" style="display:none; width:100%;">
             <div class="online-actions">
                 <button class="online-btn">
+                    @* pin icon *@
+                    <link class="fa fa-thumb-tack" />
+                    <span>My Pins</span>
+                </button>
+                <button class="online-btn">
                     @* chat bubbles *@
                     <link class="fa-solid fa-comments" />
                     <span>Chats</span>
@@ -62,7 +67,7 @@
                     @* user icon *@
                     <link class="fa-solid fa-user" />
                     <span>Contacts</span>
-                </button>
+                </button>   
             </div>
         </div>
 
@@ -83,7 +88,7 @@
         </button>
 
         @* Hint area *@
-        <div class="footer-hint-area">
+        @* <div class="footer-hint-area">
             <a href="@(User.IsInRole("SuperAdmin") ? "/Admin/Health" : "#")"
                class="d-flex align-items-center gap-2 text-decoration-none"
                id="fsm-health-footer"
@@ -104,7 +109,7 @@
             <p class="hint-powered">
                 Powered by <a href="@AppSettings.CompanyUrl" target="_blank" rel="noopener">@AppSettings.CompanyName</a>
             </p>
-        </div>
+        </div> *@
     </div>
 
     @* ── Right: action buttons ──────────────────────────────────────────────── *@

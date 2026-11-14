@@ -7,6 +7,7 @@
         Crew = 3,
         Site = 4,
         Equipment = 5,
-        Contact = 6
+        Contact = 6,
+        Note = 7
     }
 }

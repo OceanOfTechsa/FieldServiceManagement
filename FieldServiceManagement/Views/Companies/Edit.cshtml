@@ -39,10 +39,11 @@
                 @Html.HiddenFor(m => m.CreatedAt)
                 @Html.HiddenFor(m => m.UpdatedBy)
 
-                <div style="flex:1;overflow-y:auto;padding:0px 24px;" class="my-3">
+                <div style="flex:1;overflow-y:auto;padding:0 24px;" class="my-3">
                     @if (!ViewData.ModelState.IsValid)
+                    {
                         @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
-                    
+                    }
 
                     <div class="row g-3">
                         <!-- Name -->

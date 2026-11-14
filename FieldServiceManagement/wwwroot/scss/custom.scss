@@ -55,6 +55,8 @@
 @import 'Footer';
 @import '_bootstrap-switch.scss';
 
+@import 'fsm-site.scss';
+
 
 // ─── Scrollbar ────────────────────────────────────────────────────────────────
 * {
@@ -1306,7 +1308,7 @@ hr {
         font-size: 11px;
         font-weight: 600;
         letter-spacing: .04em;
-        text-transform: uppercase;
+        //text-transform: uppercase;
         padding: 10px 18px;
         white-space: nowrap;
 
@@ -2938,4 +2940,45 @@ select.form-select {
     margin-top: auto;
     padding-top: 10px;
     border-top: 1px solid var(--border, #dee2e6);
+}
+
+
+.icon-xs {
+  font-size: 10px;
+}
+
+.icon-sm {
+  font-size: 12px;
+}
+
+.icon-small {
+  font-size: 14px;
+}
+
+.icon-md {
+  font-size: 16px;
+}
+
+.icon-lg {
+  font-size: 18px;
+}
+
+.icon-xl {
+  font-size: 20px;
+}
+
+.icon-2xl {
+  font-size: 24px;
+}
+
+.icon-3xl {
+  font-size: 32px;
+}
+
+.icon-4xl {
+  font-size: 40px;
+}
+
+.icon-5xl {
+  font-size: 48px;
 }

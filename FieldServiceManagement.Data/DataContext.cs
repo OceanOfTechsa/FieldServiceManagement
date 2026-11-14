@@ -5,13 +5,16 @@ using FieldServiceManagement.Data.DataModels.Audits;
 using FieldServiceManagement.Data.DataModels.Company;
 using FieldServiceManagement.Data.DataModels.Contact;
 using FieldServiceManagement.Data.DataModels.Country;
+using FieldServiceManagement.Data.DataModels.Crew;
 using FieldServiceManagement.Data.DataModels.Currency;
 using FieldServiceManagement.Data.DataModels.Customer;
+using FieldServiceManagement.Data.DataModels.DataImportHistory;
 using FieldServiceManagement.Data.DataModels.Department;
 using FieldServiceManagement.Data.DataModels.Disclaimer;
 using FieldServiceManagement.Data.DataModels.EmailErrorLog;
 using FieldServiceManagement.Data.DataModels.EmailLog;
 using FieldServiceManagement.Data.DataModels.EmailQueue;
+using FieldServiceManagement.Data.DataModels.Entity;
 using FieldServiceManagement.Data.DataModels.Form;
 using FieldServiceManagement.Data.DataModels.FormApprovalProgress;
 using FieldServiceManagement.Data.DataModels.FormSubmission;
@@ -21,6 +24,7 @@ using FieldServiceManagement.Data.DataModels.FormSubmissionStageState;
 using FieldServiceManagement.Data.DataModels.Industry;
 using FieldServiceManagement.Data.DataModels.Invoice;
 using FieldServiceManagement.Data.DataModels.Language;
+using FieldServiceManagement.Data.DataModels.Note;
 using FieldServiceManagement.Data.DataModels.Notification;
 using FieldServiceManagement.Data.DataModels.Organisation;
 using FieldServiceManagement.Data.DataModels.OrganisationSubscription;
@@ -42,14 +46,12 @@ using FieldServiceManagement.Data.DataModels.WorkflowEscalationRule;
 using FieldServiceManagement.Data.DataModels.WorkflowStageDefinition;
 using FieldServiceManagement.Data.DataModels.WorkOrder;
 using FieldServiceManagement.Data.RepositoryServices.Contracts;
+using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Settings;
-using FieldServiceManagement.Data.DataModels.Crew;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using FieldServiceManagement.Models;
-using FieldServiceManagement.Data.DataModels.Entity;
 
 namespace FieldServiceManagement.Data
 {
@@ -120,6 +122,8 @@ namespace FieldServiceManagement.Data
         public DbSet<EntityType> EntityTypes { get; set; }
         public DbSet<AddressType> AddressTypes { get; set; }
         public DbSet<EntityLinkedAddress> EntityLinkedAddresses { get; set; }
+        public DbSet<DataImportHistory> DataImportHistories { get; set; }
+        public DbSet<Note> Notes { get; set; }
         #endregion
 
         #region Error
@@ -177,6 +181,11 @@ namespace FieldServiceManagement.Data
                 .HasForeignKey(u => u.OrganisationId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
+
+            modelBuilder.Entity<DataImportHistory>()
+                .Property(x => x.StatusId)
+                .HasConversion<int>()
+                .HasColumnName("StatusId");
 
             modelBuilder.Entity<AppUserProfile>().HasNoKey().ToView(null);
             modelBuilder.Entity<UserAnnouncement>().HasNoKey();

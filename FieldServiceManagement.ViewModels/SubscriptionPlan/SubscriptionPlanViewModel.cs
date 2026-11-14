@@ -14,5 +14,7 @@
         public string CurrencyCode { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int MaxImportFileMb { get; set; }
+        public int MaxImportRecords { get; set; }
     }
 }

@@ -43,7 +43,9 @@
                 <div class="flex-grow-1 overflow-y-auto p-2 pt-0">
 
                     @if (!ViewData.ModelState.IsValid)
-                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    {
+                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                        }
                     
                     @if (Model.TwoFactorEnabled == true)
                     {

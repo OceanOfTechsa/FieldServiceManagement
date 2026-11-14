@@ -1,0 +1,750 @@
+﻿@using System.Text.Json
+@using FieldServiceManagement.Enum
+@using FieldServiceManagement.ViewModels.DataImport
+@using FieldServiceManagement.ViewModels.Shared
+
+@model IEnumerable<DataImportHistoryViewModel>
+
+@{
+    ViewData["Title"] = $"Data Import ({ViewBag.Module})";
+
+    var imports = Model?.ToList() ?? new List<DataImportHistoryViewModel>();
+
+    var selectedStatus = ViewBag.SelectedStatus?.ToString() ?? "All";
+
+    var isValidStatus = System.Enum.TryParse<DataImportStatus>(
+        selectedStatus,
+        true,
+        out DataImportStatus status
+    );
+
+    var filteredImports = selectedStatus switch
+    {
+        "All" => imports,
+        _ when isValidStatus => imports
+            .Where(x => x.StatusId == status)
+            .ToList(),
+        _ => imports
+    };
+
+    var inProgress = imports.Any(x =>
+        x.StatusId is DataImportStatus.Queued or DataImportStatus.Running);
+}
+
+<div class="d-flex flex-column container-fluid px-0 h-full">
+
+    <!-- Header -->
+    <div class="bg-surface d-flex justify-content-between align-items-center mb-2 px-3">
+        <div class="d-flex align-items-center gap-3">
+            <!-- Status Filter -->
+            <div class="d-flex gap-1 align-items-center text-muted">
+                <i class="bi bi-funnel"></i>
+                <div id="app" class="mt-2">
+                    <enum-dropdown :options="statusOptions"
+                                   v-model="selectedStatus"
+                                   placeholder="All"
+                                   param-name="status"
+                                   suffix="Imports">
+                    </enum-dropdown>
+                </div>
+            </div>
+
+            <!-- Module Switcher -->
+            <div class="d-flex gap-1 align-items-center text-success">
+                <div id="moduleApp">
+                    <enum-dropdown :options="moduleOptions"
+                                   v-model="selectedModule"
+                                   placeholder="Module"
+                                   param-name="module"
+                                   suffix=""
+                                   :icon-only="true">
+                    </enum-dropdown>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+            <!-- Search -->
+            <div class="d-flex align-items-center position-relative">
+                <button type="button"
+                        class="btn border-fsm btn-xs mb-0 mt-0"
+                        id="searchBtn"
+                        title="Search imports"
+                        aria-label="Search imports">
+                    <i class="bi bi-search"></i>
+                </button>
+
+                <div id="searchWrapper" class="search-wrapper">
+                    <input class="border-fsm form-control search-input"
+                           placeholder="Search by module, file or email..."
+                           id="searchInput" />
+                    <button type="button" id="cancelSearch" class="cancel-btn">✕</button>
+                </div>
+            </div>
+
+            <button type="button"
+                    class="btn btn-outline-primary btn-xs mb-0"
+                    id="refreshBtn"
+                    title="Refresh"
+                    aria-label="Refresh">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Import History Table -->
+    <div class="border-0 rounded-2 overflow-hidden mx-2">
+        <div class="table-responsive fsm-table-wrapper bg-surface">
+            <div class="d-flex justify-content-between align-content-center p-3">
+                <div>
+                    <h5>Data Import</h5>
+                    <p class="small text-muted">
+                        Bring your existing data into OOT FSM by importing it in bulk.
+                        Choose a module, upload your file, and map the fields — then track
+                        the status and history of every import from one place.
+                    </p>
+                    @if (User.IsInRole("Administrator"))
+                    {   
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-fsm-import-trigger>
+                            Import Data
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <table class="table align-middle mb-0 fsm-table bg-surface">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th class="fsm-sortable" data-sort="module">
+                            Module
+                            <span class="fsm-sort-icon">
+                                <i class="bi bi-chevron-expand"></i>
+                            </span>
+                        </th>
+                        <th class="fsm-sortable" data-sort="date">
+                            Imported On
+                            <span class="fsm-sort-icon">
+                                <i class="bi bi-chevron-expand"></i>
+                            </span>
+                        </th>
+                        <th>Imported By</th>
+                        <th>Status</th>
+                        <th>Started At</th>
+                        <th>Completed At</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (filteredImports.Any())
+                    {
+                        foreach (var item in filteredImports)
+                        {
+                            var files = string.IsNullOrWhiteSpace(item.FilesJson)
+                                ? new Dictionary<string, FileImportInfoViewModel>()
+                                : JsonSerializer.Deserialize<Dictionary<string, FileImportInfoViewModel>>(item.FilesJson)
+                                    ?? new Dictionary<string, FileImportInfoViewModel>();
+
+                            var (statusLabel, iconClass, iconCss) = item.StatusId switch
+                            {
+                                DataImportStatus.Queued => ("Queued", "bi-clock-fill", "text-warning"),
+                                DataImportStatus.Running => ("Running", "bi-arrow-repeat", "text-primary"),
+                                DataImportStatus.Completed => ("Completed", "bi-check-circle-fill", "text-success"),
+                                DataImportStatus.Failed => ("Failed", "bi-x-circle-fill", "text-danger"),
+                                _ => ("Unknown", "bi-question-circle-fill", "text-secondary")
+                            };
+
+                            <tr class="@(files.Count > 1 ? "has-import-files" : "")"
+                                data-sort-date="@item.CreatedAt.ToString("yyyyMMddHHmmss")"
+                                data-sort-module="@item.Module">
+
+                                <!-- File Name -->
+                                <td>
+                                    @if (files.Any())
+                                    {
+                                        var firstFile = files.First();
+                                        <div class="fsm-import-files">
+                                            <div class="fsm-import-files-trigger">
+                                                <div class="text-truncate" style="max-width: 260px;" title="@firstFile.Value.FileName">
+                                                    @if (files.Count > 1)
+                                                    {
+                                                        <span class="text-muted">@firstFile.Key:</span>
+                                                    }
+                                                    <span class="text-success">@firstFile.Value.FileName</span>
+                                                    @if (files.Count > 1)
+                                                    {
+                                                        <span class="badge bg-light text-muted">+@(files.Count - 1)</span>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            @if (files.Count > 1)
+                                            {
+                                                <div class="fsm-import-files-popup">
+                                                    @foreach (var file in files)
+                                                    {
+                                                        <div class="fsm-import-file-item">
+                                                            <div class="fw-semibold text-truncate mb-2" title="@file.Value.FileName">
+                                                                <span class="text-muted">@file.Key:</span>
+                                                                @file.Value.FileName
+                                                            </div>
+                                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                                <span class="d-inline-flex align-items-center gap-1">
+                                                                    <i class="bi @iconClass @iconCss"></i>
+                                                                    <span class="fsm-meta-text">@statusLabel</span>
+                                                                </span>
+                                                                <span class="d-inline-flex align-items-center gap-1">
+                                                                    <i class="bi bi-hdd-stack"></i>
+                                                                    <span class="fsm-meta-text">@file.Value.Module</span>
+                                                                </span>
+                                                                <span class="d-inline-flex align-items-center gap-1">
+                                                                    <i class="bi bi-person"></i>
+                                                                    <span class="fsm-meta-text">
+                                                                        @item.CreatedBy?.Name @item.CreatedBy?.Surname
+                                                                    </span>
+                                                                </span>
+                                                                <span class="d-inline-flex align-items-center gap-1">
+                                                                    <i class="bi bi-calendar2-week"></i>
+                                                                    <span class="fsm-meta-text">
+                                                                        @item.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                                                                    </span>
+                                                                </span>
+                                                                <span class="d-inline-flex align-items-center gap-1">
+                                                                    <i class="bi bi-file-earmark-text"></i>
+                                                                    <span class="fsm-meta-text">
+                                                                        @file.Value.Records.ToString("N0") records
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="fsm-meta-text">—</span>
+                                    }
+                                </td>
+
+                                <!-- Module -->
+                                <td>
+                                    <span class="fsm-tag fsm-tag--bubble fsm-tag--professional">
+                                        @item.Module
+                                    </span>
+                                </td>
+
+                                <!-- Imported On -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @item.CreatedAt.ToString("MMM dd, yyyy hh:mm")
+                                        @item.CreatedAt.ToString("tt").ToUpper()
+                                    </span>
+                                </td>
+
+                                <!-- Imported By -->
+                                <td>
+                                    @await Html.PartialAsync("~/Views/Shared/_ActionUser.cshtml", new ActionUserViewModel
+                                    {
+                                        Id = item!.CreatedBy!.Id!,
+                                        Name = item?.CreatedBy.Name!,
+                                        Surname = item?.CreatedBy.Surname!,
+                                        AvatarUrl = item?.CreatedBy.AvatarUrl!
+                                    })
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                    <span class="d-inline-flex align-items-center gap-2">
+                                        <i class="bi @iconClass @iconCss"></i>
+                                        <span class="fsm-meta-text">@statusLabel</span>
+                                    </span>
+                                </td>
+
+                                <!-- Started At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(item?.StartedAt?.ToString("MMM dd, yyyy hh:mm") ?? "—")
+                                        @(item?.StartedAt?.ToString("tt").ToUpper() ?? "")
+                                    </span>
+                                </td>
+
+                                <!-- Completed At -->
+                                <td>
+                                    <span class="fsm-meta-text">
+                                        @(item?.CompletedAt?.ToString("MMM dd, yyyy hh:mm") ?? "—")
+                                        @(item?.CompletedAt?.ToString("tt").ToUpper() ?? "")
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-end">
+                                    @if (!string.IsNullOrWhiteSpace(item.ErrorFilePath))
+                                    {
+                                        <a href="/DataImport/@item.Id/Errors"
+                                           class="btn btn-xs border-fsm rounded shadow-sms"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-title="Download skipped records"
+                                           data-bs-placement="top"
+                                           data-bs-custom-class="fsm-tooltip">
+                                            <i class="bi bi-arrow-down-circle"></i>
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8">
+                                <div class="fsm-empty-state">
+                                    <div class="fsm-empty-icon">
+                                        <i class="bi bi-clock-history"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-1">No imports found</h6>
+                                    <p class="text-muted small mb-0">
+                                        No import records match the selected filter.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer -->
+        <div class="fsm-table-footer">
+            <span>
+                Total Imports : <strong id="totalImports">@filteredImports.Count</strong>
+                @if (selectedStatus != "All")
+                {
+                    <span class="ms-2 text-black smaller fsm-pill bg-warning-subtle">Filtered</span>
+                }
+            </span>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="fsm-page-btn" id="prevPage" disabled>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <span class="fsm-page-current" id="pageLabel">1 / 1</span>
+                <button class="fsm-page-btn" id="nextPage" disabled>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                <select class="fsm-per-page" id="perPage">
+                    <option value="10">10 Records per page</option>
+                    <option value="25">25 Records per page</option>
+                    <option value="50">50 Records per page</option>
+                    <option value="100">100 Records per page</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Module Dialog -->
+<div id="fsm-import-dialog"
+     class="fsm-dialog-backdrop"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="import-dialog-title">
+
+    <div class="fsm-dialog fsm-dialog-lg">
+        <p id="import-dialog-title" class="dialog-title">Select Module to Import</p>
+
+        <div class="dialog-success">
+            <div class="warn-icon">
+                <i class="bi bi-hdd-stack"></i>
+            </div>
+            <div class="warn-text">
+                <p>Choose a Module</p>
+                <p class="warn-sub">Select the module you want to import data for. You will be taken to that module’s import page.</p>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            <label for="importModuleSelect" class="form-label fw-semibold mb-1">Module</label>
+            <select id="importModuleSelect" class="form-select cursor-pointer">
+                <!-- options populated by JS -->
+            </select>
+        </div>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" id="fsm-import-cancel">Cancel</button>
+            <a href="#" class="btn-confirm" id="fsm-import-proceed">Proceed</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ── Shared enum-dropdown component ───────────────────────────────
+        Vue.component('enum-dropdown', {
+            props: {
+                options: Array,
+                value: String,
+                placeholder: { type: String, default: 'Select...' },
+                paramName: { type: String, default: 'status' },
+                suffix: { type: String, default: '' },
+                iconOnly: { type: Boolean, default: false }
+            },
+            data() {
+                return { search: '', open: false };
+            },
+            computed: {
+                filtered() {
+                    return this.options.filter(o =>
+                        o.toLowerCase().includes(this.search.toLowerCase())
+                    );
+                },
+                display() {
+                    return this.value || this.placeholder;
+                }
+            },
+            methods: {
+                select(option) {
+                    this.$emit('input', option);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set(this.paramName, option);
+                    window.location.href = url.toString();
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.$nextTick(() => this.$refs.search?.focus());
+                    }
+                },
+                close() {
+                    this.open = false;
+                    this.search = '';
+                }
+            },
+
+            template: 
+            `
+                <div style="position:relative;display:inline-block;" v-click-outside="close">
+                    <!-- Icon-only trigger (Module Switcher) -->
+                    <button v-if="iconOnly"
+                            class="text-muted small bg-transparent border-0 d-flex align-items-center gap-1"
+                            type="button"
+                            @@click="toggle"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="View import history for a different module"
+                            data-bs-placement="bottom"
+                            data-bs-custom-class="fsm-tooltip">
+                        <i class="bi bi-hdd-stack" style="font-size:15px;"></i>
+                        <span>Switch Module</span>
+                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
+                    </button>
+
+                    <!-- Normal text trigger (Status Filter) -->
+                    <button v-else
+                            class="btn btn-sm border-0 bg-transparent px-2 text-muted"
+                            type="button"
+                            @@click="toggle">
+                        {{ display }}
+                        <span v-if="suffix"> {{ suffix }}</span>
+                        <i class="bi bi-chevron-down" style="font-size:10px;"></i>
+                    </button>
+
+                    <div v-if="open"
+                            style="position:absolute;top:100%;left:0;z-index:1000;min-width:220px;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);overflow:hidden;background:#fff;">
+                        <div class="d-flex align-items-center px-3 py-2"
+                                style="border-bottom:1px solid #f0f0f0;gap:8px;">
+                            <i class="bi bi-search" style="color:#adb5bd;font-size:13px;"></i>
+                            <input ref="search"
+                                    v-model="search"
+                                    type="text"
+                                    class="border-0 bg-transparent w-100"
+                                    placeholder="Search"
+                                    style="outline:none;box-shadow:none;font-size:13px;color:#495057;" />
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li v-if="filtered.length === 0">
+                                <span class="dropdown-item small text-danger">
+                                    <i class="bi bi-exclamation-circle me-2"></i>
+                                    No results
+                                </span>
+                            </li>
+                            <li v-for="option in filtered" :key="option">
+                                <button type="button"
+                                        class="dropdown-item py-2 px-3 border-0 text-start w-100"
+                                        @@click="select(option)"
+                                        style="font-size:13px;color:#212529;"
+                                        :style="value === option ? 'background:rgba(16,185,129,.10);color:#059669;font-weight:500;' : ''">
+                                    {{ option }}
+                                    <span v-if="suffix"> {{ suffix }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        });
+
+        Vue.directive('click-outside', {
+            bind(el, binding) {
+                el._clickOutside = (e) => {
+                    if (!el.contains(e.target)) binding.value();
+                };
+                document.addEventListener('click', el._clickOutside);
+            },
+            unbind(el) {
+                document.removeEventListener('click', el._clickOutside);
+            }
+        });
+
+        // ── Module Switcher ──────────────────────────────────────────────
+        new Vue({
+            el: '#moduleApp',
+            data() {
+                return {
+                    moduleOptions: [
+                        "Contacts",
+                        "Companies",
+                        "Services and Parts",
+                        "Assets"
+                    ],
+                    selectedModule: '@(ViewBag.Module ?? "Contacts")'
+                };
+            }
+        });
+
+        // ── Status Filter ────────────────────────────────────────────────
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    statusOptions: [
+                        "All",
+                        ...@Html.Raw(Json.Serialize(System.Enum.GetNames(typeof(DataImportStatus))))
+                            ],
+                    selectedStatus: '@selectedStatus'
+                };
+            }
+        });
+
+        // ── Search + Table logic ─────────────────────────────────────────
+        const searchBtn = document.getElementById('searchBtn');
+        const searchWrapper = document.getElementById('searchWrapper');
+        const cancelSearch = document.getElementById('cancelSearch');
+        const searchInput = document.getElementById('searchInput');
+
+        const table = document.querySelector('.fsm-table');
+        const tbody = table?.querySelector('tbody');
+
+        if (tbody) {
+            // Fixed: table has 8 columns
+            const rows = Array.from(tbody.querySelectorAll('tr'))
+                .filter(row => row.cells.length === 8);
+
+            // Import files hover popup
+            const importRows = rows.filter(row =>
+                row.classList.contains('has-import-files')
+            );
+
+            importRows.forEach(row => {
+                const popup = row.querySelector('.fsm-import-files-popup');
+                if (!popup) return;
+
+                function positionPopup() {
+                    const rowRect = row.getBoundingClientRect();
+                    const popupRect = popup.getBoundingClientRect();
+                    const padding = 8;
+
+                    let left = Math.max(
+                        padding,
+                        Math.min(rowRect.left, window.innerWidth - popupRect.width - padding)
+                    );
+
+                    let top = rowRect.bottom + padding;
+                    if (top + popupRect.height > window.innerHeight - padding) {
+                        top = rowRect.top - popupRect.height - padding;
+                    }
+
+                    popup.style.left = `${left}px`;
+                    popup.style.top = `${Math.max(padding, top)}px`;
+                }
+
+                row.addEventListener('mouseenter', positionPopup);
+                row.addEventListener('mouseleave', () => {
+                    popup.style.left = '';
+                    popup.style.top = '';
+                });
+                window.addEventListener('resize', positionPopup);
+            });
+
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const pageLabel = document.getElementById('pageLabel');
+            const perPageSelect = document.getElementById('perPage');
+            const totalImports = document.getElementById('totalImports');
+
+            let filteredRows = [...rows];
+            let currentPage = 1;
+            let perPage = 10;
+            let currentSort = null;
+            let ascending = true;
+
+            function render() {
+                const total = filteredRows.length;
+                const totalPages = Math.max(1, Math.ceil(total / perPage));
+                currentPage = Math.min(currentPage, totalPages);
+
+                const start = (currentPage - 1) * perPage;
+                const end = start + perPage;
+
+                rows.forEach(row => row.style.display = 'none');
+                filteredRows.forEach((row, index) => {
+                    row.style.display = index >= start && index < end ? '' : 'none';
+                });
+
+                if (pageLabel) pageLabel.textContent = `${currentPage} / ${totalPages}`;
+                if (prevBtn) prevBtn.disabled = currentPage <= 1;
+                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+                if (totalImports) totalImports.textContent = total;
+            }
+
+            function applySearch() {
+                const value = searchInput.value.toLowerCase().trim();
+                filteredRows = rows.filter(row =>
+                    row.textContent.toLowerCase().includes(value)
+                );
+                if (currentSort) sortRows(currentSort, false);
+                currentPage = 1;
+                render();
+            }
+
+            function sortRows(column, toggle = true) {
+                if (toggle) {
+                    ascending = currentSort === column ? !ascending : true;
+                    currentSort = column;
+                }
+
+                filteredRows.sort((a, b) => {
+                    const aValue = a.dataset[`sort${column}`] || '';
+                    const bValue = b.dataset[`sort${column}`] || '';
+                    return ascending
+                        ? aValue.localeCompare(bValue)
+                        : bValue.localeCompare(aValue);
+                });
+            }
+
+            // Search
+            searchBtn?.addEventListener('click', () => {
+                searchWrapper.classList.add('active');
+                searchBtn.classList.add('d-none');
+                setTimeout(() => searchInput.focus(), 200);
+            });
+
+            cancelSearch?.addEventListener('click', () => {
+                searchWrapper.classList.remove('active');
+                searchBtn.classList.remove('d-none');
+                searchInput.value = '';
+                applySearch();
+            });
+
+            searchInput?.addEventListener('input', applySearch);
+
+            // Sorting
+            table.querySelectorAll('th.fsm-sortable').forEach(th => {
+                th.style.cursor = 'pointer';
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    sortRows(column);
+
+                    table.querySelectorAll('.fsm-sort-icon i').forEach(icon => {
+                        icon.className = 'bi bi-chevron-expand';
+                    });
+
+                    const icon = th.querySelector('.fsm-sort-icon i');
+                    if (icon) {
+                        icon.className = ascending ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+                    }
+
+                    filteredRows.forEach(row => tbody.appendChild(row));
+                    currentPage = 1;
+                    render();
+                });
+            });
+
+            // Pagination
+            prevBtn?.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    render();
+                }
+            });
+
+            nextBtn?.addEventListener('click', () => {
+                if (currentPage < Math.ceil(filteredRows.length / perPage)) {
+                    currentPage++;
+                    render();
+                }
+            });
+
+            perPageSelect?.addEventListener('change', () => {
+                perPage = parseInt(perPageSelect.value, 10) || 10;
+                currentPage = 1;
+                render();
+            });
+
+            render();
+        }
+
+        // ── Import Module Dialog ─────────────────────────────────────────
+        const importModules = [
+            { label: 'Contacts', href: '/Customers/Contacts/Import' },
+            { label: 'Companies', href: '/Customers/Companies/Import' },
+            { label: 'Services and Parts', href: '/ServicesAndParts/Import' },
+            { label: 'Assets', href: '/Assets/import' }
+        ];
+
+        const importDialog = document.getElementById('fsm-import-dialog');
+        const moduleSelect = document.getElementById('importModuleSelect');
+        const proceedLink = document.getElementById('fsm-import-proceed');
+        const cancelBtn = document.getElementById('fsm-import-cancel');
+
+        if (moduleSelect) {
+            importModules.forEach((mod, index) => {
+                const option = document.createElement('option');
+                option.value = mod.href;
+                option.textContent = mod.label;
+                if (index === 0) option.selected = true;
+                moduleSelect.appendChild(option);
+            });
+
+            moduleSelect.addEventListener('change', () => {
+                proceedLink.href = moduleSelect.value;
+            });
+            proceedLink.href = moduleSelect.value;
+        }
+
+        document.querySelectorAll('[data-fsm-import-trigger]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                importDialog.classList.add('show');
+            });
+        });
+
+        cancelBtn?.addEventListener('click', () => {
+            importDialog.classList.remove('show');
+        });
+
+        importDialog?.addEventListener('click', e => {
+            if (e.target === importDialog) {
+                importDialog.classList.remove('show');
+            }
+        });
+
+        // Refresh
+        document.getElementById('refreshBtn')?.addEventListener('click', () => {
+            location.reload();
+        });
+    </script>
+}

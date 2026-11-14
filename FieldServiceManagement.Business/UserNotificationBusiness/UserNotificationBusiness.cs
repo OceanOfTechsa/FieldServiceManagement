@@ -4,6 +4,7 @@ using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Announcement;
 using FieldServiceManagement.ViewModels.Notification;
 using System.ComponentModel.DataAnnotations;
+using FieldServiceManagement.Data.Extensions;
 
 namespace FieldServiceManagement.Business.NotificationBusiness
 {
@@ -68,6 +69,11 @@ namespace FieldServiceManagement.Business.NotificationBusiness
             };
 
             return await new NotificationRepository().CreateNotificationsBulkAsync(notification);
+        }
+
+        public async Task<bool> CreateUserNotificationAsync(CreateUserNotification model)
+        {
+            return await new NotificationRepository().CreateUserNotificationAsync(model, DateTime.Now.SaDateTime());
         }
 
 

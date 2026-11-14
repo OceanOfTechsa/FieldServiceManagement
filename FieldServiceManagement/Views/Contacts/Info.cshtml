@@ -11,9 +11,11 @@
                   || User.IsInRole(nameof(UserRole.SuperAdmin))
                   || User.IsInRole(nameof(UserRole.CallCenterAgent)))
                   && contact.IsDeleted == false;
+    
     var organisationAddresses = Model.OrganisationAddresses ?? new();
-
-    ViewData["Title"] = fullName;
+    var salutaion = ((UserSalutation)contact.Salutation).GetNormalisedDisplayName();
+    
+    ViewData["Title"] = $"{salutaion}. {contact.Name?.FirstOrDefault()} {contact.Surname} (Contacts)";
 }
 
 <link type="text/css" rel="stylesheet" href="~/css/customers/company-info.css" />

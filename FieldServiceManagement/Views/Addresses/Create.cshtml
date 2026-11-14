@@ -43,8 +43,9 @@
                         </span>
                     </div>
                     @if (!ViewData.ModelState.IsValid)
+                    {
                         @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
-                    
+                    }
 
                   @*   <h6 class="my-4">Address Details</h6> *@
                     <div class="row g-3">

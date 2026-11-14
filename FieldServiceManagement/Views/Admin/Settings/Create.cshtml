@@ -14,11 +14,11 @@
             ShowBack = true,
             ShowHome = true,
             Icon = "bi-gear",
-            Items = new List<BreadcrumbItem>
-            {
+            Items = 
+            [
                 new() { Label = "Settings", Url = "/Admin/Settings" },
                 new() { Label = "Create", Url = null},
-            }
+            ]
         })
     </div>
 
@@ -40,8 +40,10 @@
                     </div>
 
                     @if (!ViewData.ModelState.IsValid)
-                    @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
-                    
+                    {
+                        @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    }
+
 
                     <div>
                         <div class="row g-3">

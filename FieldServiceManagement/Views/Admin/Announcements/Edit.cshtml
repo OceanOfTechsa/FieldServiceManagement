@@ -41,7 +41,9 @@
                     </div>
 
                     @if (!ViewData.ModelState.IsValid)
+                    {
                         @await Html.PartialAsync("_FormErrorNotice", ViewData.GetModelErrors())
+                    }
                     
                     <div>
                         <div class="row g-3">

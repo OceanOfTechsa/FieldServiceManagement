@@ -31,6 +31,7 @@ namespace FieldServiceManagement.Business.Configuration
         public static string systemMaintenanceEstimatedTime => GetSettingValue("systemMaintenanceEstimatedTime");
         public static string AvatarBaseUrl => GetSettingValue("AvatarBaseUrl");
         public static string systemNote => GetSettingValue("systemNote");
+        public static Guid SystemUserId => GetGuidSetting("SystemUserId");
         public static string GetUrLEncryptionKey()
         {
             if (EnvironmentName != nameof(Enum.Environment.Development))
@@ -139,6 +140,15 @@ namespace FieldServiceManagement.Business.Configuration
             return DateTime.TryParse(value, out var result)
                 ? result
                 : DateTime.MinValue;
+        }
+        
+        private static Guid GetGuidSetting(string key, Guid defaultValue = default)
+        {
+            var value = GetSettingValue(key);
+
+            return Guid.TryParse(value, out var result)
+                ? result
+                : defaultValue;
         }
         #endregion
     }

@@ -56,14 +56,14 @@ namespace FieldServiceManagement.Areas.Identity.Factories
             return await new UserBusiness().GetUserDetailsByUserNameAsync(email);
         }
 
-        private static string? ResolveRole(AppUserViewModel Profile)
+        private static string? ResolveRole(AppUserViewModel profile)
         {
-            if (Profile.UserRoleId != null && System.Enum.IsDefined(typeof(UserRole), Profile.UserRoleId.Value))
+            if (profile.UserRoleId != null && System.Enum.IsDefined(typeof(UserRole), profile.UserRoleId.Value))
             {
-                var roleEnum = (UserRole)Profile.UserRoleId.Value;
+                var roleEnum = (UserRole)profile.UserRoleId.Value;
                 return roleEnum.GetDisplayName();
             }
-            return Profile.UserRoleId?.ToString();
+            return profile.UserRoleId?.ToString();
         }
     }
 }

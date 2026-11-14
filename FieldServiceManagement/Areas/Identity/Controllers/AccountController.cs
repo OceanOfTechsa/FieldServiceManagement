@@ -8,8 +8,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using FieldServiceManagement.Business.AuditsBusiness;
+using FieldServiceManagement.Business.Configuration;
+using FieldServiceManagement.Business.UserBusiness;
+using FieldServiceManagement.ViewModels.Audit;
 
-namespace FieldServiceManagement.Web.Areas.Identity.Controllers;
+namespace FieldServiceManagement.Areas.Identity.Controllers;
 
 [Area("Identity")]
 public class AccountController : Controller
@@ -53,29 +57,39 @@ public class AccountController : Controller
     {
         model.Browser = GetBrowser();
         model.IsInDev = GetEnv();
-
+     
         if (!ModelState.IsValid)
             return View(model);
-
+     
         try
         {
+            var identityUser = await _signInManager.UserManager.FindByEmailAsync(model.Email);
+            var wasLockedOut = identityUser != null
+                && await _signInManager.UserManager.IsLockedOutAsync(identityUser);
+     
             var result = await _signInManager.PasswordSignInAsync(
                 model.Email,
                 model.Password,
                 model.RememberMe,
                 lockoutOnFailure: true
             );
-
+            
+            if (result.IsLockedOut && !wasLockedOut)
+                await LogLockoutAsync(model.Email);
+     
             if (result.RequiresTwoFactor)
+            {
                 return RedirectToAction(nameof(LoginWith2FA), new
                 {
                     rememberMe = model.RememberMe,
                     returnUrl = model.ReturnUrl
                 });
+            }
+     
             var guardResult = ApplyGuards(result, model.ReturnUrl);
             if (guardResult != null)
                 return guardResult;
-
+     
             ModelState.AddModelError("", "Invalid login attempt.");
             return View(model);
         }
@@ -467,6 +481,31 @@ public class AccountController : Controller
             return RedirectToAction(nameof(Lockout));
 
         return null;
+    }
+    
+    private async Task LogLockoutAsync(string email)
+    {
+        var user = await new UserBusiness().GetUserDetailsByUserNameAsync(email);
+        if (user is null)
+            return;
+     
+        var fullName = $"{user.Name} {user.Surname}".Trim();
+     
+        await new AuditLogBusiness().LogFieldChangeAsync(new AuditLogViewModel
+        {
+            EntityName = "Profile",
+            EntityId = user.Id.ToString(),
+            Action = "UserLockedOut",
+            FieldName = null,
+            OldValue = null,
+            NewValue = null,
+            PerformedByUserId = AppSettings.SystemUserId,
+            PerformedByName = "system@fsm.com",
+            Comment = $"{fullName}'s account was locked out after too many failed login attempts.",
+            OrganisationId = user.OrganisationId,
+            IpAddress = new LocalIPResolver().GetRoutedIPv4(),
+            ShowComment = true
+        });
     }
     #endregion
 }
