@@ -1,9 +1,10 @@
 ﻿(function () {
     "use strict";
 
-    // TODO: create this endpoint. It receives the files plus a mapping JSON per file.
-    const IMPORT_URL = "/Customers/Contacts/Import";
-    const IMPORT_HISTORY_URL = "/ImportHistory?module=Contacts";
+    const CONFIG = window.IMPORT_CONFIG;
+    if (!CONFIG) return;
+
+    const MODULES = CONFIG.modules;
     const SAMPLE_ROWS = 2;
 
     const $ = id => document.getElementById(id);
@@ -11,83 +12,9 @@
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-    // ─────────────────────── Field definitions ───────────────────────
-    // Taken from the data models:
-    //   Contact  : Salutation, Name, Surname, Email, Phone, Mobile, CompanyId (not nullable),
-    //              ServiceAddressId?, BillingAddressId?, IsActive
-    //   Address  : Street, City, StateId?, CountryId?, ZipCode (the Street/City/ZipCode strings are not nullable)
-    //   Note     : Title, Content, Parent (not built yet)
-    //
-    // required:     shows the red * and blocks Import until mapped
-    // requiredWith: required only while another field is mapped
-    // matchBy:      "Select" under the field name = what the file value identifies (sent as matchBy)
-    // aliases:      normalised header names (lowercase, letters/digits only) used by auto-mapping
-
-    const COMPANY_MATCH = [["id", "Id"], ["name", "Name"]];
-    const LOOKUP_MATCH = [["id", "Id"], ["name", "Name"]];                     // State / Country (StateId, CountryId)
-    const CONTACT_MATCH = [["id", "Contact Id"], ["email", "Email"], ["name", "Contact Name"]];
-
-    // One block of address fields: used for Service/Billing in the contacts file
-    const addressFields = (section, prefix, isDefault) => [
-        { key: prefix + "Street", label: "Street", section, aliases: [prefix + "street", prefix + "street1", prefix + "address", prefix + "addressline1", ...(isDefault ? ["street", "street1", "address", "addressline1", "streetaddress"] : [])] },
-        { key: prefix + "City", label: "City", section, aliases: [prefix + "city", ...(isDefault ? ["city", "town"] : [])] },
-        { key: prefix + "State", label: "State", section, matchBy: LOOKUP_MATCH, defaultMatch: "name", aliases: [prefix + "state", prefix + "stateid", prefix + "province", ...(isDefault ? ["state", "stateid", "province"] : [])] },
-        { key: prefix + "Zip", label: "Postal Code", section, aliases: [prefix + "zip", prefix + "zipcode", prefix + "postalcode", prefix + "postcode", ...(isDefault ? ["zip", "zipcode", "postalcode", "postcode"] : [])] },
-        { key: prefix + "Country", label: "Country", section, matchBy: LOOKUP_MATCH, defaultMatch: "name", aliases: [prefix + "country", prefix + "countryid", ...(isDefault ? ["country", "countryid"] : [])] }
-    ];
-
-    const MODULES = {
-        contacts: {
-            label: "Contacts",
-            charset: "utf-8",
-            uploader: () => contactsUploader,
-            fields: [
-                { key: "id", label: "Contact Id", aliases: ["contactid", "id"] },
-                { key: "salutation", label: "Salutation", aliases: ["salutation", "prefix", "title"] },
-                { key: "name", label: "First Name", required: true, aliases: ["firstname", "first", "name", "givenname", "forename"] },
-                { key: "surname", label: "Last Name", required: true, aliases: ["lastname", "last", "surname", "familyname"] },
-                { key: "email", label: "Email", required: true, aliases: ["email", "emailaddress", "mail"] },
-                { key: "phone", label: "Phone", aliases: ["phone", "phonenumber", "telephone", "tel", "workphone"] },
-                { key: "mobile", label: "Mobile", aliases: ["mobile", "mobilenumber", "mobilephone", "cell", "cellphone"] },
-                // CompanyId is not nullable on Contact, so every contact needs a company
-                { key: "company", label: "Company", required: true, matchBy: COMPANY_MATCH, defaultMatch: "name", aliases: ["company", "companyname", "companyid", "organisation", "organization"] },
-                { key: "isActive", label: "Active", aliases: ["active", "isactive", "status"] },
-                ...addressFields("Service Address", "service", true),
-                ...addressFields("Billing Address", "billing", false)
-            ]
-        },
-        addresses: {
-            label: "Addresses",
-            charset: "iso-8859-1",
-            uploader: () => addressesUploader,
-            fields: [
-                // Mandatory: links the address to a Contact
-                { key: "contact", label: "Contact", required: true, matchBy: CONTACT_MATCH, defaultMatch: "id", aliases: ["contactid", "contact", "companyid", "contactemail", "contactname", "email", "emailaddress"] },
-                // Service or Billing: needed to know which address slot to link
-                { key: "addressType", label: "Address Type", required: true, aliases: ["addresstype", "type"] },
-                { key: "street", label: "Street", required: true, aliases: ["street", "street1", "address", "addressline1", "streetaddress"] },
-                { key: "city", label: "City", required: true, aliases: ["city", "town"] },
-                { key: "state", label: "State", matchBy: LOOKUP_MATCH, defaultMatch: "name", aliases: ["state", "stateid", "province"] },
-                { key: "zip", label: "Postal Code", required: true, aliases: ["zip", "zipcode", "postalcode", "postcode"] },
-                { key: "country", label: "Country", matchBy: LOOKUP_MATCH, defaultMatch: "name", aliases: ["country", "countryid"] }
-            ]
-        },
-        notes: {
-            label: "Notes",
-            charset: "iso-8859-1",
-            uploader: () => notesUploader,
-            fields: [
-                // Parent = the contact the note belongs to
-                { key: "parent", label: "Parent (Contact)", required: true, matchBy: CONTACT_MATCH, defaultMatch: "id", aliases: ["parentid", "parent", "contactid", "contact", "contactemail", "contactname", "email", "emailaddress"] },
-                { key: "title", label: "Title", aliases: ["title", "notetitle", "subject"] },
-                { key: "content", label: "Content", required: true, aliases: ["content", "notecontent", "note", "notes", "body", "text", "description"] }
-            ]
-        }
-    };
-
-    // key -> { signature, headers, normHeaders, rows, mapping, replaceEmpty, matchBy }
+    // key -> { signature, charset, headers, normHeaders, rows, empty, mapping, replaceEmpty, matchBy }
     const state = {};
-    let active = "contacts";
+    let active = CONFIG.primary;
     let filter = "all";
 
     // ─────────────────────── CSV parsing ───────────────────────
@@ -127,6 +54,7 @@
 
         if (field !== "" || row.length) { row.push(field); rows.push(row); }
 
+        // Zoho rule: single blank rows are ignored, but more than 10 in a row marks the end of the file
         const result = [];
         let blanks = 0;
         for (const r of rows) {
@@ -140,6 +68,8 @@
     }
 
     async function loadModules() {
+        const maxRecords = typeof IMPORT_LIMITS !== "undefined" ? IMPORT_LIMITS.maxRecords : Infinity;   // set by the page from the plan
+
         for (const [key, mod] of Object.entries(MODULES)) {
             const file = mod.uploader()?.currentFile;
             if (!file) { delete state[key]; continue; }
@@ -151,17 +81,13 @@
             const text = new TextDecoder(charset).decode(await file.arrayBuffer());
             const rows = parseCsv(text, detectDelimiter(text));
 
-            if (rows.length < 2) {
-                const err = new Error(`${mod.label}: ${rows.length === 0 ? "the file is empty." : "the file has a header row but no data rows."}`);
-                err.key = key;   // so the error shows under the right upload card
-                throw err;
-            }
+            // err.key tells handleNext which upload card shows the message
+            const fail = message => { const err = new Error(`${mod.label}: ${message}`); err.key = key; return err; };
 
-            if (rows.length - 1 > IMPORT_LIMITS.maxRecords) {
-                const err = new Error(`${mod.label}: the file has ${(rows.length - 1).toLocaleString()} records, but your plan allows up to ${IMPORT_LIMITS.maxRecords.toLocaleString()} per file.`);
-                err.key = key;
-                throw err;
-            }
+            if (rows.length === 0) throw fail("the file is empty.");
+            if (rows.length === 1) throw fail("the file has a header row but no data rows.");
+            if (rows.length - 1 > maxRecords)
+                throw fail(`the file has ${(rows.length - 1).toLocaleString()} records, but your plan allows up to ${maxRecords.toLocaleString()} per file.`);
 
             const headers = rows[0].map((h, i) => h.trim() || `Column ${i + 1}`);
             const dataRows = rows.slice(1);
@@ -176,7 +102,7 @@
                 empty: headers.map((_, i) => dataRows.every(r => (r[i] ?? "").trim() === "")),
                 mapping: {},        // fieldKey -> column index
                 replaceEmpty: {},   // fieldKey -> text used when the cell is empty
-                matchBy: {}         // fieldKey -> how the cell value identifies the record (company, state, country, contact)
+                matchBy: {}         // fieldKey -> how the cell value identifies the record
             };
 
             autoMap(key);
@@ -251,10 +177,16 @@
                 problems.push({ key, message: `${mod.label}: choose how to match ${noMatch.map(f => f.label).join(", ")} (the select under the field name).` });
         }
 
+        // Finding existing records by Id / Email / Name only works if that column is mapped
         const opts = typeof getImportData === "function" ? getImportData() : {};
         const matchBy = opts.importOption === "new" ? opts.skipExistingBasedOn : opts.findExistingBasedOn;
-        if (state.contacts && matchBy === "id" && state.contacts.mapping.id == null)
-            problems.push({ key: "contacts", message: "Contacts: map Contact Id, which is used to find existing contacts." });
+        const matchField = CONFIG.existingMatchFields?.[matchBy];
+        const primary = state[CONFIG.primary];
+
+        if (primary && matchField && primary.mapping[matchField] == null) {
+            const label = MODULES[CONFIG.primary].fields.find(f => f.key === matchField)?.label ?? matchField;
+            problems.push({ key: CONFIG.primary, message: `${MODULES[CONFIG.primary].label}: map ${label}, which is used to find existing records.` });
+        }
 
         return problems;
     }
@@ -328,7 +260,7 @@
                </select>`
             : "";
 
-        const replaceInput = isMapped && !field.matchBy   // match-by fields (company, state, country, contact) have no replace-empty value
+        const replaceInput = isMapped && !field.matchBy   // match-by fields (company, state, country, parent) have no replace-empty value
             ? `<input type="text" class="form-control form-control-sm" placeholder="Type here"
                       data-replace-input="${field.key}" value="${esc(st.replaceEmpty[field.key] ?? "")}" />`
             : "";
@@ -393,19 +325,19 @@
     }
 
     async function handleNext() {
-        const btn = $("nextBtn");
-        btn.disabled = true;
+        $("nextBtn").disabled = true;
 
         try {
-            await loadModules();submitImport
+            await loadModules();
             buildModuleSelect();
             hideMapError();
             render();
             showStep(2);
         } catch (err) {
-            (MODULES[err.key]?.uploader() ?? contactsUploader).showError(err.message || "Couldn't read the file.");
+            const card = MODULES[err.key]?.uploader() ?? MODULES[CONFIG.primary].uploader();
+            card.showError(err.message || "Couldn't read the file.");
         } finally {
-            enableNextButton();
+            if (typeof enableNextButton === "function") enableNextButton();   // defined by the page
         }
     }
 
@@ -450,14 +382,16 @@
         fd.append("findExistingBasedOn", opts.findExistingBasedOn || "");
         fd.append("dontUpdateEmpty", importOption === "new" ? "false" : String(opts.dontUpdateEmpty?.[importOption] ?? true));
 
+        // contactsFile / contactsMapping / contactsCharset, addressesFile / ... : the server model binds them by name
         for (const key of Object.keys(state)) {
             fd.append(`${key}File`, MODULES[key].uploader().currentFile);
             fd.append(`${key}Mapping`, JSON.stringify(buildMapping(key)));
+            fd.append(`${key}Charset`, state[key].charset);
         }
 
         // Plain object for the console (FormData itself prints as empty)
         const payload = {
-            url: IMPORT_URL,
+            url: CONFIG.importUrl,
             options: {
                 importOption,
                 skipExistingBasedOn: opts.skipExistingBasedOn || "none",
@@ -471,28 +405,20 @@
             const file = MODULES[key].uploader().currentFile;
             payload.files[key] = { name: file.name, size: file.size, type: file.type };
             payload.mappings[key] = buildMapping(key);
-
-            for (const key of Object.keys(state)) {
-                fd.append(`${key}File`, MODULES[key].uploader().currentFile);
-                fd.append(`${key}Mapping`, JSON.stringify(buildMapping(key)));
-                fd.append(`${key}Charset`, state[key].charset);
-            }
         }
         console.log("Import payload:", payload);
-        console.log("Import form data entries:", [...fd.entries()]);
 
         // Show the "initiated" screen straight away: the import itself runs in the background
-        $("viewImportHistoryBtn").href = IMPORT_HISTORY_URL;
+        $("viewImportHistoryBtn").href = CONFIG.historyUrl;
         showStep(3);
 
-        // Sent as a form field as well as a header, so [ValidateAntiForgeryToken] passes with the default
-        // antiforgery settings (a header alone only works if AddAntiforgery sets HeaderName).
-        // Added after the console logs above so the token is not printed.
+        // Sent as a form field as well as a header, so [ValidateAntiForgeryToken] passes with the default antiforgery settings.
+        // Added after the console log above so the token is not printed.
         const token = document.querySelector("#mapStep input[name='__RequestVerificationToken']")?.value;
         if (token) fd.append("__RequestVerificationToken", token);
 
         try {
-            const response = await fetch(IMPORT_URL, {
+            const response = await fetch(CONFIG.importUrl, {
                 method: "POST",
                 headers: token ? { "RequestVerificationToken": token } : {},
                 body: fd
@@ -575,7 +501,8 @@
         });
 
         $("prevBtn").addEventListener("click", () => showStep(1));
-        // Zoho: "Yes, Initiate Import" confirmation. Problems are shown straight away, the dialog only opens when valid.
+
+        // Zoho: "Yes, Initiate Import" confirmation. Problems are shown straight away, the dialog only opens when everything is valid.
         $("importBtn").addEventListener("click", () => {
             if (validate().length) { submitImport(); return; }
             $("fsm-confirm-import-dialog").classList.add("show");
@@ -587,7 +514,7 @@
         });
     }
 
-    // Replaces the placeholder handleNext in the page's inline script
+    // The Next button in the view calls this
     window.handleNext = handleNext;
 
     document.addEventListener("DOMContentLoaded", init);

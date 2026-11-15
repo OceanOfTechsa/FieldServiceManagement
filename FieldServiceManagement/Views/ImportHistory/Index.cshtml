@@ -168,11 +168,11 @@
                                         var firstFile = files.First();
                                         <div class="fsm-import-files">
                                             <div class="fsm-import-files-trigger">
-                                                <div class="text-truncate" style="max-width: 260px;" title="@firstFile.Value.FileName">
-                                                    @if (files.Count > 1)
+                                                <div class="text-truncate" style="max-width: 260px;"s>
+                                                    @* @if (files.Count > 1)
                                                     {
                                                         <span class="text-muted">@firstFile.Key:</span>
-                                                    }
+                                                    } *@
                                                     <span class="text-success">@firstFile.Value.FileName</span>
                                                     @if (files.Count > 1)
                                                     {
@@ -187,8 +187,8 @@
                                                     @foreach (var file in files)
                                                     {
                                                         <div class="fsm-import-file-item">
-                                                            <div class="fw-semibold text-truncate mb-2" title="@file.Value.FileName">
-                                                                <span class="text-muted">@file.Key:</span>
+                                                            <div class="fw-bold text-truncate mb-2" title="@file.Value.FileName">
+                                                                @* <i class="bi bi-file-earmark-spreadsheet text-primary"></i> *@
                                                                 @file.Value.FileName
                                                             </div>
                                                             <div class="d-flex align-items-center flex-wrap gap-2">
@@ -285,7 +285,7 @@
                                 <td class="text-end">
                                     @if (!string.IsNullOrWhiteSpace(item.ErrorFilePath))
                                     {
-                                        <a href="/DataImport/@item.Id/Errors"
+                                        <a href="/ImportHistory/@item.Id/Errors"
                                            class="btn btn-xs border-fsm rounded shadow-sms"
                                            data-bs-toggle="tooltip"
                                            data-bs-title="Download skipped records"
