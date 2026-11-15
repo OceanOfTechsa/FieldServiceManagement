@@ -1,4 +1,5 @@
-﻿using FieldServiceManagement.Business.NotificationBusiness;
+﻿using FieldServiceManagement.Business.Imports;
+using FieldServiceManagement.Business.NotificationBusiness;
 using FieldServiceManagement.Business.NotificationBusiness.ImportNotifications;
 using FieldServiceManagement.Data.DataModels.Address;
 using FieldServiceManagement.Data.DataModels.Company;
@@ -12,13 +13,12 @@ using FieldServiceManagement.Enum;
 using FieldServiceManagement.Repository.Repositories;
 using FieldServiceManagement.ViewModels.Contact;
 using FieldServiceManagement.ViewModels.Extensions;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using System.Text;
 
-namespace FieldServiceManagement.Business.Imports
+namespace FieldServiceManagement.Business.Imports.Workers
 {
     public class ContactImportWorker : BackgroundService
     {

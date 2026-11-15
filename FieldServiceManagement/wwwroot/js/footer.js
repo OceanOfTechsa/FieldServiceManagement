@@ -1,4 +1,154 @@
-﻿(function () {
+﻿window.FsmFooterPopup = (() => {
+    let hideTimer = null;
+    const DEFAULT_DURATION = 3200;
+
+    const VARIANTS = {
+        info:    { icon: 'bi-info-circle-fill',          cls: 'is-info' },
+        success: { icon: 'bi-check-circle-fill',         cls: 'is-success' },
+        warning: { icon: 'bi-exclamation-triangle-fill', cls: 'is-warning' },
+        error:   { icon: 'bi-x-circle-fill',             cls: 'is-error' }
+    };
+
+    function getEls() {
+        const root  = document.getElementById('fsm-footer-status');
+        const popup = document.getElementById('fsm-footer-popup');
+        // if (!root) {
+        //     console.warn('[FsmFooterPopup] #fsm-footer-status not found in the DOM');
+        //     return null;
+        // }
+        // if (!popup) {
+        //     console.warn('[FsmFooterPopup] #fsm-footer-popup not found inside the status bar');
+        //     return null;
+        // }
+
+        return {
+            root,
+            popup,
+            header: popup.querySelector('.fsm-footer-popup-header'),
+            icon:   popup.querySelector('.fsm-footer-popup-icon'),
+            title:  popup.querySelector('.fsm-footer-popup-title'),
+            meta:   popup.querySelector('.fsm-footer-popup-meta'),
+            body:   popup.querySelector('.fsm-footer-popup-body')
+        };
+    }
+
+    function show({ title = '', content = '', justNow = 'Just now', type = 'info', duration = DEFAULT_DURATION } = {}) {
+        const els = getEls();
+        if (!els) return; // warning already logged
+
+        if (hideTimer) {
+            clearTimeout(hideTimer);
+            hideTimer = null;
+        }
+
+        // reset previous variant
+        els.popup.classList.remove('is-info', 'is-success', 'is-warning', 'is-error');
+
+        const variant = VARIANTS[type] || VARIANTS.info;
+        els.popup.classList.add(variant.cls);
+
+        if (els.header) {
+            els.header.classList.remove('d-none');
+            if (els.icon)  els.icon.className = `fsm-footer-popup-icon bi ${variant.icon}`;
+            if (els.title) els.title.textContent = title;
+            if (els.meta)  els.meta.textContent  = justNow;
+        }
+        if (els.body) {
+            els.body.innerHTML = content;
+        }
+
+        els.popup.setAttribute('aria-hidden', 'false');
+
+        // force reflow so the transition actually runs
+        void els.popup.offsetWidth;
+        els.popup.classList.add('is-visible');
+
+        // Force a layout so we get accurate size
+        els.popup.style.visibility = 'hidden';
+        els.popup.style.opacity = '0';
+        els.popup.classList.add('is-visible');          // temporarily so offsetHeight is correct
+        const popupHeight = els.popup.offsetHeight || 90;
+        const popupWidth  = els.popup.offsetWidth  || 320;
+
+        // Reset so the transition can run properly
+        els.popup.classList.remove('is-visible');
+        void els.popup.offsetWidth;
+
+        // Position above the status bar
+        const statusRect = els.root.getBoundingClientRect();
+        const gap = 12;
+
+        // Horizontal – center under the status area, keep 16px screen margin
+        let left = statusRect.left + (statusRect.width / 2) - (popupWidth / 2);
+        left = Math.max(16, Math.min(left, window.innerWidth - popupWidth - 16));
+
+        // Vertical – place the bottom of the popup just above the top of the status bar
+        const bottom = window.innerHeight - statusRect.top + gap;
+
+        els.popup.style.left   = `${left}px`;
+        els.popup.style.right  = 'auto';
+        els.popup.style.bottom = `${bottom}px`;
+        els.popup.style.top    = 'auto';
+
+        // Now show it with the animation
+        els.popup.setAttribute('aria-hidden', 'false');
+        void els.popup.offsetWidth;
+        els.popup.classList.add('is-visible');
+        hideTimer = setTimeout(() => hide(), duration);
+    }
+
+    function hide() {
+        const els = getEls();
+        if (!els) return;
+
+        els.popup.classList.remove('is-visible');
+        els.popup.setAttribute('aria-hidden', 'true');
+
+        setTimeout(() => {
+            if (els.header) els.header.classList.add('d-none');
+            if (els.body)   els.body.innerHTML = '';
+            els.popup.classList.remove('is-info', 'is-success', 'is-warning', 'is-error');
+        }, 180);
+
+        if (hideTimer) {
+            clearTimeout(hideTimer);
+            hideTimer = null;
+        }
+    }
+
+    // keep open while hovering
+    document.addEventListener('DOMContentLoaded', () => {
+        const els = getEls();
+        if (!els) return;
+
+        els.popup.addEventListener('mouseenter', () => {
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+                hideTimer = null;
+            }
+        });
+        els.popup.addEventListener('mouseleave', () => {
+            if (els.popup.classList.contains('is-visible') &&
+                els.header && !els.header.classList.contains('d-none')) {
+                hideTimer = setTimeout(() => hide(), 800);
+            }
+        });
+    });
+
+    return { show, hide };
+})();
+
+// short helper
+window.showFooterPopup = function (opts) {
+    if (window.FsmFooterPopup) {
+        window.FsmFooterPopup.show(opts);
+    } else {
+        // console.warn('[FsmFooterPopup] main object not ready yet');
+    }
+};
+
+
+(function () {
     'use strict';
 
     // ─── State ──────────────────────────────────────────────────────────────────

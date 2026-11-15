@@ -188,6 +188,16 @@
             problems.push({ key: CONFIG.primary, message: `${MODULES[CONFIG.primary].label}: map ${label}, which is used to find existing records.` });
         }
 
+        // A new record cannot be created without these fields, so they must be mapped whenever the import can create records
+        if (primary && opts.importOption !== "update" && CONFIG.createRequiredFields) {
+            const missing = MODULES[CONFIG.primary].fields.filter(f => CONFIG.createRequiredFields.includes(f.key) && primary.mapping[f.key] == null);
+            if (missing.length)
+                problems.push({
+                    key: CONFIG.primary,
+                    message: `${MODULES[CONFIG.primary].label}: to create new records, also map ${missing.map(f => f.section ? `${f.section} ${f.label}` : f.label).join(", ")}.`
+                });
+        }
+
         return problems;
     }
 
@@ -361,6 +371,15 @@
 
         return fields;
     }
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        })[char]);
+    }
 
     async function submitImport() {
         const problems = validate();
@@ -431,9 +450,34 @@
 
             if (!response.ok || result?.success === false)
                 throw new Error(result?.message || "The import could not be started. Please try again.");
+
+            if (response.ok) {
+                showFooterPopup({
+                    title: 'Import Initiated',
+                    content: `
+                        <p>${escapeHtml(result?.message || "Your import has been queued successfully.")}</p>
+                        <p class="mb-0 text-muted">
+                            Processing will continue in the background. You can monitor its progress
+                            under Import History on the import history page.
+                        </p>
+                    `,
+                    type: 'success'
+                });
+            }
         } catch (err) {
             // The import did not start, so go back to the mapping with the reason
             console.error("Import failed to start:", err);
+            showFooterPopup({
+                title: 'Import failed',
+                content: `
+                    <p>${escapeHtml(err.message || "The import could not be started.")}</p>
+                    <p class="mb-0 text-muted">
+                        Please review your files and field mappings, then try again.
+                        If the problem persists, contact your system administrator.
+                    </p>
+                `,
+                type: 'error'
+            })
             showStep(2);
             showMapError(err.message || "Network error. Please try again.");
         }

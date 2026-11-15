@@ -79,17 +79,17 @@ namespace FieldServiceManagement.Controllers
                 var message = ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
-                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m)) ?? "The import request is invalid.";
+                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m))
+                    ?? "The import request is invalid.";
 
                 return BadRequest(new { success = false, message });
             }
 
             var result = await new ContactBusiness().StartContactImportAsync(request, User.Identity?.Name!);
 
-            if (!result.Success)
-                return BadRequest(new { success = false, message = result.Message });
+            if (!result.Success) return BadRequest(new { success = false, message = result.Message });
 
-            return Accepted(new { success = true, importId = result.ImportId });
+            return Accepted(new{success = true,importId = result.ImportId,message = result.Message});
         }
 
         [HttpGet("Info")]

@@ -6,6 +6,11 @@ namespace FieldServiceManagement.Business.Imports
     // It lives in its own file because every import (Contacts now, other modules later) needs the same reader.
     public static class ImportCsv
     {
+        static ImportCsv()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         // Returns every non-blank row as (row number, cells).
         // Row numbers count the blank rows too, so they match the spreadsheet: the header is row 1.
         public static List<(int Row, string[] Cells)> Parse(byte[] Bytes, string Charset)

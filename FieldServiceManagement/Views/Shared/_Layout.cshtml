@@ -35,6 +35,21 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            window.showFooterPopupSafe = function (opts) {
+                const attempt = (left) => {
+                    if (window.FsmFooterPopup) {
+                        window.FsmFooterPopup.show(opts);
+                    } else if (left > 0) {
+                        setTimeout(() => attempt(left - 1), 40);
+                    } else {
+                        console.warn('FsmFooterPopup not available');
+                    }
+                };
+                attempt(25);
+            };
+        </script>
         
         <script type="text/javascript" defer src="~/js/FSM/announcement-collapsible.js"></script>
         <script type="text/javascript" defer src="~/js/FSM/announcement-bulk-seen.js"></script>

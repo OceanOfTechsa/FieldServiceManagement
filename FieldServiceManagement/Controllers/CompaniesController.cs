@@ -1,6 +1,9 @@
-﻿using FieldServiceManagement.Business.AddressBusiness;
+﻿using FieldServiceManagement.Business;
+using FieldServiceManagement.Business.AddressBusiness;
 using FieldServiceManagement.Business.CompanyBusiness;
+using FieldServiceManagement.Business.ContactBusiness;
 using FieldServiceManagement.Business.URLEncryptionBusiness;
+using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Helpers;
 using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Address;
@@ -97,11 +100,38 @@ namespace FieldServiceManagement.Controllers
         }
 
         [HttpGet("Import")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
-        public IActionResult Import(string? callBack)
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Import(string? callBack)
         {
-            var model = new CompaniesImportViewModel { callBack = callBack };
-            return View(model);
+            var (MaxFileBytes, MaxRecords) = await new DataImportBusiness().GetImportLimitsAsync(User.GetOrganisationIdOrThrow());
+            ViewBag.ImportMaxFileBytes = MaxFileBytes;
+            ViewBag.ImportMaxRecords = MaxRecords;
+
+            return View(new CompaniesImportViewModel { callBack = callBack });
+        }
+
+        [HttpPost("Import")]
+        [Authorize(Roles = "Administrator")]
+        [ValidateAntiForgeryToken]
+        [RequestSizeLimit(16 * 1024 * 1024)]
+        public async Task<IActionResult> Import(CompanyImportRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var message = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m)) ?? "The import request is invalid.";
+
+                return BadRequest(new { success = false, message });
+            }
+
+            var result = await new CompanyBusiness().StartCompanyImportAsync(request, User.Identity?.Name!);
+
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
+
+            return Accepted(new { success = true, importId = result.ImportId });
         }
 
         [HttpPost("LinkAddress")]

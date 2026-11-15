@@ -48,5 +48,19 @@ namespace FieldServiceManagement.Business
                 .GetUserDetailsByUserNameAsync(Email);
             return await new DataImportRepository().GetErrorFileAsync(Id, user.OrganisationId);
         }
+       
+
+        public async Task<(long MaxFileBytes, int MaxRecords)> GetImportLimitsAsync(Guid OrganisationId)
+        {
+            var subscription = await new OrganisationSubscriptionBusiness().GetOrganisationSubscriptionByOrgIdAsync(OrganisationId);
+            var plan = subscription is null
+                ? null
+                : await new SubscriptionPlanBusiness().GetSubscriptionPlanByIdAsync(subscription.PlanId);
+
+            if (plan is null)
+                return (1 * 1024 * 1024, 1000);
+
+            return (plan.MaxImportFileMb * 1024L * 1024L, plan.MaxImportRecords);
+        }
     }
 }
