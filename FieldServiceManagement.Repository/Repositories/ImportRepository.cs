@@ -1,17 +1,18 @@
-﻿using System.Linq.Expressions;
-using FieldServiceManagement.Data;
+﻿using FieldServiceManagement.Data;
+using FieldServiceManagement.Data.DataModels.Company;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace FieldServiceManagement.Repository.Repositories
 {
     // Loads reference data for any import: companies, states, countries, and whatever other modules need later.
     // Nothing in here knows about Contacts.
-    public class ImportLookupRepository : IDisposable
+    public class ImportRepository : IDisposable
     {
         private DataContext _dbContext;
         private bool _disposed = false;
 
-        public ImportLookupRepository()
+        public ImportRepository()
         {
             _dbContext = DataContext.Create();
         }
@@ -52,6 +53,37 @@ namespace FieldServiceManagement.Repository.Repositories
             return rows.ToDictionary(GetKey, GetValue);
         }
 
+
+        // Reads full records (not just Id and Name), for the records an import may update
+        public async Task<List<TEntity>> GetEntitiesAsync<TEntity>(Expression<Func<TEntity, bool>>? Filter) where TEntity : class
+        {
+            IQueryable<TEntity> query = _dbContext.Set<TEntity>().AsNoTracking();
+
+            if (Filter is not null)
+                query = query.Where(Filter);
+
+            return await query.ToListAsync();
+        }
+
+        // Saves a whole batch. One SaveChanges is one database transaction: the whole batch is saved, or none of it.
+        // The addresses are added before the records that point to them.
+        public async Task SaveBatchAsync(ImportBatch Batch)
+        {
+            _dbContext.Addresses.AddRange(Batch.NewAddresses);
+            _dbContext.Contacts.AddRange(Batch.NewContacts);
+            _dbContext.Companies.AddRange(Batch.NewCompanies);
+            _dbContext.EntityAddresses.AddRange(Batch.NewLinks);
+            _dbContext.Notes.AddRange(Batch.NewNotes);
+
+            _dbContext.Addresses.UpdateRange(Batch.UpdatedAddresses);
+            _dbContext.Contacts.UpdateRange(Batch.UpdatedContacts);
+            _dbContext.Companies.UpdateRange(Batch.UpdatedCompanies);
+            _dbContext.EntityAddresses.UpdateRange(Batch.UpdatedLinks);
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+
         #region DISPOSE
 
         public void Dispose()
@@ -73,7 +105,7 @@ namespace FieldServiceManagement.Repository.Repositories
             }
         }
 
-        ~ImportLookupRepository() => Dispose(false);
+        ~ImportRepository() => Dispose(false);
 
         #endregion
     }

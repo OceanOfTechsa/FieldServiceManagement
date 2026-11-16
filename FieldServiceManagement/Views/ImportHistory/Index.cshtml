@@ -6,7 +6,7 @@
 @model IEnumerable<DataImportHistoryViewModel>
 
 @{
-    ViewData["Title"] = $"Data Import ({ViewBag.Module})";
+    ViewData["Title"] = $"Import History ({ViewBag.Module})";
 
     var imports = Model?.ToList() ?? new List<DataImportHistoryViewModel>();
 

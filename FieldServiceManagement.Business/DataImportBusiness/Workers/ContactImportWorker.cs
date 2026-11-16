@@ -1,4 +1,4 @@
-﻿using FieldServiceManagement.Business.Imports;
+﻿using FieldServiceManagement.Business.Imports.Readers;
 using FieldServiceManagement.Business.NotificationBusiness;
 using FieldServiceManagement.Business.NotificationBusiness.ImportNotifications;
 using FieldServiceManagement.Data.DataModels.Address;
@@ -51,7 +51,7 @@ namespace FieldServiceManagement.Business.Imports.Workers
                     await history.MarkRunningAsync(job.ImportId, DateTime.Now.SaDateTime());
 
                     // ───── Load the lookup data once ─────
-                    using var lookupRepo = new ImportLookupRepository();
+                    using var lookupRepo = new ImportRepository();
 
                     var companies = new ImportLookup<Guid>(await lookupRepo.GetLookupAsync<Company, Guid>(
                         c => c.OrganisationId == job.OrganisationId && !c.IsDeleted,
@@ -123,8 +123,6 @@ namespace FieldServiceManagement.Business.Imports.Workers
                     var newLinks = new List<EntityAddress>();
                     var updatedLinks = new Dictionary<Guid, EntityAddress>();
                     var newNotes = new List<Note>();                 // NOTES
-                    var noteKeys = new HashSet<string>();            // NOTES: every note already attached to a contact, plus the ones added by this import
-                    var noteKeysInBatch = new List<string>();        // NOTES: the keys added by the batch that is waiting to be saved
                     var pending = new List<(string File, int Number, string[] Cells, bool IsNew)>();
 
                     // ───── Helpers shared by the Contacts, Addresses and Notes sections ─────
@@ -188,13 +186,13 @@ namespace FieldServiceManagement.Business.Imports.Workers
 
                     static string AddrKey(string? street, string? city, string? zip) => $"{Norm(street)}|{Norm(city)}|{Norm(zip)}";
 
-                    // NOTES: the same note on the same contact (ignoring case and extra spaces) has the same key
-                    static string NoteKey(Guid entityId, string? title, string? content)
-                    {
-                        var hash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(
-                            Encoding.UTF8.GetBytes(Norm(title) + "\n" + Norm(content))));
-                        return entityId + "|" + hash;
-                    }
+                    // The notes the contacts already have, so a re-import does not add them again
+                    var notes = new ImportNotes(
+                        job.NotesCsv is null
+                            ? new List<Note>()
+                            : await lookupRepo.GetEntitiesAsync<Note>(n =>
+                                n.OrganisationId == job.OrganisationId && n.EntityTypeId == (int)EntityTypes.Contact && !n.IsDeleted),
+                        (int)EntityTypes.Contact, "contact");
 
                     // Every active address in the organisation, grouped by street + city + postal code
                     var addressIndex = new Dictionary<string, List<Address>>();
@@ -214,14 +212,6 @@ namespace FieldServiceManagement.Business.Imports.Workers
                     }
 
                     foreach (var x in orgAddresses.OrderBy(x => x.CreatedAt)) IndexAdd(x);   // oldest first, so the oldest copy is the one reused
-
-                    // NOTES: the notes the contacts already have, so a re-import does not add them again
-                    if (job.NotesCsv is not null)
-                    {
-                        using var noteRepo = new ContactRepository();
-                        foreach (var n in await noteRepo.GetNotesAsync(job.OrganisationId, (int)EntityTypes.Contact))
-                            noteKeys.Add(NoteKey(n.EntityId, n.Title, n.Content));
-                    }
 
                     // State and Country only count when the file gave them
                     bool SameAddress(Address x, AddressData a) =>
@@ -403,13 +393,17 @@ namespace FieldServiceManagement.Business.Imports.Workers
 
                         try
                         {
-                            using var saveRepo = new ContactRepository();   // a fresh connection per batch
-                            await saveRepo.SaveBatchAsync(newContacts, updatedContacts.Values.ToList(),
-                                                          newAddresses, updatedAddresses.Values.ToList(),
-                                                          newLinks, updatedLinks.Values.ToList(),
-                                                          newNotes);
-                            created += pending.Count(p => p.IsNew);
-                            updated += pending.Count(p => !p.IsNew);
+                            using var saveRepo = new ImportRepository();   // a fresh connection per batch
+                            await saveRepo.SaveBatchAsync(new ImportBatch
+                            {
+                                NewContacts = newContacts,
+                                UpdatedContacts = [.. updatedContacts.Values],
+                                NewAddresses = newAddresses,
+                                UpdatedAddresses = [.. updatedAddresses.Values],
+                                NewLinks = newLinks,
+                                UpdatedLinks = [.. updatedLinks.Values],
+                                NewNotes = newNotes
+                            });
                         }
                         catch (Exception ex)
                         {
@@ -431,7 +425,7 @@ namespace FieldServiceManagement.Business.Imports.Workers
                                     links.Remove((l.EntityId, l.AddressTypeId));
                                 linkCount[l.AddressId] = Math.Max(0, linkCount.GetValueOrDefault(l.AddressId) - 1);
                             }
-                            foreach (var k in noteKeysInBatch) noteKeys.Remove(k);   // NOTES: those notes were not saved, so an identical later row must not be skipped
+                            notes.Forget(newNotes);   
                             byName = null;
 
                             foreach (var p in pending)
@@ -445,180 +439,51 @@ namespace FieldServiceManagement.Business.Imports.Workers
                         newLinks.Clear();
                         updatedLinks.Clear();
                         newNotes.Clear();
-                        noteKeysInBatch.Clear();
                         pending.Clear();
                     }
 
-                    // ═════════════ CONTACTS FILE ═════════════
-                    if (job.ContactsCsv is not null && job.ContactsMapping is not null)
+                    // ═════════════ NOTES FILE ═════════════
+                    if (job.NotesCsv is not null && job.NotesMapping is not null)
                     {
-                        int createdBefore = created, updatedBefore = updated, skippedBefore = errors.Count;
+                        int createdBefore = created, skippedBefore = errors.Count;
 
-                        var contactRows = ImportCsv.Parse(job.ContactsCsv, job.ContactsCharset).Skip(1);   // skip the header row
-
-                        foreach (var (number, cells) in contactRows)
+                        foreach (var (number, cells) in ImportCsv.Parse(job.NotesCsv, job.NotesCharset).Skip(1))
                         {
-                            var row = new ImportRow(number, cells, job.ContactsMapping);
+                            var row = new ImportRow(number, cells, job.NotesMapping);
 
-                            // 1. mandatory fields (after "Replace Empty Value")
-                            var blank = new List<string>();
-                            if (row.Get("name") == "") blank.Add("First Name");
-                            if (row.Get("surname") == "") blank.Add("Last Name");
-                            if (row.Get("email") == "") blank.Add("Email");
-                            if (row.Get("company") == "") blank.Add("Company");
-                            if (blank.Count > 0)
+                            // 1. the row's own fields
+                            var n = notes.Read(row);
+                            if (n.Error is not null)
                             {
-                                errors.Add("Contacts", number, $"Mandatory field(s) empty: {string.Join(", ", blank)}.", cells);
+                                errors.Add("Notes", number, n.Error, cells);
                                 continue;
                             }
 
-                            // 2. email format
-                            var email = row.Get("email");
-                            if (!MailAddress.TryCreate(email, out var parsed) || !parsed.Address.Equals(email, StringComparison.OrdinalIgnoreCase))
+                            // 2. the contact the note belongs to
+                            var parent = FindParent(n.ParentValue, row.MatchBy("parent"));
+                            if (parent.Contact is null)
                             {
-                                errors.Add("Contacts", number, "Invalid email address.", cells);
+                                errors.Add("Notes", number, parent.Error!, cells);
                                 continue;
                             }
 
-                            // 2b. salutation: the file has text (Mr, Mrs, Dr), the database stores the number
-                            int? salutationId = null;
-                            var salutationText = row.Get("salutation");
-                            if (salutationText != "")
+                            // 3. the same note on the same contact is not added twice
+                            var note = notes.TryCreate(parent.Contact.Id, n.Title, n.Content, job.OrganisationId, job.UserId, now);
+                            if (note is null)
                             {
-                                salutationId = ParseSalutation(salutationText);
-                                if (salutationId is null)
-                                {
-                                    errors.Add("Contacts", number,
-                                        $"Salutation '{salutationText}' is not valid. Use: {string.Join(", ", System.Enum.GetNames(typeof(UserSalutation)))}.", cells);
-                                    continue;
-                                }
-                            }
-
-                            // 3. company must exist
-                            var company = companies.Find("Company", row.Get("company"), row.MatchBy("company"));
-                            if (!company.Ok)
-                            {
-                                errors.Add("Contacts", number, company.Error!, cells);
+                                errors.Add("Notes", number, notes.DuplicateMessage, cells);
                                 continue;
                             }
 
-                            // 4. service and billing address
-                            var service = ReadAddress(row, "service", "Service Address");
-                            if (service.Error is not null)
-                            {
-                                errors.Add("Contacts", number, service.Error, cells);
-                                continue;
-                            }
-                            var billing = ReadAddress(row, "billing", "Billing Address");
-                            if (billing.Error is not null)
-                            {
-                                errors.Add("Contacts", number, billing.Error, cells);
-                                continue;
-                            }
-
-                            // 5. does this contact already exist, and what do the import options say to do?
-                            var fileId = row.Get("id");
-                            Contact? existing = null;
-                            if (findBy == "id")
-                            {
-                                if (fileId != "" && fileKeyMap.TryGetValue(fileId, out var earlierId)) byId.TryGetValue(earlierId, out existing);   // same Id earlier in this file
-                                else if (Guid.TryParse(fileId, out var realId)) byId.TryGetValue(realId, out existing);
-                            }
-                            else if (findBy == "email")
-                            {
-                                byEmail.TryGetValue(email, out existing);
-                            }
-
-                            if (existing is not null && job.ImportOption == "new")
-                            {
-                                errors.Add("Contacts", number, "A contact with this Id or Email already exists.", cells);
-                                continue;
-                            }
-                            if (existing is null && job.ImportOption == "update")
-                            {
-                                errors.Add("Contacts", number, "No existing contact was found for this Id or Email.", cells);
-                                continue;
-                            }
-
-                            // 6. build the change
-                            Contact contact;
-
-                            if (existing is not null)
-                            {
-                                // UPDATE: the mandatory fields always change, the optional ones follow "Don't update empty values"
-                                contact = existing;
-                                contact.Name = row.Get("name");
-                                contact.Surname = row.Get("surname");
-                                contact.Email = email;
-                                contact.CompanyId = company.Value;
-
-                                if (Opt(row, "phone") is { } phone) contact.Phone = phone;
-                                if (Opt(row, "mobile") is { } mobile) contact.Mobile = mobile;
-                                if (Opt(row, "isActive") is { } active) contact.IsActive = ParseActive(active, contact.IsActive);
-
-                                if (row.IsMapped("salutation"))
-                                {
-                                    if (salutationId is int salutation) contact.Salutation = salutation;
-                                    else if (!job.DontUpdateEmpty) contact.Salutation = 0;   // "Don't update empty values" is off: an empty cell clears it
-                                }
-
-                                // an address block with data updates (or creates) the contact's address in that slot
-                                if (service.Any) contact.ServiceAddressId = ApplyAddress(contact, AddressTypes.Service, service, out _);
-                                if (billing.Any) contact.BillingAddressId = ApplyAddress(contact, AddressTypes.Billing, billing, out _);
-
-                                contact.UpdatedAt = now;
-                                contact.UpdatedBy = job.UserId;
-
-                                // a contact added in this same batch is already going in as new
-                                if (!newContacts.Contains(contact)) updatedContacts[contact.Id] = contact;
-                            }
-                            else
-                            {
-                                // CREATE
-                                contact = new Contact
-                                {
-                                    Id = Guid.NewGuid(),
-                                    OrganisationId = job.OrganisationId,
-                                    Name = row.Get("name"),
-                                    Surname = row.Get("surname"),
-                                    Email = email,
-                                    Phone = row.Get("phone"),
-                                    Mobile = row.Get("mobile"),
-                                    CompanyId = company.Value,
-                                    Salutation = salutationId ?? 0,
-                                    IsActive = ParseActive(row.Get("isActive"), true),
-                                    IsDeleted = false,
-                                    CreatedAt = now,
-                                    UpdatedAt = now,
-                                    CreatedBy = job.UserId,
-                                    UpdatedBy = job.UserId
-                                };
-
-                                // new address rows and links, which the new contact points to
-                                if (service.Any) contact.ServiceAddressId = ApplyAddress(contact, AddressTypes.Service, service, out _);
-                                if (billing.Any) contact.BillingAddressId = ApplyAddress(contact, AddressTypes.Billing, billing, out _);
-
-                                newContacts.Add(contact);
-
-                                // a later row with the same email or Id now finds this contact
-                                byId[contact.Id] = contact;
-                                byEmail[contact.Email] = contact;
-                                byName = null;
-                            }
-
-                            if (fileId != "") fileKeyMap[fileId] = contact.Id;
-
-                            pending.Add(("Contacts", number, cells, existing is null));
+                            newNotes.Add(note);
+                            pending.Add(("Notes", number, cells, true));
                             if (pending.Count >= 500) await FlushAsync();
                         }
 
-                        await FlushAsync();   // the last, smaller batch
+                        await FlushAsync();
 
-                        _logger.LogInformation("Contacts file: {Created} created, {Updated} updated, {Skipped} skipped",
-                            created - createdBefore, updated - updatedBefore, errors.Count - skippedBefore);
-
-                        summaries.Add(new ImportFileSummary("Contacts", job.ContactsFileName, contactRows.Count(),
-                                created - createdBefore, updated - updatedBefore, errors.Count - skippedBefore));
+                        _logger.LogInformation("Notes file: {Created} created, {Skipped} skipped",
+                            created - createdBefore, errors.Count - skippedBefore);
                     }
 
                     // ═════════════ ADDRESSES FILE ═════════════
@@ -733,15 +598,6 @@ namespace FieldServiceManagement.Business.Imports.Workers
                                 errors.Add("Notes", number, parent.Error!, cells);
                                 continue;
                             }
-
-                            // 4. the same note on the same contact is not added twice
-                            var key = NoteKey(parent.Contact.Id, title, content);
-                            if (!noteKeys.Add(key))
-                            {
-                                errors.Add("Notes", number, "This contact already has a note with the same title and content.", cells);
-                                continue;
-                            }
-                            noteKeysInBatch.Add(key);
 
                             // 5. add the note
                             newNotes.Add(new Note

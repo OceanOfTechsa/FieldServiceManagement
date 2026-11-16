@@ -1,0 +1,163 @@
+﻿@using FieldServiceManagement.Business.UserBusiness
+@using FieldServiceManagement.Web.Navigation
+
+@{
+    ViewData["Title"] = "Settings";
+
+    var currentUser = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User?.Identity?.Name!);
+    var currentPlan = currentUser!.SubscriptionPlan!.Id;
+}
+
+
+<div class="settings-page d-flex flex-column align-items-center">
+    <!-- Header -->
+    <div class="settings-header w-100">
+        <div class="settings-header-content w-75 mx-auto d-flex align-items-center gap-3">
+
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-gear" style="font-size:22px"></i>
+                <h5 class="mb-0">Setup</h5>
+            </div>
+
+            <!-- Search -->
+            @await Html.PartialAsync("_SettingsSearch")
+        </div>
+    </div>
+
+    <!-- Settings Content -->
+    <div class="settings-content w-75 mx-auto mb-5">
+
+        <div class="settings-grid">
+
+            @foreach (var group in SettingsNavigation.Groups)
+            {
+                <div class="settings-card">
+
+                    <div class="settings-card-title">
+                        @group.Title
+                    </div>
+
+                    <div class="settings-card-items">
+
+                        @foreach (var item in group.Subs)
+                        {
+                            var isLocked = currentPlan < (int)item.RequiredPlan;
+
+                            <a href="@item.Url"
+                               class="settings-item"
+                               data-group="@group.Title"
+                               data-title="@item.Title"
+                               data-required-plan="@((int)item.RequiredPlan)"
+                               data-premium="@isLocked.ToString().ToLower()"
+                               data-update="@item.HasUpdate.ToString().ToLower()"
+                               id="settings-item"
+                            >
+
+                                <span class="settings-item-title">
+                                    @item.Title
+                                </span>
+
+                                <span class="settings-item-badges">
+
+                                    @if (item.IsNew)
+                                    {
+                                        <span class="settings-new-badge">
+                                            @item.NewText
+                                        </span>
+                                    }
+
+                                    @if (item.HasUpdate)
+                                    {
+                                        <span class="settings-updated-badge"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-title="This setting has recently been updated with new improvements or functionality."
+                                              data-bs-placement="top"
+                                              data-bs-custom-class="fsm-tooltip">
+
+                                            <i class="bi bi-stars icon-gradient"></i>
+                                        </span>
+                                    }
+
+                                    @if (isLocked)
+                                    {
+                                        <span class="settings-premium-badge"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-title="Available on the @item.RequiredPlan plan. Upgrade your subscription to access this feature."
+                                              data-bs-placement="top"
+                                              data-bs-custom-class="fsm-tooltip">
+
+                               
+                                            <i class="bi bi-award"></i>
+                                        </span>
+                                    }
+
+                                </span>
+
+                            </a>
+                        }
+
+                    </div>
+                </div>
+            }
+
+            <!-- FSM Toolkits -->
+            <div class="settings-promo-card toolkit-card">
+
+                <div class="settings-promo-icon toolkit-icon">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+                <div class="settings-promo-title">
+                    FSM Toolkits
+                </div>
+
+                <p>
+                    Explore additional free tools on our websites
+                </p>
+
+                <a href="#" class="settings-promo-link">
+                    Explore Tools
+                    <span><i class="bi bi-chevron-right"></i></span>
+                </a>
+
+            </div>
+
+            <!-- Explore More Capabilities -->
+            <div class="settings-promo-card capabilities-card">
+
+                <div class="settings-promo-icon capabilities-icon">
+                    <i class="bi bi-crown"></i>
+                </div>
+
+                <div class="settings-promo-title">
+                    Explore More Capabilities
+                </div>
+
+                <p>
+                    Discover advanced features available in higher editions
+                </p>
+
+                <div class="settings-capabilities-actions">
+
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               id="showPlanFeatures"
+                               aria-label="Show higher-plan features">
+                    </div>
+
+                    <a href="#"
+                       class="settings-promo-arrow"
+                       title="View pricing"
+                       aria-label="View pricing">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

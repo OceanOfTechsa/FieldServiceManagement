@@ -1,151 +1,235 @@
-﻿window.FsmFooterPopup = (() => {
+﻿
+window.FsmFooterPopup = (() => {
     let hideTimer = null;
+    let cleanupTimer = null;
+
     const DEFAULT_DURATION = 3200;
+    const EXIT_DURATION = 800;
+    const HOVER_HIDE_DURATION = 2000;
 
     const VARIANTS = {
-        info:    { icon: 'bi-info-circle-fill',          cls: 'is-info' },
-        success: { icon: 'bi-check-circle-fill',         cls: 'is-success' },
+        info: { icon: 'bi-info-circle-fill', cls: 'is-info' },
+        success: { icon: 'bi-check-circle-fill', cls: 'is-success' },
         warning: { icon: 'bi-exclamation-triangle-fill', cls: 'is-warning' },
-        error:   { icon: 'bi-x-circle-fill',             cls: 'is-error' }
+        error: { icon: 'bi-x-circle-fill', cls: 'is-error' }
     };
 
     function getEls() {
-        const root  = document.getElementById('fsm-footer-status');
+        const root = document.getElementById('fsm-footer-status');
         const popup = document.getElementById('fsm-footer-popup');
-        // if (!root) {
-        //     console.warn('[FsmFooterPopup] #fsm-footer-status not found in the DOM');
-        //     return null;
-        // }
-        // if (!popup) {
-        //     console.warn('[FsmFooterPopup] #fsm-footer-popup not found inside the status bar');
-        //     return null;
-        // }
+
+        if (!root || !popup) {
+            return null;
+        }
 
         return {
             root,
             popup,
             header: popup.querySelector('.fsm-footer-popup-header'),
-            icon:   popup.querySelector('.fsm-footer-popup-icon'),
-            title:  popup.querySelector('.fsm-footer-popup-title'),
-            meta:   popup.querySelector('.fsm-footer-popup-meta'),
-            body:   popup.querySelector('.fsm-footer-popup-body')
+            icon: popup.querySelector('.fsm-footer-popup-icon'),
+            title: popup.querySelector('.fsm-footer-popup-title'),
+            meta: popup.querySelector('.fsm-footer-popup-meta'),
+            body: popup.querySelector('.fsm-footer-popup-body')
         };
     }
 
-    function show({ title = '', content = '', justNow = 'Just now', type = 'info', duration = DEFAULT_DURATION } = {}) {
-        const els = getEls();
-        if (!els) return; // warning already logged
-
+    function clearHideTimer() {
         if (hideTimer) {
             clearTimeout(hideTimer);
             hideTimer = null;
         }
+    }
 
-        // reset previous variant
-        els.popup.classList.remove('is-info', 'is-success', 'is-warning', 'is-error');
+    function clearCleanupTimer() {
+        if (cleanupTimer) {
+            clearTimeout(cleanupTimer);
+            cleanupTimer = null;
+        }
+    }
+
+    function scheduleHide(duration) {
+        clearHideTimer();
+        hideTimer = setTimeout(() => hide(), duration);
+    }
+
+    function show({
+        title = '',
+        content = '',
+        justNow = 'Just now',
+        type = 'info',
+        duration = DEFAULT_DURATION
+    } = {}) {
+        const els = getEls();
+        if (!els) return;
+
+        clearHideTimer();
+        clearCleanupTimer();
+
+        // Cancel any previous exit animation.
+        els.popup.classList.remove('is-hiding', 'is-visible');
+
+        // Reset previous variants.
+        els.popup.classList.remove(
+            'is-info',
+            'is-success',
+            'is-warning',
+            'is-error'
+        );
 
         const variant = VARIANTS[type] || VARIANTS.info;
         els.popup.classList.add(variant.cls);
 
+        // Update header.
         if (els.header) {
             els.header.classList.remove('d-none');
-            if (els.icon)  els.icon.className = `fsm-footer-popup-icon bi ${variant.icon}`;
-            if (els.title) els.title.textContent = title;
-            if (els.meta)  els.meta.textContent  = justNow;
+
+            if (els.icon) {
+                els.icon.className = `fsm-footer-popup-icon bi ${variant.icon}`;
+            }
+
+            if (els.title) {
+                els.title.textContent = title;
+            }
+
+            // if (els.meta) {
+            //     els.meta.textContent = justNow;
+            // }
         }
+
+        // Update content.
         if (els.body) {
             els.body.innerHTML = content;
         }
 
-        els.popup.setAttribute('aria-hidden', 'false');
-
-        // force reflow so the transition actually runs
-        void els.popup.offsetWidth;
-        els.popup.classList.add('is-visible');
-
-        // Force a layout so we get accurate size
+        // Temporarily make visible for accurate measurement.
         els.popup.style.visibility = 'hidden';
         els.popup.style.opacity = '0';
-        els.popup.classList.add('is-visible');          // temporarily so offsetHeight is correct
-        const popupHeight = els.popup.offsetHeight || 90;
-        const popupWidth  = els.popup.offsetWidth  || 320;
 
-        // Reset so the transition can run properly
+        els.popup.classList.add('is-visible');
+        const popupWidth = els.popup.offsetWidth || 320;
+
+        // Reset before applying the actual position.
         els.popup.classList.remove('is-visible');
         void els.popup.offsetWidth;
 
-        // Position above the status bar
+        els.popup.style.visibility = '';
+        els.popup.style.opacity = '';
+
+        // Position above the status bar.
         const statusRect = els.root.getBoundingClientRect();
         const gap = 12;
 
-        // Horizontal – center under the status area, keep 16px screen margin
         let left = statusRect.left + (statusRect.width / 2) - (popupWidth / 2);
-        left = Math.max(16, Math.min(left, window.innerWidth - popupWidth - 16));
 
-        // Vertical – place the bottom of the popup just above the top of the status bar
+        left = Math.max(
+            16,
+            Math.min(left, window.innerWidth - popupWidth - 16)
+        );
+
         const bottom = window.innerHeight - statusRect.top + gap;
 
-        els.popup.style.left   = `${left}px`;
-        els.popup.style.right  = 'auto';
+        els.popup.style.left = `${left}px`;
+        els.popup.style.right = 'auto';
         els.popup.style.bottom = `${bottom}px`;
-        els.popup.style.top    = 'auto';
+        els.popup.style.top = 'auto';
 
-        // Now show it with the animation
+        // Trigger enter animation.
         els.popup.setAttribute('aria-hidden', 'false');
+
         void els.popup.offsetWidth;
+
         els.popup.classList.add('is-visible');
-        hideTimer = setTimeout(() => hide(), duration);
+
+        scheduleHide(duration);
     }
 
     function hide() {
         const els = getEls();
         if (!els) return;
 
+        clearHideTimer();
+
+        if (!els.popup.classList.contains('is-visible')) {
+            return;
+        }
+
+        // Start the slow fade-up animation.
         els.popup.classList.remove('is-visible');
+        els.popup.classList.add('is-hiding');
+
         els.popup.setAttribute('aria-hidden', 'true');
 
-        setTimeout(() => {
-            if (els.header) els.header.classList.add('d-none');
-            if (els.body)   els.body.innerHTML = '';
-            els.popup.classList.remove('is-info', 'is-success', 'is-warning', 'is-error');
-        }, 180);
+        clearCleanupTimer();
 
-        if (hideTimer) {
-            clearTimeout(hideTimer);
-            hideTimer = null;
-        }
+        // Remove content after the exit animation.
+        cleanupTimer = setTimeout(() => {
+            // Only clean up if another show/hover hasn't reversed the exit.
+            if (els.popup.classList.contains('is-hiding')) {
+                els.popup.classList.remove('is-hiding');
+
+                if (els.header) {
+                    els.header.classList.add('d-none');
+                }
+
+                if (els.body) {
+                    els.body.innerHTML = '';
+                }
+
+                els.popup.classList.remove(
+                    'is-info',
+                    'is-success',
+                    'is-warning',
+                    'is-error'
+                );
+            }
+
+            cleanupTimer = null;
+        }, EXIT_DURATION);
     }
 
-    // keep open while hovering
-    document.addEventListener('DOMContentLoaded', () => {
+    function bindHoverEvents() {
         const els = getEls();
         if (!els) return;
 
         els.popup.addEventListener('mouseenter', () => {
-            if (hideTimer) {
-                clearTimeout(hideTimer);
-                hideTimer = null;
+            clearHideTimer();
+
+            // Reverse an ongoing exit animation.
+            if (els.popup.classList.contains('is-hiding')) {
+                clearCleanupTimer();
+
+                els.popup.classList.remove('is-hiding');
+                els.popup.classList.add('is-visible');
+
+                els.popup.setAttribute('aria-hidden', 'false');
             }
         });
+
         els.popup.addEventListener('mouseleave', () => {
-            if (els.popup.classList.contains('is-visible') &&
-                els.header && !els.header.classList.contains('d-none')) {
-                hideTimer = setTimeout(() => hide(), 800);
+            if (
+                els.popup.classList.contains('is-visible') &&
+                els.header &&
+                !els.header.classList.contains('d-none')
+            ) {
+                scheduleHide(HOVER_HIDE_DURATION);
             }
         });
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindHoverEvents, { once: true });
+    } else {
+        bindHoverEvents();
+    }
 
     return { show, hide };
 })();
 
-// short helper
+// Short helper
 window.showFooterPopup = function (opts) {
-    if (window.FsmFooterPopup) {
-        window.FsmFooterPopup.show(opts);
-    } else {
-        // console.warn('[FsmFooterPopup] main object not ready yet');
-    }
+    window.FsmFooterPopup?.show(opts);
 };
+
 
 
 (function () {

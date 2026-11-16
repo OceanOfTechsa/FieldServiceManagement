@@ -266,13 +266,13 @@ namespace FieldServiceManagement.Web.Navigation
                    new NavSubItem
                    {
                        Title = "Create Settings",
-                       Url = "/Admin/Settings/Create",
+                       Url = "/Admin/AppSettings/Create",
                        Roles = ["SuperAdmin"]
                    },
                     new NavSubItem
                    {
                        Title = "View Settings",
-                       Url = "/Admin/Settings",
+                       Url = "/Admin/AppSettings",
                        Roles = ["SuperAdmin"]
                    },
                ]

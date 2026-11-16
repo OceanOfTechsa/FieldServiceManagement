@@ -9,7 +9,7 @@ namespace FieldServiceManagement.Controllers
 {
     [Authorize(Roles = "SuperAdmin")]
     [Route("Admin/[controller]")]
-    public class SettingsController : Controller
+    public class AppSettingsController : Controller
     {
         [HttpGet("")]
         public async Task<IActionResult> Index()

@@ -1,189 +1,181 @@
 ﻿'use strict';
-(function() {
+(function () {
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-const SCROLL_THRESHOLD = 80;
-const SLIDE_BACK_DELAY = 220;
+    // ─── Constants ───────────────────────────────────────────────────────────────
+    const SCROLL_THRESHOLD = 80;
+    const SLIDE_BACK_DELAY = 220;
 
-const VISIBLE_COUNTS = [
-    {breakpoint: 1536, count: 9 },
-    {breakpoint: 1280, count: 5 },
-    {breakpoint: 1024, count: 5 },
-];
+    const VISIBLE_COUNTS = [
+        { breakpoint: 1536, count: 9 },
+        { breakpoint: 1280, count: 5 },
+        { breakpoint: 1024, count: 5 },
+    ];
 
-// ─── Elements ─────────────────────────────────────────────────────────────────
-const header        = document.getElementById('fsm-header');
-const navItems      = Array.from(document.querySelectorAll('.fsm-nav-item'));
-const moreWrapper   = document.getElementById('fsm-more-wrapper');
-const moreMenu      = document.getElementById('fsm-more-menu');
-const backdrop      = document.getElementById('fsm-backdrop');
+    // ─── Elements ─────────────────────────────────────────────────────────────────
+    const header = document.getElementById('fsm-header');
+    const navItems = Array.from(document.querySelectorAll('.fsm-nav-item'));
+    const moreWrapper = document.getElementById('fsm-more-wrapper');
+    const moreMenu = document.getElementById('fsm-more-menu');
+    const backdrop = document.getElementById('fsm-backdrop');
 
-// Offcanvas: profile
-const profileSheet  = document.getElementById('fsm-profile-sheet');
-const profileTriggers = document.querySelectorAll('[data-fsm-profile-trigger]');
-const profileClose  = document.querySelectorAll('[data-fsm-profile-close]');
+    // Offcanvas: profile
+    const profileSheet = document.getElementById('fsm-profile-sheet');
+    const profileTriggers = document.querySelectorAll('[data-fsm-profile-trigger]');
+    const profileClose = document.querySelectorAll('[data-fsm-profile-close]');
 
-// Offcanvas: notifications
-const notifSheet    = document.getElementById('fsm-notif-sheet');
-const notifTriggers = document.querySelectorAll('[data-fsm-notif-trigger]');
-const notifClose = document.querySelectorAll('[data-fsm-notif-close]');
+    // Offcanvas: notifications
+    const notifSheet = document.getElementById('fsm-notif-sheet');
+    const notifTriggers = document.querySelectorAll('[data-fsm-notif-trigger]');
+    const notifClose = document.querySelectorAll('[data-fsm-notif-close]');
 
-// Offcanvas: New User
-const newUserSheet = document.getElementById('fsm-new-user-sheet');
-const newUserTriggers = document.querySelectorAll('[data-fsm-new-user-trigger]');
-const newUserClose = document.querySelectorAll('[data-fsm-new-user-close]');
+    // Offcanvas: New User
+    const newUserSheet = document.getElementById('fsm-new-user-sheet');
+    const newUserTriggers = document.querySelectorAll('[data-fsm-new-user-trigger]');
+    const newUserClose = document.querySelectorAll('[data-fsm-new-user-close]');
 
+    // Offcanvas: mobile menu
+    const mobileSheet = document.getElementById('fsm-mobile-sheet');
+    const mobileTrigger = document.getElementById('fsm-mobile-trigger');
+    const mobileClose = document.querySelectorAll('[data-fsm-mobile-close]');
 
-// Offcanvas: mobile menu
-const mobileSheet   = document.getElementById('fsm-mobile-sheet');
-const mobileTrigger = document.getElementById('fsm-mobile-trigger');
-const mobileClose   = document.querySelectorAll('[data-fsm-mobile-close]');
+    // Sign-out dialog
+    const signoutDialog = document.getElementById('fsm-signout-dialog');
+    const signoutTriggers = document.querySelectorAll('[data-fsm-signout-trigger]');
+    const signoutCancel = document.querySelectorAll('[data-fsm-signout-cancel]');
+    const signoutConfirm = document.getElementById('fsm-signout-confirm');
 
-// Sign-out dialog
-const signoutDialog  = document.getElementById('fsm-signout-dialog');
-const signoutTriggers = document.querySelectorAll('[data-fsm-signout-trigger]');
-const signoutCancel  = document.querySelectorAll('[data-fsm-signout-cancel]');
-const signoutConfirm = document.getElementById('fsm-signout-confirm');
+    // Notifications Help Dialog
+    const notificatiosHelpDialog = document.getElementById('fsm-notifications-help-dialog');
+    const notificationsHelpTriggers = document.querySelectorAll('[data-fsm-notifications-help-trigger]');
+    const notificationsHelpCancels = document.querySelectorAll('[data-fsm-close-notifications-help]');
 
-
-// Notifications Help Dialog
-const notificatiosHelpDialog = document.getElementById('fsm-notifications-help-dialog');
-const notificationsHelpTriggers = document.querySelectorAll('[data-fsm-notifications-help-trigger]');
-const notificationsHelpCancels = document.querySelectorAll('[data-fsm-close-notifications-help]');
-
-
-notificationsHelpTriggers.forEach(btn => btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    notificatiosHelpDialog?.classList.add('show');
-}));
-
-notificationsHelpCancels.forEach(btn => btn.addEventListener('click', () => {
-    notificatiosHelpDialog?.classList.remove('show');
-}));
-
-// ─── Scroll behaviour ─────────────────────────────────────────────────────────
-let ticking          = false;
-let effectTriggered  = false;
-let animationTimeout = null;
-
-function handleScroll() {
-    if (ticking || !header) return;
-    window.requestAnimationFrame(() => {
-        const y = window.scrollY;
-        if (y < SCROLL_THRESHOLD) {
-            effectTriggered = false;
-            header.classList.remove('is-hidden', 'is-scrolled');
-            if (animationTimeout) {clearTimeout(animationTimeout); animationTimeout = null; }
-        }
-        else {
-            header.classList.add('is-scrolled');
-            if (!effectTriggered) {
-                effectTriggered = true;
-                header.classList.add('is-hidden');
-                animationTimeout = setTimeout(() => {
-                    header.classList.remove('is-hidden');
-                    animationTimeout = null;
-                }, SLIDE_BACK_DELAY);
-            }
-        }
-        ticking = false;
-    });
-    ticking = true;
-}
-
-window.addEventListener('scroll', handleScroll, {passive: true });
-
-// ─── Responsive visible count ─────────────────────────────────────────────────
-function getVisibleCount(width) {
-    for (const {breakpoint, count} of VISIBLE_COUNTS) {
-        if (width >= breakpoint) return count;
-    }
-    return 9;
-}
-
-function applyVisibleCount() {
-    if (!navItems.length) return;
-    const count = getVisibleCount(window.innerWidth);
-
-    // Items beyond the more menu that were previously hidden in the main menu
-    const moreMenuItems = document.querySelectorAll('.fsm-more-item');
-
-    navItems.forEach((item, i) => {
-        item.style.display = i < count ? '' : 'none';
-    });
-
-    moreMenuItems.forEach((item, i) => {
-        // These are the overflow items — show only those past count
-        const globalIndex = parseInt(item.dataset.index, 10);
-        item.style.display = globalIndex >= count ? '' : 'none';
-    });
-
-    // Hide/show the "More" button itself
-    if (moreWrapper) {
-        const hasHidden = navItems.some((item, i) => i >= count);
-        moreWrapper.style.display = hasHidden ? '' : 'none';
-    }
-}
-
-window.addEventListener('resize', applyVisibleCount);
-applyVisibleCount();
-// ─── Desktop dropdowns ──────────────────────────────────────────
-const dropdowns = document.querySelectorAll('.fsm-dropdown');
-let activeDropdown = null;
-
-function closeAllDropdowns() {
-    dropdowns.forEach(dd => {
-        const menu = dd.querySelector('.fsm-dropdown-menu');
-        const tog = dd.querySelector('.nav-dropdown-toggle, .nav-more-btn');
-        menu?.classList.remove('show');
-        tog?.setAttribute('aria-expanded', 'false');
-    });
-    activeDropdown = null;
-}
-
-dropdowns.forEach(dd => {
-    const toggle = dd.querySelector('.nav-dropdown-toggle, .nav-more-btn');
-    const menu   = dd.querySelector('.fsm-dropdown-menu');
-    if (!toggle || !menu) return;
-
-    let hoverTimer = null;
-
-    // Hover open (desktop only)
-    dd.addEventListener('mouseenter', () => {
-        clearTimeout(hoverTimer);
-        if (activeDropdown && activeDropdown !== dd) closeAllDropdowns();
-        menu.classList.add('show');
-        toggle.setAttribute('aria-expanded', 'true');
-        activeDropdown = dd;
-    });
-
-    dd.addEventListener('mouseleave', () => {
-        hoverTimer = setTimeout(() => {
-            menu.classList.remove('show');
-            toggle.setAttribute('aria-expanded', 'false');
-            if (activeDropdown === dd) activeDropdown = null;
-        }, 120);
-    });
-
-    // Click toggle (fallback for keyboard/touch)
-    toggle.addEventListener('click', (e) => {
+    notificationsHelpTriggers.forEach(btn => btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isOpen = menu.classList.contains('show');
-        closeAllDropdowns();
-        if (!isOpen) {
+        notificatiosHelpDialog?.classList.add('show');
+    }));
+
+    notificationsHelpCancels.forEach(btn => btn.addEventListener('click', () => {
+        notificatiosHelpDialog?.classList.remove('show');
+    }));
+
+    // ─── Scroll behaviour ─────────────────────────────────────────────────────────
+    let ticking = false;
+    let effectTriggered = false;
+    let animationTimeout = null;
+
+    function handleScroll() {
+        if (ticking || !header) return;
+        window.requestAnimationFrame(() => {
+            const y = window.scrollY;
+            if (y < SCROLL_THRESHOLD) {
+                effectTriggered = false;
+                header.classList.remove('is-hidden', 'is-scrolled');
+                if (animationTimeout) { clearTimeout(animationTimeout); animationTimeout = null; }
+            }
+            else {
+                header.classList.add('is-scrolled');
+                if (!effectTriggered) {
+                    effectTriggered = true;
+                    header.classList.add('is-hidden');
+                    animationTimeout = setTimeout(() => {
+                        header.classList.remove('is-hidden');
+                        animationTimeout = null;
+                    }, SLIDE_BACK_DELAY);
+                }
+            }
+            ticking = false;
+        });
+        ticking = true;
+    }
+
+    // window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // ─── Responsive visible count ─────────────────────────────────────────────────
+    function getVisibleCount(width) {
+        for (const { breakpoint, count } of VISIBLE_COUNTS) {
+            if (width >= breakpoint) return count;
+        }
+        return 9;
+    }
+
+    function applyVisibleCount() {
+        if (!navItems.length) return;
+        const count = getVisibleCount(window.innerWidth);
+
+        const moreMenuItems = document.querySelectorAll('.fsm-more-item');
+
+        navItems.forEach((item, i) => {
+            item.style.display = i < count ? '' : 'none';
+        });
+
+        moreMenuItems.forEach((item) => {
+            const globalIndex = parseInt(item.dataset.index, 10);
+            item.style.display = globalIndex >= count ? '' : 'none';
+        });
+
+        if (moreWrapper) {
+            const hasHidden = navItems.some((item, i) => i >= count);
+            moreWrapper.style.display = hasHidden ? '' : 'none';
+        }
+    }
+
+    window.addEventListener('resize', applyVisibleCount);
+    applyVisibleCount();
+
+    // ─── Desktop dropdowns ────────────────────────────────────────────────────────
+    const dropdowns = document.querySelectorAll('.fsm-dropdown');
+    let activeDropdown = null;
+
+    function closeAllDropdowns() {
+        dropdowns.forEach(dd => {
+            const menu = dd.querySelector('.fsm-dropdown-menu');
+            const tog = dd.querySelector('.nav-dropdown-toggle, .nav-more-btn');
+            menu?.classList.remove('show');
+            tog?.setAttribute('aria-expanded', 'false');
+        });
+        activeDropdown = null;
+    }
+
+    dropdowns.forEach(dd => {
+        const toggle = dd.querySelector('.nav-dropdown-toggle, .nav-more-btn');
+        const menu = dd.querySelector('.fsm-dropdown-menu');
+        if (!toggle || !menu) return;
+
+        let hoverTimer = null;
+
+        dd.addEventListener('mouseenter', () => {
+            clearTimeout(hoverTimer);
+            if (activeDropdown && activeDropdown !== dd) closeAllDropdowns();
             menu.classList.add('show');
             toggle.setAttribute('aria-expanded', 'true');
             activeDropdown = dd;
-        }
+        });
+
+        dd.addEventListener('mouseleave', () => {
+            hoverTimer = setTimeout(() => {
+                menu.classList.remove('show');
+                toggle.setAttribute('aria-expanded', 'false');
+                if (activeDropdown === dd) activeDropdown = null;
+            }, 120);
+        });
+
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = menu.classList.contains('show');
+            closeAllDropdowns();
+            if (!isOpen) {
+                menu.classList.add('show');
+                toggle.setAttribute('aria-expanded', 'true');
+                activeDropdown = dd;
+            }
+        });
     });
-});
 
-// Close on outside click — stopPropagation on toggle prevents this firing immediately
-document.addEventListener('click', closeAllDropdowns);
+    document.addEventListener('click', closeAllDropdowns);
 
-// ─── Offcanvas helpers ────────────────────────────────────────────────────────
-function openSheet(sheet) {
-    if (!sheet) return;
+    // ─── Offcanvas helpers ────────────────────────────────────────────────────────
+    function openSheet(sheet) {
+        if (!sheet) return;
         sheet.classList.add('show');
         backdrop?.classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -192,7 +184,6 @@ function openSheet(sheet) {
     function closeSheet(sheet) {
         if (!sheet) return;
         sheet.classList.remove('show');
-        // Only remove backdrop if no other sheet is open
         const anyOpen = [profileSheet, notifSheet, mobileSheet].some(s => s && s.classList.contains('show'));
         if (!anyOpen) {
             backdrop?.classList.remove('show');
@@ -216,7 +207,7 @@ function openSheet(sheet) {
     notifTriggers.forEach(t => t.addEventListener('click', () => openSheet(notifSheet)));
     notifClose.forEach(t => t.addEventListener('click', () => closeSheet(notifSheet)));
 
-    //New User Sheet
+    // New User Sheet
     newUserTriggers.forEach(t => t.addEventListener('click', () => openSheet(newUserSheet)));
     newUserClose.forEach(t => t.addEventListener('click', () => closeSheet(newUserSheet)));
 
@@ -230,7 +221,6 @@ function openSheet(sheet) {
         if (!sub) return;
         btn.addEventListener('click', () => {
             const open = sub.classList.contains('show');
-            // close all others
             document.querySelectorAll('.mobile-sub-menu').forEach(m => m.classList.remove('show'));
             if (!open) sub.classList.add('show');
         });
@@ -248,8 +238,8 @@ function openSheet(sheet) {
         btn.addEventListener('click', () => signoutDialog?.classList.remove('show'));
     });
 
-    signoutDialog?.addEventListener('click', (e) => {
-        // if (e.target === signoutDialog) signoutDialog.classList.remove('show');
+    signoutDialog?.addEventListener('click', () => {
+        // Intentionally left as no-op (original behaviour preserved)
     });
 
     if (signoutConfirm) {
@@ -262,17 +252,17 @@ function openSheet(sheet) {
                     'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value ?? ''
                 }
             })
-            .finally(() => {
-                window.location.replace('/Identity/Account/Login');
-            });
+                .finally(() => {
+                    window.location.replace('/Identity/Account/Login');
+                });
         });
     }
 
     // ─── Keyboard: close sheets on Escape ────────────────────────────────────────
     document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeAllSheets();
-        signoutDialog?.classList.remove('show');
+        if (e.key === 'Escape') {
+            closeAllSheets();
+            signoutDialog?.classList.remove('show');
             dropdowns.forEach(dd => dd.querySelector('.fsm-dropdown-menu')?.classList.remove('show'));
         }
     });
@@ -369,13 +359,11 @@ function openSheet(sheet) {
         return `${days}d ago`;
     }
 
-    // Returns a "YYYY-MM-DD" key (local time) so items can be grouped by calendar day
     function dateKey(dateString) {
         const d = new Date(dateString);
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    // Returns a friendly group label: "Today", "Yesterday", or a formatted date
     function groupLabel(dateString) {
         const itemDate = new Date(dateString);
         const today = new Date();
@@ -390,7 +378,6 @@ function openSheet(sheet) {
 
     function showLoader() {
         listContainer.innerHTML = `
-
             <div class="fsm-empty-state">
                 <div class="fsm-loader-spinner" role="status"></div>
                 <span class="text-muted small mt-2">Loading notifications...</span>
@@ -466,8 +453,6 @@ function openSheet(sheet) {
         currentNotifications = notifications;
 
         if (!notifications.length) {
-            listContainer.innerHTML = '';
-            // noResultsMsg?.classList.remove('d-none');
             listContainer.innerHTML = `
                 <div class="fsm-empty-state">
                     <div class="fsm-empty-icon">
@@ -479,11 +464,12 @@ function openSheet(sheet) {
                     </p>
                 </div>
             `;
-            markAllReadBtn.classList.add("d-none")
+            markAllReadBtn.classList.add("d-none");
             return;
         }
         noResultsMsg?.classList.add('d-none');
-        markAllReadBtn.classList.remove("d-none")
+        markAllReadBtn.classList.remove("d-none");
+
         const term = searchInput?.value.trim();
         let html = '';
         let lastGroupKey = null;
@@ -496,16 +482,13 @@ function openSheet(sheet) {
                 lastGroupKey = groupKey;
             }
 
-            // const unreadClass = n.isRead ? '' : ' notification-item-unread';
             const iconPath = severityIcons[n.severityCode] || severityIcons.info;
             const hasLink = !!n.actionUrl;
 
-            // Link present -> clicking it marks as read automatically, no separate button needed
             const actionLink = hasLink
                 ? `<a href="${escapeHtml(n.actionUrl)}" class="notif-action-link small" data-id="${escapeHtml(n.id)}" data-index="${index}">${escapeHtml(n.actionText || 'View')}</a>`
                 : '';
 
-            // No link -> show an explicit "mark as read" checkmark instead
             const markReadBtn = (!hasLink && !n.isRead)
                 ? `<button type="button" class="fsm-mark-notification-seen-btn" data-id="${escapeHtml(n.id)}" data-index="${index}" aria-label="Mark as read">
                     <span class="fsm-btn-content">
@@ -515,12 +498,14 @@ function openSheet(sheet) {
                 : '';
 
             const borderClass = index === notifications.length - 1 ? '' : ' border-bottom';
+
             function truncateText(text, maxLength = 29) {
                 if (!text) return '';
                 return text.length > maxLength
                     ? text.slice(0, maxLength).trimEnd() + '…'
                     : text;
             }
+
             html += `
             <div class="notification-item${borderClass} searchable-notif d-flex px-2 py-2"
                  data-id="${escapeHtml(n.id)}"
@@ -547,20 +532,19 @@ function openSheet(sheet) {
 
         listContainer.innerHTML = html;
 
-        // Link click -> mark as read (fire-and-forget), then let the browser navigate normally
         listContainer.querySelectorAll('.notif-action-link').forEach(link => {
             link.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const index = parseInt(this.dataset.index, 10);
                 const notification = currentNotifications[index];
                 const itemEl = this.closest('.notification-item');
+
                 if (notification && !notification.isRead) {
-                    markAsRead(notification.id, itemEl); // don't block navigation on this
+                    markAsRead(notification.id, itemEl);
                 }
             });
         });
 
-        // No-link items -> explicit checkmark button
         listContainer.querySelectorAll('.fsm-mark-notification-seen-btn').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
@@ -573,6 +557,7 @@ function openSheet(sheet) {
                 const index = parseInt(this.dataset.index, 10);
                 const notification = currentNotifications[index];
                 const itemEl = this.closest('.notification-item');
+
                 if (notification) {
                     markAsRead(notification.id, itemEl, originalContent, btn);
                 }
@@ -642,7 +627,7 @@ function openSheet(sheet) {
             const result = await response.json();
 
             if (result.success) {
-                await loadNotifications(); // re-fetch so the marked item drops out of the list
+                await loadNotifications();
             } else {
                 document
                     .getElementById(`notification-error-${id}`)
@@ -677,6 +662,7 @@ function openSheet(sheet) {
         }
 
         document.getElementById('mark-all-notifications-error')?.classList.add('d-none');
+
         try {
             const response = await fetch('/Notifications/MarkAllNotificationsAsRead', {
                 method: 'POST',
@@ -686,9 +672,11 @@ function openSheet(sheet) {
             if (!response.ok) {
                 throw new Error(`Request failed with status ${response.status}`);
             }
+
             const result = await response.json();
+
             if (result.success) {
-                await loadNotifications(); // refetch so read items reflect the server state
+                await loadNotifications();
             } else {
                 document
                     .getElementById('mark-all-notifications-error')
@@ -782,3 +770,165 @@ function openSheet(sheet) {
         }
     });
 })();
+
+
+// ─── Settings: sticky header shadow ───────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    const settingsHeader = document.querySelector(".settings-header");
+    if (!settingsHeader) return;
+
+    const updateHeader = () => {
+        settingsHeader.classList.toggle("is-scrolled", window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    updateHeader();
+});
+
+
+// ─── Settings: search ─────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("settingsSearch");
+    const searchResults = document.getElementById("settingsSearchResults");
+    const clearButton = document.getElementById("settingsSearchClear");
+
+    if (!searchInput || !searchResults) return;
+
+    const settingsItems = Array.from(document.querySelectorAll("#settings-item"));
+
+    console.log(settingsItems)
+
+    function appendHighlightedText(container, text, query) {
+        const lowerText = text.toLocaleLowerCase();
+        const lowerQuery = query.toLocaleLowerCase();
+        let position = 0;
+        let matchIndex;
+
+        while ((matchIndex = lowerText.indexOf(lowerQuery, position)) !== -1) {
+            container.append(document.createTextNode(text.slice(position, matchIndex)));
+
+            const mark = document.createElement("mark");
+            mark.textContent = text.slice(matchIndex, matchIndex + query.length);
+            container.append(mark);
+
+            position = matchIndex + query.length;
+        }
+
+        container.append(document.createTextNode(text.slice(position)));
+    }
+
+    function createResult(item, query) {
+        const result = document.createElement("a");
+        result.className = "settings-search-result";
+        result.href = item.getAttribute("href") || "#";
+        result.setAttribute("role", "option");
+
+        const group = document.createElement("span");
+        group.className = "settings-search-result-group";
+        appendHighlightedText(group, item.dataset.group || "", query);
+
+        const title = document.createElement("span");
+        title.className = "settings-search-result-title";
+        appendHighlightedText(title, item.dataset.title || item.textContent.trim(), query);
+
+        result.append(group, title);
+        result.addEventListener("click", () => {
+            searchResults.classList.remove("show");
+        });
+
+        return result;
+    }
+
+    function searchSettings() {
+        const query = searchInput.value.trim();
+        searchResults.replaceChildren();
+
+        if (clearButton) {
+            clearButton.style.display = query ? "block" : "none";
+        }
+
+        if (!query) {
+            searchResults.classList.remove("show");
+            return;
+        }
+
+        const normalizedQuery = query.toLocaleLowerCase();
+        const matches = settingsItems.filter(item => {
+            const title = item.dataset.title || item.textContent.trim();
+            const group = item.dataset.group || "";
+
+            return `${title} ${group}`.toLocaleLowerCase().includes(normalizedQuery);
+        });
+
+        searchResults.classList.add("show");
+
+        if (!matches.length) {
+            const empty = document.createElement("div");
+            empty.className = "settings-search-empty";
+            empty.textContent = "No matching settings found.";
+            searchResults.append(empty);
+            return;
+        }
+
+        const count = document.createElement("div");
+        count.className = "settings-search-count";
+        count.textContent = `${matches.length} matching settings`;
+        searchResults.append(count);
+
+        matches.forEach(item => {
+            searchResults.append(createResult(item, query));
+        });
+    }
+
+    searchInput.addEventListener("input", searchSettings);
+
+    clearButton?.addEventListener("click", () => {
+        searchInput.value = "";
+        searchSettings();
+        searchInput.focus();
+    });
+
+    document.addEventListener("click", event => {
+        if (!event.target.closest(".settings-search-wrapper")) {
+            searchResults.classList.remove("show");
+        }
+    });
+
+    searchInput.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            searchInput.value = "";
+            searchSettings();
+            searchResults.classList.remove("show");
+        }
+    });
+});
+
+
+// ─── Settings: show/hide premium features ────────────────────────────────────
+// NOTE: this was previously nested inside the search DOMContentLoaded handler,
+// which meant it never ran (DOMContentLoaded had already fired by then).
+// It is now a top-level listener.
+document.addEventListener("DOMContentLoaded", () => {
+    const planSwitch = document.getElementById("showPlanFeatures");
+    if (!planSwitch) return;
+
+    const settingsCards = document.querySelectorAll(".settings-card");
+
+    function updatePlanFeatures() {
+        const showPremium = planSwitch.checked;
+
+        settingsCards.forEach(card => {
+            const items = card.querySelectorAll('.settings-item[data-premium="true"]');
+
+            items.forEach(item => {
+                item.hidden = !showPremium;   // OFF → hide, ON → show
+            });
+
+            const visibleItems = card.querySelectorAll('.settings-item:not([hidden])');
+            card.hidden = visibleItems.length === 0;
+        });
+    }
+
+    planSwitch.addEventListener("change", updatePlanFeatures);
+    updatePlanFeatures();   // apply initial state (switch is OFF → premium hidden)
+});

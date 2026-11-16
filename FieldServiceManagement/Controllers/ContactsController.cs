@@ -11,7 +11,6 @@ using FieldServiceManagement.ViewModels.Interfaces;
 using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace FieldServiceManagement.Controllers
 {

@@ -49,18 +49,25 @@
                     <button id="cancelSearch" class="cancel-btn">✕</button>
                 </div>
             </div>
-            <a href="/Customers/Companies/Import" class="btn border-fsm btn-xs">
-                <i class="bi bi-file-earmark-arrow-up"></i>
-            </a>
+
             <button class="btn btn-info-soft btn-xs">
                 <i class="bi bi-question-circle-fill"></i>
             </button>
-            <a href="/Customers/Companies/Create" class="btn btn-primary btn-xs"
-               title="New Company"
-               aria-label="New Company">
-                <i class="fa-solid fa-plus"></i>
-                New Company
-            </a>
+
+            <div class="fsm-btn-group bg-primary">
+                <a href="/Customers/Companies/Create" class="btn-main">
+                    @* <i class="fa-solid fa-plus"></i> *@
+                    Create
+                </a>
+                <button class="fsm-btn-group__trigger" aria-expanded="false" aria-label="More actions">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="fsm-btn-group__menu">
+                    <a href="/Customers/Companies/Import" class="fsm-btn-group__item">
+                        Import
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 

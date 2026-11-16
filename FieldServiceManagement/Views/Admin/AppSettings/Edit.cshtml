@@ -15,7 +15,7 @@
             Icon = "bi-gear",
             Items = new List<BreadcrumbItem>
             {
-                new() { Label = "Settigs", Url = "/Admin/Settings" },
+                new() { Label = "Settigs", Url = "/Admin/AppSettings" },
                  new() { Label = Model.key, Url = null },
                 new() { Label = "Edit", Url = null},
             }
@@ -25,7 +25,7 @@
     <div class="fsm-fixed-view-wrapper-forms" id="fsm-edit-setting">
         <div class="w-100 h-100 bg-white rounded-2 overflow-hidden d-flex flex-column">
 
-            <form id="edit-setting-form" method="post" action="/Admin/Settings/Edit" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+            <form id="edit-setting-form" method="post" action="/Admin/AppSettings/Edit" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(m => m.Id)
 
@@ -106,7 +106,7 @@
                 </div>
 
                 <div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:#fff;">
-                    <a href="/Admin/Settings" type="button" class="btn btn-light btn-xs border">
+                    <a href="/Admin/AppSettings" type="button" class="btn btn-light btn-xs border">
                         Cancel
                     </a>
                     <button type="submit" id="save-setting-btn" class="btn btn-primary btn-xs" data-loading-text="Saving" data-spinner-size="spinner-xs">

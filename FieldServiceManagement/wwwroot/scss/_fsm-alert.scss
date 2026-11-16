@@ -1,4 +1,5 @@
-﻿// ============================================================
+﻿
+// ============================================================
 // FSM Footer Status Popup
 // Original visual style, arrow pointing down, JS-positioned
 // ============================================================
@@ -8,7 +9,7 @@
     overflow: visible !important;
 
     .fsm-footer-popup {
-        position: fixed; // important – JS controls left/bottom
+        position: fixed;
         z-index: 2000;
         width: max-content;
         min-width: 320px;
@@ -18,13 +19,13 @@
         border: 1px solid var(--bs-border-color, #dee2e6);
         border-radius: 12px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
-        // start hidden
+        // ── Animation defaults ─────────────────────────────
         visibility: hidden;
         opacity: 0;
         pointer-events: none;
-        transform: translateY(8px);
-        transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
-        // arrow pointing down
+        transform: translateY(0);
+        transition: opacity 600ms ease-out, transform 600ms ease-out, visibility 0s linear 600ms;
+        // ── Arrow pointing down ────────────────────────────
         &::before {
             content: "";
             position: absolute;
@@ -37,7 +38,7 @@
             border-bottom: 1px solid var(--bs-border-color, #dee2e6);
             transform: translateY(-5px) rotate(45deg);
         }
-        // ── Header ──────────────────────────────────────────
+        // ── Header ─────────────────────────────────────────
         .fsm-footer-popup-header {
             display: flex;
             align-items: center;
@@ -77,7 +78,7 @@
                 flex-shrink: 0;
             }
         }
-        // ── Body ────────────────────────────────────────────
+        // ── Body ───────────────────────────────────────────
         .fsm-footer-popup-body {
             padding: 10px 16px 12px;
             font-size: 13px;
@@ -102,7 +103,7 @@
                 font-size: 12px;
             }
         }
-        // ── Variants ────────────────────────────────────────
+        // ── Variants ───────────────────────────────────────
         &.is-info {
             .fsm-footer-popup-icon,
             .fsm-footer-popup-title {
@@ -130,15 +131,24 @@
                 color: var(--bs-danger);
             }
         }
-        // ── Visible state ───────────────────────────────────
+        // ── Enter animation ───────────────────────────────
         &.is-visible {
             visibility: visible !important;
             opacity: 1 !important;
             transform: translateY(0) !important;
             pointer-events: auto !important;
+            transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s;
+        }
+        // ── Exit animation ─────────────────────────────────
+        &.is-hiding {
+            visibility: visible !important;
+            opacity: 0 !important;
+            transform: translateY(-12px) !important;
+            pointer-events: auto !important;
+            transition: opacity 600ms ease-out, transform 600ms ease-out, visibility 0s;
         }
     }
-        // Optional pure-CSS hover support
+        // ── Optional CSS hover support ────────────────────────
         &.has-popup:hover .fsm-footer-popup,
         .fsm-footer-popup:hover {
             visibility: visible;
@@ -148,6 +158,7 @@
         }
 }
 
+// ── Dark mode ─────────────────────────────────────────────
 [data-bs-theme="dark"] .fsm-footer-status .fsm-footer-popup {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
 }

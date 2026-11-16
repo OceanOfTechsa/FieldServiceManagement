@@ -152,22 +152,6 @@ namespace FieldServiceManagement.Repository.Repositories
                 .ToListAsync();
         }
 
-        // One SaveChanges is one database transaction: the whole batch is saved, or none of it.
-        public async Task SaveBatchAsync(List<Contact> NewContacts, List<Contact> UpdatedContacts,
-                                         List<Address> NewAddresses, List<Address> UpdatedAddresses,
-                                         List<EntityAddress> NewLinks, List<EntityAddress> UpdatedLinks,
-                                         List<Note> NewNotes)
-        {
-            _dbContext.Addresses.AddRange(NewAddresses);
-            _dbContext.Contacts.AddRange(NewContacts);
-            _dbContext.EntityAddresses.AddRange(NewLinks);
-            _dbContext.Notes.AddRange(NewNotes);
-            _dbContext.Addresses.UpdateRange(UpdatedAddresses);
-            _dbContext.Contacts.UpdateRange(UpdatedContacts);
-            _dbContext.EntityAddresses.UpdateRange(UpdatedLinks);
-            await _dbContext.SaveChangesAsync();
-        }
-
         // Every address in the organisation that is not deleted. The worker uses them to reuse an address that already exists.
         public async Task<List<Address>> GetAddressesAsync(Guid OrganisationId)
         {

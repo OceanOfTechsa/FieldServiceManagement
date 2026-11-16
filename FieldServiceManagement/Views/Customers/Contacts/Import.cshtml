@@ -1,8 +1,7 @@
-﻿@model FieldServiceManagement.ViewModels.Company.CompaniesImportViewModel
-@using FieldServiceManagement.ViewModels.Shared
+﻿@using FieldServiceManagement.ViewModels.Shared
 
 @{
-    ViewData["Title"] = "Import Companies Data";
+    ViewData["Title"] = "Data Import (Contacts)";
 }
 
 <div class="d-flex flex-column container-fluid px-0 h-full">
@@ -13,28 +12,28 @@
             ShowBack = false,
             ShowHome = true,
             ShowHistory = false,
-            Icon = "bi-building-fill-add",
+            Icon = "bi-person-fill-add",
             Items = new List<BreadcrumbItem>
             {
-                new() { Label = "Customers", Url = null },
-                new() { Label = "Companies", Url = "/Customers/Companies" },
-                new() { Label = "Import", Url = null }
+                  new() { Label = "Customers",         Url = null },
+                  new() { Label = "Contacts", Url = "/Customers/Contacts"},
+                  new() { Label = "Import", Url = null }
             }
         })
-
+       
         <div class="mt-1">
-            <div id="step1Actions">
+            <div id="step1Actions" class="d-flex align-items-center gap-2">
+                <a href="/ImportHistory?module=Contacts" class="text-primary-hover small"><i class="bi bi-clock-history me-1"></i> View Import History</a>
                 <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>Cancel</button>
                 <button class="btn btn-xs btn-primary" onclick="handleNext()" disabled id="nextBtn">Next</button>
             </div>
-            <div id="step2Actions" class="d-none">
+            <div id="step2Actions" class="d-none gap-2">
                 <button class="btn btn-xs btn-outline-secondary" data-fsm-cancel-trigger>Cancel</button>
                 <button class="btn btn-xs btn-outline-secondary" id="prevBtn">Previous</button>
                 <button class="btn btn-xs btn-primary" id="importBtn">Import</button>
             </div>
         </div>
     </div>
-
     <div class="fsm-fixed-view-wrapper-forms">
         <div class="w-100 h-100 bg-surface rounded-2 overflow-hidden d-flex flex-column p-2">
             <div class="d-flex align-items-start justify-content-between">
@@ -56,55 +55,55 @@
                     </span>
                 </nav>
                 <i class="bi bi-info-circle-fill text-primary fs-5 cursor-pointer d-md-none d-inline-flex"
-                   data-bs-toggle="offcanvas"
-                   data-bs-target="#infoOffcanvas"></i>
+                    data-bs-toggle="offcanvas"
+                   data-bs-target="#infoOffcanvas"
+                >
+                </i>
             </div>
 
-            <div class="bg-soft text-black mt-3 rounded-2 p-2 d-flex align-items-start gap-2 position-relative overflow-hidden overflow-y-auto"
-                 style="height: calc(100vh - 190px);" id="uploadStep">
+            <div class="bg-soft text-black mt-3 rounded-2 p-2 d-flex align-items-start gap-2 position-relative overflow-hidden overflow-y-auto" style="height: calc(100vh - 190px);" id="uploadStep">
                 <div class="flex-grow-1" style="flex-basis: 60%; height: calc(100vh - 210px);">
-
-                    <!-- ==================== COMPANIES ==================== -->
-                    <div id="companiesSection" class="bg-surface rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
+                    <!-- ==================== CONTACTS ==================== -->
+                    <div id="contactsSection" class="bg-surface rounded-2 d-flex flex-column gap-2 w-100 p-0 overflow-hidden mb-3">
                         <div class="fsm-upload-container rounded-2 overflow-hidden">
-                            <input type="file" class="d-none" id="companies" accept=".csv" />
-                            <label for="companies" class="fsm-upload-label w-100 rounded-2">
+                            <input type="file" class="d-none" id="contacts" accept=".csv" />
+                            <label for="contacts" class="fsm-upload-label w-100 rounded-2" id="fsm-upload-label-contacts">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="fw-semibold">Companies</span>
-                                    <span class="al-text small">Upload the file you wish to import as Companies</span>
+                                    <span class="fw-semibold">Contacts</span>
+                                    <span class="al-text small small">Upload the file you wish to import as Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
                             </label>
 
-                            <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-companies">
+                            <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-contacts">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
-                                    <span class="fw-semibold">Companies</span>
-                                    <span class="al-text small">Upload the file you wish to import as Companies</span>
+                                    <span class="fw-semibold">Contacts</span>
+                                    <span class="al-text small">Upload the file you wish to import as Contacts</span>
                                 </span>
                             </span>
 
-                            <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 border-start-0 d-none" id="companiesAttachmentInfoAccordion">
+                            <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 border-start-0 d-none" id="attachmentInfoAccordion">
                                 <div class="accordion-item rounded-2 gap-0">
-                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small ">
                                         Attachment
-                                        <i class="bi bi-arrow-down-circle cursor-pointer" data-bs-toggle="collapse" data-bs-target="#companiesAttachmentInfoCollapse"></i>
+                                        <i class="bi bi-arrow-down-circle cursor-pointer" data-bs-toggle="collapse" data-bs-target="#attachmentInfoCollapse"></i>
                                     </div>
-                                    <div id="companiesAttachmentInfoCollapse" class="accordion-collapse collapse show">
+                                    <div id="attachmentInfoCollapse" class="accordion-collapse collapse show">
                                         <div class="accordion-body al-bg px-2 pt-1">
                                             <div class="file-preview file-preview-sm bg-surface rounded-2 border border-fsm d-flex flex-column">
                                                 <div class="d-flex align-items-start gap-1 p-2">
                                                     <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
                                                     <div class="flex-grow-1 min-width-0 small gap-0">
-                                                        <span class="fw-bold d-block text-truncate file-name" id="uploadedFileName-companies">filename.csv</span>
-                                                        <span class="text-muted smaller" id="uploadedFileInfo-companies">0 MB • CSV File</span>
+                                                        <span class="fw-bold d-block text-truncate file-name" id="uploadedFileName-contacts">filename.csv</span>
+                                                        <span class="text-muted smaller" id="uploadedFileInfo-contacts">0 MB • CSV File</span>
                                                     </div>
-                                                    <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="companiesUploader.removeFile()">
+                                                    <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="contactsUploader.removeFile()">
                                                         <i class="bi bi-trash fs-6 text-danger"></i>
                                                     </button>
                                                 </div>
-                                                <div id="uploadProgressContainer-companies" class="w-100 d-none">
+                                                <div id="uploadProgressContainer-contacts" class="w-100 d-none">
                                                     <div class="progress" style="height: 3px;">
-                                                        <div id="uploadProgressBar-companies" class="progress-bar bg-primary" style="width: 0%"></div>
+                                                        <div id="uploadProgressBar-contacts" class="progress-bar bg-primary" style="width: 0%"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -113,7 +112,7 @@
                                                     <i class="bi bi-info-circle text-info"></i>
                                                     The file will be parsed using the character set
                                                 </span>
-                                                <select class="fsm-per-page" id="charset-companies">
+                                                <select class="fsm-per-page" id="charset-contacts">
                                                     <option value="utf-8" selected>UTF-8 (Unicode)</option>
                                                     <option value="iso-8859-1">ISO-8859-1 (Western Europe)</option>
                                                     <option value="windows-1252">Windows-1252 (Western Europe)</option>
@@ -127,18 +126,19 @@
                             <!-- Import Options -->
                             <div class="d-flex flex-column mt-2 px-2 d-none" id="howto">
                                 <span class="fw-semibold">How do you want to import records in the file?</span>
+                                <!-- Your original options (unchanged) -->
                                 <div class="mt-2 d-flex-column align-items-start gap-1 border-bottom">
                                     <div class="form-check mb-2">
                                         <input class="form-check-input" type="radio" name="importOption" id="importNew" value="new" checked>
-                                        <label class="form-check-label al-text" for="importNew">Add as new Companies</label>
+                                        <label class="form-check-label al-text" for="importNew">Add as new Contacts</label>
                                     </div>
                                     <div class="import-suboptions d-none" id="subNew">
                                         <div class="d-flex align-items-center gap-2 mb-2 mx-3">
-                                            <span class="small text-muted">Skip existing Companies based on</span>
+                                            <span class="small text-muted">Skip existing Contacts based on</span>
                                             <select class="fsm-per-page" id="skipBasedOn">
-                                                <option value="name" selected>Company Name</option>
-                                                <option value="id">Company Id</option>
                                                 <option value="none">None</option>
+                                                <option value="id">Contact Id</option>
+                                                <option value="email">Email</option>
                                             </select>
                                         </div>
                                     </div>
@@ -146,19 +146,19 @@
                                 <div class="mt-2 d-flex-column align-items-start gap-1 border-bottom">
                                     <div class="form-check mb-2">
                                         <input class="form-check-input" type="radio" name="importOption" id="importUpdate" value="update">
-                                        <label class="form-check-label al-text" for="importUpdate">Update existing Companies only</label>
+                                        <label class="form-check-label al-text" for="importUpdate">Update existing Contacts only</label>
                                     </div>
                                     <div class="import-suboptions d-none" id="subUpdate">
                                         <div class="d-flex align-items-center gap-2 mb-2 mx-3">
-                                            <span class="small text-muted">Find existing Companies based on</span>
+                                            <span class="small text-muted">Find existing Contacts based on</span>
                                             <select class="fsm-per-page" id="findBasedOnUpdate">
-                                                <option value="name">Company Name</option>
-                                                <option value="id">Company Id</option>
+                                                <option value="id">Contact Id</option>
+                                                <option value="email">Email</option>
                                             </select>
                                         </div>
                                         <div class="form-check ms-3 smaller">
                                             <input class="form-check-input" type="checkbox" id="chkNoEmptyUpdate" checked>
-                                            <label class="form-check-label text-muted">Don't update empty values for existing Companies</label>
+                                            <label class="form-check-label text-muted">Don't update empty values for existing Contacts</label>
                                         </div>
                                     </div>
                                 </div>
@@ -169,26 +169,26 @@
                                     </div>
                                     <div class="import-suboptions d-none" id="subBoth">
                                         <div class="d-flex align-items-center gap-2 mb-2 mx-3">
-                                            <span class="small text-muted">Find existing Companies based on</span>
+                                            <span class="small text-muted">Find existing Contacts based on</span>
                                             <select class="fsm-per-page" id="findBasedOnBoth">
-                                                <option value="name">Company Name</option>
-                                                <option value="id">Company Id</option>
+                                                <option value="id">Contact Id</option>
+                                                <option value="email">Email</option>
                                             </select>
                                         </div>
                                         <div class="form-check ms-3 smaller">
                                             <input class="form-check-input" type="checkbox" id="chkNoEmptyBoth" checked>
-                                            <label class="form-check-label text-muted">Don't update empty values for existing Companies</label>
+                                            <label class="form-check-label text-muted">Don't update empty values for existing Contacts</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <span id="upload-error-companies" class="bg-danger d-none text-white small p-1 px-2 d-flex justify-content-between align-items-center gap-2">
+                            <span id="upload-error-contacts" class="bg-danger d-none text-white small p-1 px-2 d-flex justify-content-between align-items-center gap-2">
                                 <span class="d-flex gap-2 align-items-center">
                                     <i class="bi bi-exclamation-circle-fill"></i>
-                                    <span id="uploadErrorMsg-companies"></span>
+                                    <span id="uploadErrorMsg-contacts"></span>
                                 </span>
-                                <span id="close-error-companies" style="cursor:pointer;"><i class="bi bi-x-circle"></i></span>
+                                <span id="close-error-contacts" style="cursor:pointer;"><i class="bi bi-x-circle"></i></span>
                             </span>
                         </div>
                     </div>
@@ -200,19 +200,19 @@
                             <label for="addresses" class="fsm-upload-label w-100 rounded-2">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
                                     <span class="fw-semibold">Addresses</span>
-                                    <span class="al-text small">Upload the file you wish to import as Addresses for Companies</span>
+                                    <span class="al-text small">Upload the file you wish to import as Addresses for Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
                             </label>
                             <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-addresses">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
                                     <span class="fw-semibold">Addresses</span>
-                                    <span class="al-text small">Upload the file you wish to import as Addresses for Companies</span>
+                                    <span class="al-text small">Upload the file you wish to import as Addresses for Contacts</span>
                                 </span>
                             </span>
                             <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 rounded-bottom border-start-0 d-none" id="addressAttachmentInfoAccordion">
                                 <div class="accordion-item rounded-2 gap-0">
-                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small ">
                                         Attachment
                                         <i class="bi bi-arrow-down-circle cursor-pointer"
                                            data-bs-toggle="collapse"
@@ -228,21 +228,21 @@
                                                     <div class="d-flex align-items-start gap-1 p-2">
                                                         <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
                                                         <div class="flex-grow-1 min-width-0 small gap-0">
-                                                            <span class="fw-bold d-block text-truncate file-name mt-1" id="uploadedFileName-addresses">filename.csv</span>
-                                                            <span class="text-muted smaller mt-n3" id="uploadedFileInfo-addresses">0 MB • CSV File</span>
+                                                            <span class="fw-bold d-block text-truncate file-name mt-1" id="uploadedFileName-contacts">filename.csv</span>
+                                                            <span class="text-muted smaller mt-n3" id="uploadedFileInfo-contacts">0 MB • CSV File</span>
                                                         </div>
                                                         <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="addressesUploader.removeFile()" style="line-height: 1;">
                                                             <i class="bi bi-trash fs-6 text-danger"></i>
                                                         </button>
                                                     </div>
-                                                    <div id="uploadProgressContainer-addresses" class="w-100 d-none">
+                                                    <div id="uploadProgressContainer-contacts" class="w-100 d-none">
                                                         <div class="progress" style="height: 3px;">
-                                                            <div id="uploadProgressBar-addresses" class="progress-bar bg-primary" role="progressbar"
+                                                            <div id="uploadProgressBar-notes" class="progress-bar bg-primary" role="progressbar"
                                                                  style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <span class="mt-1 text-muted small d-flex gap-2 align-items-center">
+                                                <span class="mt-1 text-muted small d-flex gap-2">
                                                     <span class="d-flex gap-1">
                                                         <i class="bi bi-info-circle text-info"></i>
                                                         The file will be parsed using the character set
@@ -272,19 +272,19 @@
                             <label for="notes" class="fsm-upload-label w-100 rounded-2">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
                                     <span class="fw-semibold">Notes</span>
-                                    <span class="al-text small">Upload the file you wish to import as Notes for Companies</span>
+                                    <span class="al-text small">Upload the file you wish to import as Notes for Contacts</span>
                                     <span class="btn btn-sm btn-primary" style="width:120px;">Choose File</span>
                                 </span>
                             </label>
                             <span class="bg-white w-100 rounded-2 d-none" id="fsm-label-no-upload-notes">
                                 <span class="px-2 d-flex flex-column gap-2 mt-2">
                                     <span class="fw-semibold">Notes</span>
-                                    <span class="al-text small">Upload the file you wish to import as Notes for Companies</span>
+                                    <span class="al-text small">Upload the file you wish to import as Notes for Contacts</span>
                                 </span>
                             </span>
                             <div class="accordion accordion-flush mt-3 px-0 al-bg border border-fsm border-end-0 rounded-bottom border-start-0 d-none" id="notesAttachmentInfoAccordion">
                                 <div class="accordion-item rounded-2 gap-0">
-                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small">
+                                    <div class="d-flex align-items-center gap-2 rounded-2 shadow-none border-0 mt-2 pb-2 px-2 al-bg small ">
                                         Attachment
                                         <i class="bi bi-arrow-down-circle cursor-pointer"
                                            data-bs-toggle="collapse"
@@ -300,21 +300,21 @@
                                                     <div class="d-flex align-items-start gap-1 p-2">
                                                         <i class="bi bi-file-earmark-spreadsheet text-primary fs-5"></i>
                                                         <div class="flex-grow-1 min-width-0 small gap-0">
-                                                            <span class="fw-bold d-block text-truncate file-name mt-1" id="uploadedFileName-notes">filename.csv</span>
-                                                            <span class="text-muted smaller mt-n3" id="uploadedFileInfo-notes">0 MB • CSV File</span>
+                                                            <span class="fw-bold d-block text-truncate file-name mt-1" id="uploadedFileName-contacts">filename.csv</span>
+                                                            <span class="text-muted smaller mt-n3" id="uploadedFileInfo-contacts">0 MB • CSV File</span>
                                                         </div>
                                                         <button type="button" class="btn btn-link text-muted p-1 ms-2" onclick="notesUploader.removeFile()" style="line-height: 1;">
                                                             <i class="bi bi-trash fs-6 text-danger"></i>
                                                         </button>
                                                     </div>
-                                                    <div id="uploadProgressContainer-notes" class="w-100 d-none">
+                                                    <div id="uploadProgressContainer-contacts" class="w-100 d-none">
                                                         <div class="progress" style="height: 3px;">
                                                             <div id="uploadProgressBar-notes" class="progress-bar bg-primary" role="progressbar"
                                                                  style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <span class="mt-1 text-muted small d-flex gap-2 align-items-center">
+                                                <span class="mt-1 text-muted small d-flex gap-2">
                                                     <span class="d-flex gap-1">
                                                         <i class="bi bi-info-circle text-info"></i>
                                                         The file will be parsed using the character set
@@ -341,7 +341,7 @@
 
                 <div class="d-none d-md-block bg-surface border border-warning rounded-2 mb-2 p-2 overflow-hidden overflow-y-auto position-sticky"
                      style="flex-basis: 40%; height: calc(100vh - 210px); top: 0; align-self: flex-start;">
-                    @await Html.PartialAsync("~/Views/Components/ImportInformation/_CompaniesImportInformation.cshtml")
+                    @await Html.PartialAsync("~/Views/Components/ImportInformation/_ContactsImportInformation.cshtml")
                 </div>
             </div>
 
@@ -349,6 +349,7 @@
         </div>
     </div>
 </div>
+
 
 <div id="fsm-cancel-import-dialog" class="fsm-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
     <div class="fsm-dialog fsm-dialog-lg">
@@ -376,7 +377,7 @@
         </div>
         <div class="dialog-footer">
             <button type="button" class="btn-cancel" data-fsm-reinvite-cancel>Cancel</button>
-            <a href="/Customers/Companies@(Model.callBack != null ? "/" + Model.callBack : "")" class="btn-confirm" id="fsm-cancel-confirm">
+            <a href="/Customers/Contacts" class="btn-confirm" id="fsm-cancel-confirm">
                 Yes, Exit
             </a>
         </div>
@@ -395,6 +396,7 @@
                 <p class="warn-sub">Are you sure you want to proceed with the data import?</p>
             </div>
         </div>
+
         <div class="dialog-body">
             The import will run in the background and we will email you the summary once it is complete. Do you want to start the import?
         </div>
@@ -411,39 +413,40 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
-        @await Html.PartialAsync("~/Views/Components/ImportInformation/_CompaniesImportInformation.cshtml")
+        @await Html.PartialAsync("~/Views/Components/ImportInformation/_ContactsImportInformation.cshtml")
     </div>
 </div>
 
-@section Scripts {
-    <script src="~/js/imports/import-file-uploader.js" nonce="9815422428"></script>
+@section Scripts{
+     <script src="~/js/imports/import-file-uploader.js" nonce="9815422428"></script>
 
     <script>
-        // The plan's limits for this organisation. The server checks them again.
         const IMPORT_LIMITS = {
             maxFileBytes: @(ViewBag.ImportMaxFileBytes ?? 1048576L),
             maxRecords: @(ViewBag.ImportMaxRecords ?? 1000)
-                };
-
+        };
+ 
         // Initialize all uploaders
-        const companiesUploader = new FileUploader('companiesSection', 'companies', 'howto');
+        const contactsUploader = new FileUploader('contactsSection', 'contacts', 'howto');
         const addressesUploader = new FileUploader('addressesSection', 'addresses');
         const notesUploader = new FileUploader('notesSection', 'notes');
 
-        // Next is available as soon as any one file is chosen
         function enableNextButton() {
-            const any = companiesUploader.currentFile || addressesUploader.currentFile || notesUploader.currentFile;
+            const any = contactsUploader.currentFile || addressesUploader.currentFile || notesUploader.currentFile;
             document.getElementById("nextBtn").toggleAttribute("disabled", !any);
         }
 
         // ==================== COLLECT ALL FORM DATA ====================
         function getImportData() {
-            // the import options only apply when a Companies file is uploaded
-            const importOption = companiesUploader.currentFile
+            const importOption = contactsUploader.currentFile
                 ? (document.querySelector('input[name="importOption"]:checked')?.value || 'new')
                 : 'new';
 
             return {
+                contactsFile: contactsUploader.currentFile,
+                addressesFile: addressesUploader.currentFile,
+                notesFile: notesUploader.currentFile,
+
                 importOption: importOption,
                 skipExistingBasedOn: document.getElementById('skipBasedOn')?.value,
                 findExistingBasedOn: (importOption === 'update' ?
@@ -491,8 +494,8 @@
 
         toggleSubOptions("new");
     </script>
-
+    
     <script src="~/js/imports/import-fields.js" nonce="9815422428"></script>
-    <script src="~/js/customers/companies/import-companies-config.js" nonce="9815422428"></script>
+    <script src="~/js/customers/contacts/import-contacts-config.js" nonce="9815422428"></script>
     <script src="~/js/imports/import-mapping-engine.js" nonce="9815422428"></script>
 }

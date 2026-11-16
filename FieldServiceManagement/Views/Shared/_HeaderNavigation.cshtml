@@ -36,7 +36,12 @@
 
     Func<string, bool> isActive = url => url != "#" && currentPath == url;
     Func<string[], bool> isAnyActive = urls => urls.Any(u => currentPath == u || currentPath.StartsWith(u));
-    bool settingsActive = currentPath.Contains("/settings");
+    bool settingsActive = currentPath.Contains("/Settings");
+    // 1. Is it exactly the settings landing page? (e.g., /settings)
+    var isSettingsLanding = currentPath == "/Settings";
+
+    // 2. Is it a sub-page? (starts with /settings/ but is not the landing page)
+    var isSettingsSubPage = currentPath.StartsWith("/Settings/") && !isSettingsLanding;
 
     Func<string[], bool> hasAccess = roles =>
     {
@@ -430,12 +435,28 @@
 {
     <header id="fsm-header" class="fsm-header accent-green" role="banner">
         <div class="container-fluid">
-
-            @* Brand *@
-            <a href="/" class="fsm-brand">
-                <img src="@AppSettings.fsmLogo" alt="FSM logo" class="brand-avatar" />
-                FSM
-            </a>
+            @if (isSettingsSubPage)
+            {
+                @* --- 1. SETTINGS SUB-PAGE: Show Back Button --- *@
+                <div>
+                   
+                </div>
+            }
+            else if (isSettingsLanding)
+            {
+                @* --- 2. SETTINGS LANDING PAGE: Show Settings Icon/Title --- *@
+                <button class="icon-btn">
+                    <i class="bi bi-arrow-left-short mt-1" style="font-size:20px;"></i>
+                </button>
+            }
+            else
+            {
+                @* --- 3. ALL OTHER PAGES: Show Normal Brand Logo --- *@
+                <a href="/" class="fsm-brand">
+                    <img src="@AppSettings.fsmLogo" alt="FSM logo" class="brand-avatar" />
+                    FSM
+                </a>
+            }
 
             @* Desktop nav *@
             @if (isLoading)
@@ -451,93 +472,96 @@
             }
             else
             {
-                <nav class="fsm-nav" aria-label="Main navigation">
-                    @* Getting started — always first *@
-                    @if(!User.IsInRole("SuperAdmin"))
-                    {
-                        <a href="/fsm/@organisationId/getting-started"
-                           class="nav-link @(currentPath.Contains("getting-started") ? "active" : "")">
-                        Getting started
-                        </a>
-                    }
-
-                    @* Main items — all rendered, JS hides by index *@
-                    @for (int i = 0; i < NavItemDefinitions.Items.Count; i++)
-                    {
-                        var item = NavItemDefinitions.Items[i];
-                        if (!hasAccess(item.Roles))
-                            continue;
-                        
-                        if (item.Subs.Count > 0)
+                @if (!settingsActive)
+                {
+                    <nav class="fsm-nav" aria-label="Main navigation">
+                        @* Getting started — always first *@
+                        @if(!User.IsInRole("SuperAdmin"))
                         {
-                            var subUrls = item.Subs.Select(s => s.Url).ToArray();
-                            var anyActive = isAnyActive(subUrls);
-                            <div class="fsm-dropdown fsm-nav-item" data-index="@i">
-                                <button class="nav-dropdown-toggle @(anyActive ? "active" : "")"
-                                        aria-haspopup="true" aria-expanded="false">
-                                    @item.Title
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-                                </button>
-                                <div class="fsm-dropdown-menu" role="menu">
-                                    @foreach (var sub in item.Subs)
-                                    {
-                                        if (!hasAccess(sub.Roles))
-                                            continue;
-
-                                        <a href="@sub.Url"
-                                           class="dropdown-item @(currentPath == sub.Url ? "active" : "")"
-                                           role="menuitem">@sub.Title
-                                        </a>
-                                    }
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <a href="@item.Url"
-                                   class="nav-link fsm-nav-item @(isActive(item.Url) ? "active" : "")"
-                                   data-index="@i">
-                                @item.Title
+                            <a href="/fsm/@organisationId/getting-started"
+                               class="nav-link @(currentPath.Contains("getting-started") ? "active" : "")">
+                            Getting started
                             </a>
                         }
-                    }
 
-                    @* More overflow button *@
-                    <div id="fsm-more-wrapper" class="fsm-dropdown" style="display:none;">
-                        <button class="nav-more-btn" aria-haspopup="true" aria-label="More navigation items">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
-                        </button>
-                        <div id="fsm-more-menu" class="fsm-dropdown-menu align-center overflow-y-auto" role="menu">
-                            @for (int i = 0; i < NavItemDefinitions.Items.Count; i++)
+                        @* Main items — all rendered, JS hides by index *@
+                        @for (int i = 0; i < NavItemDefinitions.Items.Count; i++)
+                        {
+                            var item = NavItemDefinitions.Items[i];
+                            if (!hasAccess(item.Roles))
+                                continue;
+                        
+                            if (item.Subs.Count > 0)
                             {
-                                var item = NavItemDefinitions.Items[i];
-                                if (!hasAccess(item.Roles))
-                                    continue;
-                                
-                                if (item.Subs.Count > 0)
+                                var subUrls = item.Subs.Select(s => s.Url).ToArray();
+                                var anyActive = isAnyActive(subUrls);
+                                <div class="fsm-dropdown fsm-nav-item" data-index="@i">
+                                    <button class="nav-dropdown-toggle @(anyActive ? "active" : "")"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        @item.Title
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                                    </button>
+                                    <div class="fsm-dropdown-menu" role="menu">
+                                        @foreach (var sub in item.Subs)
+                                        {
+                                            if (!hasAccess(sub.Roles))
+                                                continue;
+
+                                            <a href="@sub.Url"
+                                               class="dropdown-item @(currentPath == sub.Url ? "active" : "")"
+                                               role="menuitem">@sub.Title
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <a href="@item.Url"
+                                       class="nav-link fsm-nav-item @(isActive(item.Url) ? "active" : "")"
+                                       data-index="@i">
+                                    @item.Title
+                                </a>
+                            }
+                        }
+
+                        @* More overflow button *@
+                        <div id="fsm-more-wrapper" class="fsm-dropdown" style="display:none;">
+                            <button class="nav-more-btn" aria-haspopup="true" aria-label="More navigation items">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
+                            </button>
+                            <div id="fsm-more-menu" class="fsm-dropdown-menu align-center overflow-y-auto" role="menu">
+                                @for (int i = 0; i < NavItemDefinitions.Items.Count; i++)
                                 {
-                                    <div class="dropdown-label fsm-more-item" data-index="@i">@item.Title</div>
-                                    @foreach (var sub in item.Subs)
+                                    var item = NavItemDefinitions.Items[i];
+                                    if (!hasAccess(item.Roles))
+                                        continue;
+                                
+                                    if (item.Subs.Count > 0)
                                     {
-                                        if (!hasAccess(sub.Roles))
-                                            continue;
-                                        <a href="@sub.Url"
-                                           class="dropdown-item indented fsm-more-item @(currentPath == sub.Url ? "active" : "")"
-                                           data-index="@i" role="menuitem">@sub.Title
+                                        <div class="dropdown-label fsm-more-item" data-index="@i">@item.Title</div>
+                                        @foreach (var sub in item.Subs)
+                                        {
+                                            if (!hasAccess(sub.Roles))
+                                                continue;
+                                            <a href="@sub.Url"
+                                               class="dropdown-item indented fsm-more-item @(currentPath == sub.Url ? "active" : "")"
+                                               data-index="@i" role="menuitem">@sub.Title
+                                            </a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <a href="@item.Url"
+                                           class="dropdown-item fsm-more-item @(isActive(item.Url) ? "active" : "")"
+                                           data-index="@i" role="menuitem">@item.Title
                                         </a>
                                     }
                                 }
-                                else
-                                {
-                                    <a href="@item.Url"
-                                       class="dropdown-item fsm-more-item @(isActive(item.Url) ? "active" : "")"
-                                       data-index="@i" role="menuitem">@item.Title
-                                    </a>
-                                }
-                            }
+                            </div>
                         </div>
-                    </div>
-                </nav>
+                    </nav>                    
+                }
             }
 
             @* Right side *@
@@ -610,6 +634,10 @@
                         </div>
                     </div>
                 </div>
+
+                <a href="/Settings" class="icon-btn">
+                    <i class="bi bi-gear mt-1" style="font-size:13px"></i>
+                </a>
 
                 @await Html.PartialAsync("_ThemeToggle")
 

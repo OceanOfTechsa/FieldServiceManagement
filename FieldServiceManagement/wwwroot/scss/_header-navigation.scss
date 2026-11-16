@@ -324,6 +324,13 @@ $nav-height:      44px;
         }
     }
 
+    .text-main {
+        color: #ffffff;
+        [data-bs-theme="dark"] &{
+            color: #000000;
+        }
+    }
+
     .dot-sep {
         width: 4px;
         height: 4px;
@@ -367,6 +374,16 @@ $nav-height:      44px;
         color: $nav-text;
         position: relative;
         transition: color 0.15s;
+        // Dark mode override
+        [data-bs-theme="dark"] & {
+            border-color: rgba(255, 255, 255, 0.08); // Even more subtle in dark mode
+            color: #a0a0a0; // Lighter text/icon color
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.05); // Add a slight hover effect for dark mode
+                border-color: rgba(255, 255, 255, 0.15);
+            }
+        }
 
         &:hover {
             color: $accent-green;
@@ -1482,4 +1499,58 @@ body.fsm-app {
     height: 30px;
     padding: 2px 6px;
     min-width: 0; // lets selects/inputs shrink inside the grid track instead of overflowing
+}
+
+
+
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    color: $nav-text;
+    position: relative;
+    transition: color 0.2s ease;
+
+    svg,
+    i {
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    &:hover {
+        color: $accent-green;
+
+        svg,
+        i {
+            transform: translateX(-2px);
+        }
+    }
+
+    &.settings-btn {
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        height: 100%;
+        width: 36px;
+
+        &:hover,
+        &.active {
+            border-bottom-color: $nav-text;
+        }
+    }
+
+    .notification-dot {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+        animation: pulse 2s infinite;
+    }
 }
