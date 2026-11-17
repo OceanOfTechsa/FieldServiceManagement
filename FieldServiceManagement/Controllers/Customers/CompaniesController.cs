@@ -1,9 +1,7 @@
 ﻿using FieldServiceManagement.Business;
 using FieldServiceManagement.Business.AddressBusiness;
 using FieldServiceManagement.Business.CompanyBusiness;
-using FieldServiceManagement.Business.ContactBusiness;
 using FieldServiceManagement.Business.URLEncryptionBusiness;
-using FieldServiceManagement.Business.UserBusiness;
 using FieldServiceManagement.Helpers;
 using FieldServiceManagement.Models;
 using FieldServiceManagement.ViewModels.Address;
@@ -13,13 +11,11 @@ using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.Customers
 {
-    [Route("Customers/[controller]")]
     [Authorize]
     public class CompaniesController : Controller
     {
-        [HttpGet]
         public async Task<IActionResult> Index(string? status)
         {
             var companies = await new CompanyBusiness().GetCompaniesByUserEmailAsync(User?.Identity?.Name!);
@@ -30,7 +26,6 @@ namespace FieldServiceManagement.Controllers
             return View(companies);
         }
 
-        [HttpGet("Info")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Info(int? page, Guid Id)
         {
@@ -46,7 +41,6 @@ namespace FieldServiceManagement.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
-        [HttpGet("Create")]
         public async Task<IActionResult> Create(string? returnUrl)
         {
             var model = new CreateCompanyViewModel{ReturnUrl = returnUrl};
@@ -54,9 +48,9 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("Create")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         public async Task<IActionResult> Create(CreateCompanyViewModel model)
         {
 
@@ -69,9 +63,8 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", new { Id = UrlEncryptionBusiness.EncryptParam(companyId.ToString()!) });
         }
 
-        [HttpGet("Edit")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         [MVCDecryptFilter]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         public async Task<IActionResult> Edit(Guid Id)
         {
             var model = await new CompanyBusiness().GetCompanyByIdAsync(Id);
@@ -85,9 +78,9 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("Edit")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         public async Task<IActionResult> Edit(CompanyViewModel model)
         {
             if (!ModelState.IsValid)
@@ -99,7 +92,6 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", "Companies", new { Id = UrlEncryptionBusiness.EncryptParam(model.Id.ToString()) });
         }
 
-        [HttpGet("Import")]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Import(string? callBack)
         {
@@ -110,10 +102,10 @@ namespace FieldServiceManagement.Controllers
             return View(new CompaniesImportViewModel { callBack = callBack });
         }
 
-        [HttpPost("Import")]
-        [Authorize(Roles = "Administrator")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(16 * 1024 * 1024)]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Import(CompanyImportRequest request)
         {
             if (!ModelState.IsValid)
@@ -134,7 +126,7 @@ namespace FieldServiceManagement.Controllers
             return Accepted(new { success = true, importId = result.ImportId });
         }
 
-        [HttpPost("LinkAddress")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LinkAddress(LinkAddressRequest request)
         {
@@ -142,7 +134,7 @@ namespace FieldServiceManagement.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        [HttpPost("UnlinkAddress")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlinkAddress(string companyId, Guid entityAddressId)
         {
@@ -158,7 +150,7 @@ namespace FieldServiceManagement.Controllers
         }
 
 
-        [HttpPost("RemoveAddressLink")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveAddressLink(string companyId, Guid addressId)
         {
@@ -171,9 +163,9 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", new { Id = companyId });
         }
 
-        [HttpPost("DeleteCompany")]
-        [ValidateAntiForgeryToken]
+        [HttpPost]
         [MVCDecryptFilter]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCompany(string companyId)
         {
             var result = await new CompanyBusiness()

@@ -490,10 +490,22 @@
     border: 1px solid var(--bs-border-color);
     border-radius: 6px;
     background: var(--background);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:focus-within {
+        border-color: var(--bs-success); /* Or var(--bs-primary) */
+        // Optional: Use Bootstrap's soft glow instead of outline:
+        // box-shadow: 0 0 0 0.2rem rgba(var(--bs-success-rgb), 0.25);
+    }
 
     > i {
         color: var(--bs-secondary-color);
         font-size: 0.75rem;
+        transition: color 0.15s ease-in-out;
+    }
+    /* Optional: Also tint the search icon green when focused */
+    &:focus-within > i {
+        color: var(--bs-success);
     }
 
     input {
@@ -517,6 +529,7 @@
         }
     }
 }
+
 
 .settings-search-clear {
     display: none;

@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\css\Identity\Settings\" />
     <Folder Include="wwwroot\Vendor\" />
   </ItemGroup>
 

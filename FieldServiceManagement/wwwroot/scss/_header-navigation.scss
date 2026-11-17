@@ -1219,66 +1219,32 @@ $nav-height:      44px;
         background-color: #f59e0b;
     }
 
-        .dialog-warning ~ .dialog-footer .btn-confirm:hover,
-        .dialog-warning ~ .dialog-body ~ .dialog-footer .btn-confirm:hover {
-            background-color: #d97706;
-        }
+    .dialog-warning ~ .dialog-footer .btn-confirm:hover,
+    .dialog-warning ~ .dialog-body ~ .dialog-footer .btn-confirm:hover {
+        background-color: #d97706;
+    }
     /* Success */
     .dialog-success ~ .dialog-footer .btn-confirm,
     .dialog-success ~ .dialog-body ~ .dialog-footer .btn-confirm {
         background-color: #10b981;
     }
 
-        .dialog-success ~ .dialog-footer .btn-confirm:hover,
-        .dialog-success ~ .dialog-body ~ .dialog-footer .btn-confirm:hover {
-            background-color: #059669;
-        }
+    .dialog-success ~ .dialog-footer .btn-confirm:hover,
+    .dialog-success ~ .dialog-body ~ .dialog-footer .btn-confirm:hover {
+        background-color: #059669;
+    }
     /* Info */
     .dialog-info ~ .dialog-footer .btn-confirm,
     .dialog-info ~ .dialog-body ~ .dialog-footer .btn-confirm {
         background-color: #3b82f6;
     }
 
-        .dialog-info ~ .dialog-footer .btn-confirm:hover,
-        .dialog-info ~ .dialog-body ~ .dialog-footer .btn-confirm:hover {
-            background-color: #2563eb;
-        }
-    /* ====================== BD-CALLOUT AUTO THEMING ====================== */
-    //.bd-callout {
-    //    border-left: 4px solid;
-    //    padding: 12px 16px;
-    //    margin: 12px 0;
-    //    border-radius: 4px;
-    //}
-    ///* Danger Theme */
-    //.dialog-danger ~ .bd-callout,
-    //.dialog-danger ~ .dialog-body ~ .bd-callout {
-    //    background-color: rgba(239, 68, 68, 0.07);
-    //    border-color: #ef4444;
-    //    color: #b91c1c;
-    //}
-    ///* Warning Theme */
-    //.dialog-warning ~ .bd-callout,
-    //.dialog-warning ~ .dialog-body ~ .bd-callout {
-    //    background-color: rgba(245, 158, 11, 0.07);
-    //    border-color: #f59e0b;
-    //    color: #b45309;
-    //}
-    ///* Success Theme */
-    //.dialog-success ~ .bd-callout,
-    //.dialog-success ~ .dialog-body ~ .bd-callout {
-    //    background-color: rgba(16, 185, 129, 0.07);
-    //    border-color: #10b981;
-    //    color: #166534;
-    //}
-    ///* Info Theme */
-    //.dialog-info ~ .bd-callout,
-    //.dialog-info ~ .dialog-body ~ .bd-callout {
-    //    background-color: rgba(59, 130, 246, 0.07);
-    //    border-color: #3b82f6;
-    //    color: #1e40af;
-    //}
+    .dialog-info ~ .dialog-footer .btn-confirm:hover,
+    .dialog-info ~ .dialog-body ~ .dialog-footer .btn-confirm:hover {
+        background-color: #2563eb;
+    }
 }
+
 // ─── Body offset ─────────────────────────────────────────────────────────────
 body.fsm-app {
     padding-top: $nav-height;
@@ -1511,11 +1477,20 @@ body.fsm-app {
     height: 28px;
     border-radius: 50%;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.15);
     cursor: pointer;
     color: $nav-text;
+    border: solid 1px var(--fsm-border-subtle, rgba(0, 0, 0, 0.08));
     position: relative;
     transition: color 0.2s ease;
+
+    [data-bs-theme="dark"] & {
+        border-color: rgba(255, 255, 255, 0.08); // Even more subtle in dark mode
+        color: #a0a0a0; // Lighter text/icon color
+        &:hover {
+            background: rgba(255, 255, 255, 0.05); // Add a slight hover effect for dark mode
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+    }
 
     svg,
     i {

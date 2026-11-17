@@ -1,0 +1,11 @@
+﻿@using FieldServiceManagement.Business.UserBusiness
+
+@{
+    Layout = "_SettingsLayout";
+    ViewData["Title"] = "Notifications";
+
+    var currentUser = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User?.Identity?.Name!);
+}
+
+
+<h1>Hello, @currentUser!.User.Name!, from Notifications</h1>

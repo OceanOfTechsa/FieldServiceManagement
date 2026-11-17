@@ -16,7 +16,7 @@
 {
     <span class="rounded p-0 d-flex justify-content-start align-items-center gap-1 full-name-wrapper">
         <img src="@avatarUrl" class="fsm-avatar-sm" alt="@Model?.Name" />
-        <span class="fsm-user-name">@createdByLabel</span>
+        <span class="fsm-user-name mt-1">@createdByLabel</span>
         <i class="bi bi-bookmarks"></i>
     </span>
 }
@@ -25,6 +25,6 @@ else
     <a href="@Url.Action("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(Model?.Id.ToString()!) })"
        class="rounded p-0 d-flex justify-content-start align-items-center gap-1 full-name-wrapper">
         <img src="@avatarUrl" class="fsm-avatar-sm" alt="@Model?.Name" />
-        <span class="fsm-user-name">@createdByLabel <i class="bi bi-folder-symlink"></i></span> 
+        <span class="fsm-user-name mt-1">@createdByLabel <i class="bi bi-folder-symlink"></i></span> 
     </a>
 }

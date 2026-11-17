@@ -125,12 +125,15 @@
                                 <!-- Status -->
                                 <td>
                                     @{
-                                        string statusLabel = item.IsDeleted ? "Deleted" : (item.IsActive ? "Active" : "Inactive");
-                                        string statusCss = item.IsDeleted ? "bg-danger" : (item.IsActive ? "bg-success" : "bg-secondary");
+                                        var (statusLabel, iconClass, iconCss) = item.IsDeleted
+                                            ? ("Deleted", "bi-x-circle-fill", "text-danger")
+                                            : item.IsActive
+                                                ? ("Active", "bi-check-circle-fill", "text-success")
+                                                : ("Inactive", "bi-x-circle-fill", "text-secondary");
                                     }
                                     <span class="d-inline-flex align-items-center gap-2">
-                                        <span class="fsm-status-dot @statusCss"></span>
-                                        <span>@statusLabel</span>
+                                        <i class="bi @iconClass @iconCss"></i>
+                                        <span class="fsm-meta-text">@statusLabel</span>
                                     </span>
                                 </td>
 

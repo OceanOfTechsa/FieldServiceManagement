@@ -1,0 +1,34 @@
+﻿@using FieldServiceManagement.Business.UserBusiness
+
+@{
+    Layout = "_SettingsLayout";
+    ViewData["Title"] = "Security";
+
+    var currentUser = await new UserBusiness().GetAllUserDetailsByUsernameAsync(User?.Identity?.Name!);
+}
+
+
+
+<div class="flex-grow-1 h-100 w-100 bg-surface rounded-2 overflow-hidden d-flex bg-red-500">
+    <div class="fsm-tab-bar-vertical" id="fsm-crew-settings-tab-bar">
+        <div class="fsm-tab-track-vertical" id="fsm-crew-settings-tab-track">
+            <button class="fsm-tab-vertical active" data-tab="details" data-index="0">Manage Details</button>
+            <button class="fsm-tab-vertical" data-tab="lead" data-index="1">Manage Lead</button>
+            <button class="fsm-tab-vertical" data-tab="delete" data-index="2">Delete Crew</button>
+        </div>
+
+        <div class="fsm-tab-more-vertical fsm-dropdown" id="fsm-crew-settings-tab-more" style="display:none;">
+            <button class="fsm-tab-more-btn-vertical nav-dropdown-toggle"
+                    id="fsm-crew-settings-tab-more-btn"
+                    type="button"
+                    aria-expanded="false"
+                    aria-label="More tabs">
+                <i class="bi bi-three-dots"></i>
+            </button>
+            <div class="fsm-dropdown-menu fsm-tab-more-menu-vertical show"
+                    id="fsm-crew-settings-tab-more-menu"
+                    role="menu">
+            </div>
+        </div>
+    </div>
+</div>

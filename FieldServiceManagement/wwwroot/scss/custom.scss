@@ -1507,6 +1507,14 @@ hr {
     flex-shrink: 0;
 }
 
+.fsm-avatar-org {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
 .fsm-user-name {
     font-size: 13px;
     color: #0f172a;

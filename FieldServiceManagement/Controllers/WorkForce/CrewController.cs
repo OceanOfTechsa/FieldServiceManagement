@@ -7,15 +7,13 @@ using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.WorkForce
 {
     [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-    [Route("Workforce/[controller]")]
     public class CrewController : Controller
     {
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpGet]
         public async Task<IActionResult> Index(string? status)
         {
             var OrgId = User.GetOrganisationIdOrThrow();
@@ -28,31 +26,27 @@ namespace FieldServiceManagement.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator,Dispatcher")]
-        [HttpGet("Create")]
-        public IActionResult Create()
-        {
-            return View(new CreateCrewViewModel());
-        }
+        public IActionResult Create() => View(new CreateCrewViewModel());
+        
 
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("Create")]
-        public async Task<IActionResult> CreateCrew(CreateCrewViewModel model)
+        public async Task<IActionResult> Create(CreateCrewViewModel model)
         {
             if (!ModelState.IsValid)
-                return View("~/Views/Workforce/Crew/Create.cshtml", model);
+                return View(model);
 
             var result = await new CrewBusiness().CreateCrew(model, User?.Identity?.Name!);
             if (!result.Success)
             {
                 ModelState.AddModelError("", result.Message!);
-                return View("~/Views/Workforce/Crew/Create.cshtml",model);
+                return View(model);
             }
             return RedirectToAction("Index");
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpGet("Edit")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Edit(Guid Id)
         {
@@ -65,7 +59,6 @@ namespace FieldServiceManagement.Controllers
 
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpGet("Info")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Info(Guid Id)
         {
@@ -81,7 +74,7 @@ namespace FieldServiceManagement.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("AddMember")]
+        [HttpPost]
         public async Task<IActionResult> AddMember([FromBody] AddCrewMemberRequest request)
         {
             if (request == null || request.UserId == Guid.Empty || request.CrewId == Guid.Empty)
@@ -115,7 +108,7 @@ namespace FieldServiceManagement.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("ChangeLead")]
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeLead([FromBody] ChangeCrewLeadRequest request)
         {
@@ -139,7 +132,7 @@ namespace FieldServiceManagement.Controllers
         // Edit crew details
         // -----------------------------------------------------------------
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("Edit")]
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CrewFullProfileViewModel model)
         {
@@ -166,7 +159,7 @@ namespace FieldServiceManagement.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("RemoveMember")]
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveMember([FromBody] RemoveCrewMemberRequest request)
         {
@@ -184,7 +177,7 @@ namespace FieldServiceManagement.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("Delete")]
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete([FromBody] DeleteCrewRequest request)
         {

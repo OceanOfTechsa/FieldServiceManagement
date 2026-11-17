@@ -12,13 +12,11 @@ using FieldServiceManagement.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.Customers
 {
     [Authorize]
-    [Route("Customers/[controller]")]
     public class ContactsController : Controller
     {
-        [HttpGet]
         public async Task<IActionResult> Index(string? status)
         {
             var contacts = await new ContactBusiness().GetContactsByUserEmailAsync(User.Identity!.Name!);
@@ -29,9 +27,8 @@ namespace FieldServiceManagement.Controllers
             return View(contacts);
         }
 
-        [HttpGet("Create")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         [MVCDecryptFilter]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         public async Task<IActionResult> Create(Guid? companyId)
         {
             var model = new CreateContactViewModel { CompanyId = companyId ?? Guid.Empty };
@@ -40,9 +37,9 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("Create")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         public async Task<IActionResult> Create(CreateContactViewModel model)
         {
 
@@ -56,7 +53,6 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", new { Id = UrlEncryptionBusiness.EncryptParam(contactId.ToString()!) });
         }
 
-        [HttpGet("Import")]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Import()
         {
@@ -67,10 +63,10 @@ namespace FieldServiceManagement.Controllers
             return View();
         }
 
-        [HttpPost("Import")]
-        [Authorize(Roles = "Administrator")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(16 * 1024 * 1024)]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Import(ContactImportRequest request)
         {
             if (!ModelState.IsValid)
@@ -91,7 +87,6 @@ namespace FieldServiceManagement.Controllers
             return Accepted(new{success = true,importId = result.ImportId,message = result.Message});
         }
 
-        [HttpGet("Info")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Info(int? page, Guid Id)
         {
@@ -109,9 +104,8 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpGet("Edit")]
-        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         [MVCDecryptFilter]
+        [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
         public async Task<IActionResult> Edit(Guid Id)
         {
             var model = await new ContactBusiness().GetContactByIdAsync(Id);
@@ -128,7 +122,7 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("LinkAddress")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LinkAddress(LinkAddressRequest request)
         {
@@ -137,7 +131,7 @@ namespace FieldServiceManagement.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        [HttpPost("UnlinkAddress")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlinkAddress(string contactId, Guid entityAddressId)
         {
@@ -161,7 +155,7 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", new { Id = contactId });
         }
 
-        [HttpPost("RemoveAddressLink")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveAddressLink(string contactId, Guid addressId)
         {
@@ -174,7 +168,7 @@ namespace FieldServiceManagement.Controllers
             return Ok(new { success = true });
         }
         
-         [HttpPost("DeleteContact")]
+         [HttpPost]
          [ValidateAntiForgeryToken]
          public async Task<IActionResult> DeleteContact()
          {
@@ -188,9 +182,9 @@ namespace FieldServiceManagement.Controllers
              return Ok(new { success = true });
          }
          
-         [HttpPost("Edit")]
-         [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
+         [HttpPost]
          [ValidateAntiForgeryToken]
+         [Authorize(Roles = "SuperAdmin, Administrator, CallCenterAgent")]
          public async Task<IActionResult> Edit(ContactViewModel model)
          {
              if (!ModelState.IsValid)

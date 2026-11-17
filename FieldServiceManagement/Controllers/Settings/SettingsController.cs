@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.Settings
 {
-    public class AttendanceController : Controller
+    public class SettingsController : Controller
     {
         public IActionResult Index()
         {

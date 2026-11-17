@@ -5,12 +5,11 @@ using FieldServiceManagement.ViewModels.Address;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.Addresses
 {
     [Authorize]
     public class AddressesController : Controller
     {
-     
         public async Task<IActionResult> Index(string? status)
         {
             var Addresses = await new AddressBusiness().GetAddressByUserEmailAsync(User?.Identity?.Name!);
@@ -54,7 +53,6 @@ namespace FieldServiceManagement.Controllers
         {
             return View();
         }
-
 
 
         #region PRIVATE METHODS

@@ -41,15 +41,17 @@
                 <!-- ── Sidebar ────────────────────────────────────────── -->
                 <aside class="settings-sidebar" aria-label="Settings navigation">
                     <div class="settings-sidebar-header w-100">
-                        <div class="d-flex align-items-center gap-2 ">
+                        @* <div class="d-flex align-items-center gap-2 ">
                             <a href="/Settings" class="icon-btn">
                                 <i class="bi bi-arrow-left-short mt-1" style="font-size:20px"></i>
                             </a>
                             <span class="fw-bold fs-6 text-main mt-1">Setup Home</span>
-                        </div>
+                        </div> *@
 
                         <!-- Search -->
-                        @await Html.PartialAsync("_SettingsSearch")
+                        <div class="w-100">
+                             @await Html.PartialAsync("_SettingsSearch")
+                        </div>
                     </div>
     
 

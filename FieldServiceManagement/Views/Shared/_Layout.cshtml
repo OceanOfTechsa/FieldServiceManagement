@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿ <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/Loader.css" asp-append-version="true" />
         <title>@ViewData["Title"] | OOT FSM</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <meta name="description" content="Automate the entire spectrum of field operations with the one stop field service management platform." />
     </head>
     <body class="antialiased fsm-app" data-user-key="@(User.Identity!.IsAuthenticated ? User.FindFirst("sub")?.Value ?? User.Identity.Name : "anonymous")">

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.WorkForce
 {
-    public class UserManagementController : Controller
+    public class AttendanceController : Controller
     {
         public IActionResult Index()
         {

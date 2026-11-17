@@ -1,21 +1,17 @@
-﻿using AutoMapper;
+﻿using Microsoft.AspNetCore.Mvc;
+using FieldServiceManagement.Models;
+using FieldServiceManagement.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using FieldServiceManagement.ViewModels.Shared;
+using FieldServiceManagement.ViewModels.Equipment;
 using FieldServiceManagement.Business.EquipementBusiness;
 using FieldServiceManagement.Business.URLEncryptionBusiness;
-using FieldServiceManagement.Helpers;
-using FieldServiceManagement.Models;
-using FieldServiceManagement.ViewModels.Equipment; 
-using FieldServiceManagement.ViewModels.Shared;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.WorkForce
 {
     [Authorize(Roles = "SuperAdmin, Administrator")]
-    [Route("Workforce/[controller]")]
     public class EquipmentController : Controller
     {
-        [HttpGet]
         public async Task<IActionResult> Index(string? status)
         {
             var OrgId = User.GetOrganisationIdOrThrow();
@@ -27,7 +23,6 @@ namespace FieldServiceManagement.Controllers
             return View(equipments);
         }
 
-        [HttpGet("Create")]
         public IActionResult Create()
         {
             var model = new CreateEquipmentViewModel()
@@ -38,7 +33,8 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("Create")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateEquipmentViewModel model)
         {
             if (!ModelState.IsValid)
@@ -51,7 +47,6 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", new { Id = UrlEncryptionBusiness.EncryptParam(result?.ToString()!)});
         }
 
-        [HttpGet("Info")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Info(int? page, Guid Id)
         {
@@ -66,9 +61,8 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpGet("Edit")]
         [MVCDecryptFilter]
+        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
         public async Task<IActionResult> Edit(Guid Id)
         {
             var model = await new EquipmentBusiness().GetEquipmentByIdAsync(Id);
@@ -81,9 +75,8 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
         public async Task<IActionResult> Edit(EquipmentViewModel model)
         {
             if (!ModelState.IsValid)
@@ -103,8 +96,8 @@ namespace FieldServiceManagement.Controllers
             });
         }
 
+        [HttpPost]
         [Authorize(Roles = "SuperAdmin, Administrator, Dispatcher")]
-        [HttpPost("Delete")]
         public async Task<IActionResult> Delete([FromBody] DeleteEquipmentRequest request)
         {
             if (request is null || !ModelState.IsValid)

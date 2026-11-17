@@ -1,4 +1,4 @@
-﻿using FieldServiceManagement.Navigation;
+﻿
 using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace FieldServiceManagement.StartupModules.ServiceModules;
@@ -9,26 +9,34 @@ public static class MvcModule
         this IServiceCollection services,
         IWebHostEnvironment env)
     {
-        services.Configure<RazorViewEngineOptions>(options =>
+        var mvc = services.AddControllersWithViews(options =>
+        {
+            options.Conventions.Add(new ModuleRouteConvention());
+        });
+
+        mvc.AddRazorOptions(options =>
         {
             options.ViewLocationExpanders.Add(
-                new PrefixedViewLocationExpanderModule(ViewModules.All)
+                new ModuleViewLocationExpander()
             );
         });
 
-        var mvc = services.AddControllersWithViews();
-
         if (env.IsDevelopment())
+        {
             mvc.AddRazorRuntimeCompilation(options =>
             {
                 options.FileProviders.Clear();
                 options.FileProviders.Add(
                     new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-                        env.ContentRootPath));
+                        env.ContentRootPath
+                    )
+                );
             })
             .AddNewtonsoftJson();
+        }
 
         services.AddHttpContextAccessor();
+
         return services;
     }
 }

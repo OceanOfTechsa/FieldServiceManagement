@@ -186,10 +186,15 @@ rounded-2">
                                                 </td>
                                                 <td>@member.JoinedAt.ToString("MMM dd, yyyy")</td>
                                                 <td>
-                                                    <span class="d-inline-flex align-items-center gap-1">
-                                                        <span class="fsm-status-dot @(member.UserIsActive ? "bg-success" : "bg-secondary")"></span>
-                                                        <span class="small">@(member.UserIsActive ? "Active" : "Inactive")</span>
-                                                    </span>
+                                                    @{
+                                                        var (statusLabel, iconClass, iconCss) = member!.UserIsActive
+                                                            ? ("Active", "bi-check-circle-fill", "text-success") : ("Inactive", "bi-x-circle-fill", "text-secondary");
+                                                    }
+                                         
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi @iconClass @iconCss icon-sm"></i>
+                                                        <span class="ms-1">@statusLabel</span>
+                                                    </div>     
                                                 </td>
 
                                                 <td>
@@ -231,7 +236,7 @@ rounded-2">
                                                          )"
                                                                 alt="Avatar" class="fsm-avatar-lg" />
                                                         <div class="d-flex flex-column">
-                                                            <span class="text-black fw-medium">@member.Name @member.Surname</span>
+                                                            <span class="fw-bold">@member.Name @member.Surname</span>
                                                             <span class="text-muted small">@member.Email</span>
                                                         </div>
                                                     </div>
@@ -250,10 +255,15 @@ rounded-2">
                                                     <div class="d-flex justify-content-between align-items-start mt-3">
                                                         <p class="text-muted small mb-0 mt-2">Joined @member.JoinedAt.ToString("MMM dd, yyyy")</p>
 
-                                                        <span class="d-inline-flex align-items-center gap-1">
-                                                            <span class="fsm-status-dot @(member.UserIsActive ? "bg-success" : "bg-secondary")"></span>
-                                                            <span class="small text-muted">@(member.UserIsActive ? "Active" : "Inactive")</span>
-                                                        </span>
+                                                        @{
+                                                             var (statusLabel, iconClass, iconCss) = member!.UserIsActive
+                                                                 ? ("Active", "bi-check-circle-fill", "text-success") : ("Inactive", "bi-x-circle-fill", "text-secondary");
+                                                        }
+                                         
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="bi @iconClass @iconCss icon-sm"></i>
+                                                            <span class="ms-1">@statusLabel</span>
+                                                        </div> 
                                                     </div>
                                                 </a>
 

@@ -10,10 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FieldServiceManagement.Controllers
+namespace FieldServiceManagement.Controllers.Workforce
 {
     [Authorize(Roles = "SuperAdmin, Administrator")]
-    [Route("Workforce/[controller]")]
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -23,8 +22,6 @@ namespace FieldServiceManagement.Controllers
             _userManager = userManager;
         }
 
-
-        [HttpGet]
         public async Task<IActionResult> Index(string? status, string? role)
         {
             var users = await new UserBusiness().GetAllUsersByEmailAsync(User?.Identity?.Name!);
@@ -36,7 +33,6 @@ namespace FieldServiceManagement.Controllers
             return View(users);
         }
 
-        [HttpGet("Info")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Info(Guid Id)
         {
@@ -50,7 +46,6 @@ namespace FieldServiceManagement.Controllers
             return View(profile);
         }
 
-        [HttpGet("Invite")]
         [Authorize(Roles = "SuperAdmin, Administrator")]
         public IActionResult Invite()
         {
@@ -58,7 +53,7 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("Invite")]
+        [HttpPost]
         [Authorize(Roles = "SuperAdmin, Administrator")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Invite(UserInvitationViewModel model)
@@ -77,7 +72,6 @@ namespace FieldServiceManagement.Controllers
         }
 
 
-        [HttpGet("Edit")]
         [Authorize(Roles = "SuperAdmin, Administrator")]
         [MVCDecryptFilter]
         public async Task<IActionResult> Edit(Guid Id)
@@ -90,7 +84,7 @@ namespace FieldServiceManagement.Controllers
             return View(model);
         }
 
-        [HttpPost("Edit")]
+        [HttpPost]
         [Authorize(Roles = "SuperAdmin, Administrator")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AppUserProfileViewModel model)
@@ -109,13 +103,8 @@ namespace FieldServiceManagement.Controllers
             return RedirectToAction("Info", "Users", new { Id = UrlEncryptionBusiness.EncryptParam(model.User.Id.ToString()) });
         }
 
-        private void BuildLanguagesList(AppUserProfileViewModel model)
-        {
-            model.Languages = new LanguageBusiness().GetLanguages();
-        }
-
+        [HttpPost]
         [Authorize(Roles = "SuperAdmin, Administrator")]
-        [HttpPost("SendInvitationReminder")]
         //[ValidateAntiForgeryToken]
         public async Task<ActionResult> SendInvitationReminder([FromBody] ReminderRequest request)
         {
@@ -132,5 +121,12 @@ namespace FieldServiceManagement.Controllers
         {
             public string Email { get; set; }
         }
+
+        #region PRIVATE METHODS
+        private void BuildLanguagesList(AppUserProfileViewModel model)
+        {
+            model.Languages = new LanguageBusiness().GetLanguages();
+        }
+        #endregion
     }
 }

@@ -24,6 +24,20 @@ namespace FieldServiceManagement.Web.Navigation
                     Sub("Service Locations",    "/Settings/General/ServiceLocations"),
                 }
             },
+            new NavItem
+            {
+                Title = "Account Management",
+                Url   = "/Settings/Account",
+                Icon  = "bi bi-person-circle",
+                Roles = new[] { "SuperAdmin" },
+                Subs  = new List<NavSubItem>
+                {
+                    Sub("Profile Details", "/Settings/Account/Profile"),
+                    Sub("Preferences",  "/Settings/Account/Preferences"),
+                    Sub("Notifications",  "/Settings/Account/Notifications"),
+                    Sub("Security",    "/Settings/Account/Security"),
+                }
+            },
 
             new NavItem
             {
