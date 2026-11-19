@@ -11,7 +11,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Admin Dashboard",
                 Url = "/Admin",
-                Icon = "bi bi-person-fill-gear",
+                Icon = "UserCog",
                 Roles = ["SuperAdmin"],
                Subs =
                [
@@ -69,7 +69,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Workflow",
                 Url = "/Workflow",
-                Icon = "fa-solid fa-chart-diagram",
+                Icon = "GitBranch",
                 Roles = ["SuperAdmin"],
                 Subs =
                 [
@@ -91,7 +91,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Organisations",
                 Url = "/Admin/Organisations",
-                Icon = "fa-solid fa-building",
+                Icon = "Castle",
                 Roles = ["SuperAdmin"],
                 Subs =
                 [
@@ -113,7 +113,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Subscriptions",
                 Url = "/Admin/Subscriptions",
-                Icon = "fa-solid fa-credit-card",
+                Icon = "CircleDollarSign",
                 Roles = ["SuperAdmin"],
             },
             new NavItem
@@ -136,7 +136,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Features",
                 Url = "/FeatureManagement",
-                Icon = "bi bi-flag",
+                Icon = "Flag",
                 Roles = ["SuperAdmin"],
                 Subs =
                 [
@@ -164,7 +164,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Announcements",
                 Url = "",
-                Icon = "bi bi-megaphone-fill",
+                Icon = "Megaphone",
                 Roles = ["SuperAdmin"],
                 Subs =
                 [
@@ -192,7 +192,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Reference Data",
                 Url = "",
-                Icon = "bi bi-bezier",
+                Icon = "Tangent",
                 Roles = ["SuperAdmin"],
                 Subs =
                 [
@@ -232,7 +232,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Forms",
                 Url = "/Admin",
-                Icon = "bi bi-input-cursor-text",
+                Icon = "FileInput",
                 Roles = ["SuperAdmin"],
                Subs =
                [
@@ -259,7 +259,7 @@ namespace FieldServiceManagement.Web.Navigation
             new NavItem
             {
                 Title = "Settings",
-                Icon = "bi bi-gear-fill",
+                Icon = "Settings",
                 Roles = ["SuperAdmin"],
                Subs =
                [
@@ -284,7 +284,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Form Submissions",
                 Url = "/Formsubmission",
-                Icon = "fa-solid fa-paper-plane",
+                Icon = "Send",
                 Roles = ["Administrator", "Dispatcher", "FieldAgent", "CallCenterAgent", "CustomerPortalUser"],
                 Subs =
                 [
@@ -306,7 +306,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Customers",
                 Url = "#",
-                Icon = "fa-solid fa-wand-magic-sparkles",
+                Icon = "UserRoundGroup",
                 Roles = ["Administrator", "Dispatcher", "CallCenterAgent"],
                 Subs =
                 [
@@ -328,7 +328,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Work Order Management",
                 Url = "#",
-                Icon = "fa-solid fa-code-branch",
+                Icon = "DiagramFlowVertical",
                 Roles = ["Administrator", "Dispatcher", "FieldAgent", "LimitedFieldAgent"],
                 Subs =
                 [
@@ -374,7 +374,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Dispatch Console",
                 Url = "/DispatchConsole",
-                Icon = "fa-solid fa-truck-arrow-right",
+                Icon = "GraphHub",
                 Roles = ["Administrator", "Dispatcher"],
                 Subs = []
             },
@@ -382,7 +382,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Billing",
                 Url = "#",
-                Icon = "fa fa-landmark",
+                Icon = "CreditCardCheck",
                 Roles = ["Administrator", "Dispatcher"],
                 Subs =
                 [
@@ -404,7 +404,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Services & Parts",
                 Url = "/ServicesAndParts",
-                Icon = "fa-solid fa-hand-holding-hand",
+                Icon = "WrenchOff",
                 Roles = ["Administrator", "Dispatcher", "FieldAgent"],
                 Subs = []
             },
@@ -412,7 +412,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Workforce",
                 Url = "#",
-                Icon = "fa-solid fa-users",
+                Icon = "UsersRoundCollaboration",
                 Roles = ["Administrator", "Dispatcher", "FieldAgent"],
                 Subs =
                 [
@@ -458,7 +458,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Reports",
                 Url = "/Reports",
-                Icon = "fa-solid fa-file-lines",
+                Icon = "ClipboardMinus",
                 Roles = ["Administrator", "Dispatcher"],
                 Subs = []
             },
@@ -466,7 +466,7 @@ namespace FieldServiceManagement.Web.Navigation
             {
                 Title = "Addresses",
                 Url = "/Addresses",
-                Icon = "fa-solid fa-file-lines",
+                Icon = "MapPinHouse",
                 Roles = ["Administrator", "Dispatcher", "CallCenterAgent", "FieldAgent"],
                 Subs = 
                 [
@@ -485,31 +485,6 @@ namespace FieldServiceManagement.Web.Navigation
                 ]
             },
             #endregion
-
-            #region CLIENT ROUTES
-             new NavItem
-            {
-                Title = "Form Submissions ",
-                Url = "/Formsubmission",
-                Icon = "fa-solid fa-paper-plane",
-                Roles = ["CustomerPortalUser"],
-                Subs =
-                [
-                    new NavSubItem
-                    {
-                        Title = "Pending",
-                        Url = "/Formsubmission/Pending",
-                        Roles = ["Administrator", "Dispatcher", "FieldAgent", "CallCenterAgent", "CustomerPortalUser"]
-                    },
-                    new NavSubItem
-                    {
-                        Title = "History",
-                        Url = "/Formsubmission/History",
-                        Roles = ["Administrator", "Dispatcher", "CallCenterAgent", "CustomerPortalUser"]
-                    }
-                ]
-            },  
-	        #endregion
         ];
     }
 }

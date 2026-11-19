@@ -1,0 +1,93 @@
+﻿
+<!-- Global Search Modal -->
+<div id="globalSearchModal"
+     hidden
+     class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-6 opacity-0 backdrop-blur-md transition-opacity duration-200"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="globalSearchTitle"
+     aria-hidden="true">
+
+    <!-- Command Palette -->
+    <div id="globalSearchContainer"
+         class="w-full max-w-[390px] scale-95 overflow-hidden rounded-lg border border-white/10 bg-[#1e1e1e] shadow-2xl transition-transform duration-200">
+
+        <!-- Search Input -->
+        <div class="p-3 pb-2">
+            <div class="flex h-9 items-center gap-2 rounded-md border border-white/10 bg-[#262626] px-2.5">
+
+                <i data-lucide="search"
+                   class="size-4 shrink-0 text-neutral-400"
+                   aria-hidden="true"></i>
+
+                <input type="text"
+                       id="globalSearchInput"
+                       class="h-full min-w-0 flex-1 bg-transparent text-[13px] text-neutral-100 outline-none placeholder:text-neutral-500"
+                       placeholder="Type a command or search..."
+                       autocomplete="off"
+                       spellcheck="false"
+                       aria-label="Search workspace">
+
+                <kbd class="rounded border border-white/10 bg-[#303030] px-1.5 py-0.5 text-[10px] text-neutral-400">
+                    ESC
+                </kbd>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="globalSearchResults"
+             class="max-h-[340px] overflow-y-auto px-2 pb-2">
+
+            <p id="globalSearchTitle"
+               class="px-3 pt-1 pb-2 font-medium text-[11px] text-neutral-400">
+                Go to
+            </p>
+
+            <!-- Example navigation results -->
+            <div class="space-y-0.5">
+
+                <button type="button"
+                        class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] text-neutral-200 transition-colors hover:bg-white/10"
+                        data-search-result>
+                    <i data-lucide="chart-no-axes-combined"
+                       class="size-4 text-blue-400"></i>
+                    <span>Dashboard</span>
+                </button>
+
+                <button type="button"
+                        class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] text-neutral-200 transition-colors hover:bg-white/10"
+                        data-search-result>
+                    <i data-lucide="users"
+                       class="size-4 text-sky-400"></i>
+                    <span>Customers</span>
+                </button>
+
+                <button type="button"
+                        class="flex w-full items-center gap-2.5 rounded-md bg-white/10 px-2.5 py-2 text-left text-[13px] text-neutral-100 transition-colors"
+                        data-search-result
+                        aria-selected="true">
+                    <i data-lucide="clipboard-list"
+                       class="size-4 text-violet-400"></i>
+                    <span>Work Orders</span>
+                </button>
+
+                <button type="button"
+                        class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] text-neutral-200 transition-colors hover:bg-white/10"
+                        data-search-result>
+                    <i data-lucide="users-round"
+                       class="size-4 text-indigo-400"></i>
+                    <span>Contacts</span>
+                </button>
+
+                <button type="button"
+                        class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] text-neutral-200 transition-colors hover:bg-white/10"
+                        data-search-result>
+                    <i data-lucide="building-2"
+                       class="size-4 text-blue-400"></i>
+                    <span>Organisations</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,253 @@
+﻿<div id="appearanceDrawer"
+     class="fixed inset-y-3 right-0 z-50 flex w-full max-w-[380px] translate-x-full flex-col rounded-md border-l border-border bg-background shadow-xl transition-transform duration-300">
+
+    <!-- Header -->
+    <div class="flex h-16 shrink-0 items-center justify-between border-b border-border px-5">
+        <div>
+           <div class="flex items-center gap-2">
+                <h2 class="text-base font-semibold">Theme Customizer</h2>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="CircleQuestionMark" width="16" height="16" class="text-muted-foreground cursor-pointer" role="button"></i>
+
+                    <button type="button"
+                            id="appearanceResetAll"
+                            class="text-muted-foreground relative inline-flex cursor-pointer items-center justify-center hover:text-foreground"
+                            aria-label="Reset all appearance settings"
+                            title="Reset to defaults">
+                        <i data-lucide="RefreshCcw" width="16" height="16"></i>
+                        <span id="appearanceResetBadge"
+                                class="absolute -top-0.5 -right-0.5 hidden size-2 rounded-full bg-red-500 ring-2 ring-background">
+                        </span>
+                    </button>
+                </div>
+           </div>
+            <p class="text-muted-foreground text-xs">Customize your workspace</p>
+        </div>
+
+        <button type="button"
+                data-appearance-close
+                class="text-muted-foreground flex size-8 items-center justify-center rounded-md transition hover:bg-muted hover:text-foreground"
+                aria-label="Close appearance settings"
+        >
+            <i data-lucide="X" width="17" height="17" class="text-muted-foreground cursor-pointer" role="button"></i>
+        </button>
+    </div>
+
+    <!-- Settings -->
+    <div class="flex-1 space-y-7 overflow-y-auto p-5">
+
+        <!-- Theme colour -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Theme colour</h3>
+                <p class="text-muted-foreground text-xs">Choose your workspace accent colour.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <input type="color"
+                       id="appearanceThemeColor"
+                       class="size-9 cursor-pointer rounded-md border border-border bg-transparent p-1"
+                       aria-label="Choose theme colour">
+
+                <input type="text"
+                       id="appearanceThemeColorHex"
+                       maxlength="7"
+                       class="h-9 w-28 rounded-md border border-input bg-background px-3 text-sm uppercase outline-none focus:ring-1 focus:ring-ring"
+                       placeholder="#0B9944">
+
+                <button type="button" id="appearanceResetColor" class="text-xs font-medium text-primary hover:underline">
+                    Default
+                </button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Font -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Font family</h3>
+                <p class="text-muted-foreground text-xs">Choose your preferred interface font.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-font="Roboto" class="appearance-option">
+                    <span class="text-lg">Aa</span>
+                    <span class="text-xs">Roboto</span>
+                </button>
+
+                <button type="button" data-font="Inter"
+                        class="appearance-option">
+                    <span class="text-lg">Aa</span>
+                    <span class="text-xs">Inter</span>
+                </button>
+
+                <button type="button" data-font="Heebo"
+                        class="appearance-option">
+                    <span class="text-lg">Aa</span>
+                    <span class="text-xs">Heebo</span>
+                </button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Colour mode -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Colour mode</h3>
+                <p class="text-muted-foreground text-xs">Switch between light and dark appearance.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-color-mode="light" class="appearance-option">
+                    <i class="fa fa-sun text-lg"></i>
+                    <span class="text-xs">Light</span>
+                </button>
+
+                <button type="button" data-color-mode="dark" class="appearance-option">
+                    <i class="fa fa-moon text-lg"></i>
+                    <span class="text-xs">Dark</span>
+                </button>
+
+                <button type="button" data-color-mode="system" class="appearance-option">
+                    <i class="fa fa-desktop text-lg"></i>
+                    <span class="text-xs">System</span>
+                </button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Border radius -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Border radius</h3>
+                <p class="text-muted-foreground text-xs">Adjust the roundness of interface elements.</p>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1">
+                <button type="button" data-radius="none" class="appearance-option text-xs">None</button>
+                <button type="button" data-radius="sm" class="appearance-option text-xs">Small</button>
+                <button type="button" data-radius="md" class="appearance-option text-xs">Medium</button>
+                <button type="button" data-radius="lg" class="appearance-option text-xs">Large</button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Page layout -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Page layout</h3>
+                <p class="text-muted-foreground text-xs">
+                    Choose between a standard or floating application layout.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button"
+                        data-page-layout="default"
+                        class="appearance-option text-xs">
+                    Default
+                </button>
+
+                <button type="button"
+                        data-page-layout="floating"
+                        class="appearance-option text-xs">
+                    Floating
+                </button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Content layout -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Content layout</h3>
+                <p class="text-muted-foreground text-xs">Choose how content uses available space.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" data-content-layout="full" class="appearance-option text-xs">
+                    Full width
+                </button>
+
+                <button type="button" data-content-layout="compact" class="appearance-option text-xs">
+                    Compact
+                </button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Scale -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Interface scale</h3>
+                <p class="text-muted-foreground text-xs">Adjust the overall interface sizing.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-scale="sm" class="appearance-option text-xs">Small</button>
+                <button type="button" data-scale="md" class="appearance-option text-xs">Medium</button>
+                <button type="button" data-scale="lg" class="appearance-option text-xs">Large</button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Sidebar variant -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Sidebar style</h3>
+                <p class="text-muted-foreground text-xs">Choose how the sidebar is displayed.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-sidebar-variant="flush" class="appearance-option text-xs">
+                    Flush
+                </button>
+
+                <button type="button" data-sidebar-variant="inset" class="appearance-option text-xs">
+                    Inset
+                </button>
+
+                <button type="button" data-sidebar-variant="floating" class="appearance-option text-xs">
+                    Floating
+                </button>
+            </div>
+        </section>
+
+        <div class="border-t border-border"></div>
+
+        <!-- Sidebar mode -->
+        <section class="space-y-3">
+            <div>
+                <h3 class="text-sm font-semibold">Sidebar behaviour</h3>
+                <p class="text-muted-foreground text-xs">Control sidebar visibility and width.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-sidebar-mode="expanded" class="appearance-option text-xs">
+                    Expanded
+                </button>
+
+                <button type="button" data-sidebar-mode="icon" class="appearance-option text-xs">
+                    Icons
+                </button>
+
+                <button type="button" data-sidebar-mode="hidden" class="appearance-option text-xs">
+                    Hidden
+                </button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Overlay -->
+<div id="appearanceOverlay"
+     class="backdrop-blur-[0px] fixed inset-0 z-40 hidden bg-black/40"
+     data-appearance-close>
+</div>
